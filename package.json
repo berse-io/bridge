@@ -3,6 +3,7 @@
   "scripts": {
     "build:contracts": "yarn wsrun -p ${npm_package_config_solPackages} -r build:contracts",
     "build": "yarn wsrun -p ${npm_package_config_tsPackages} -r build",
+    "watch": "tsc -b -W tsconfig.json",
     "test": "yarn wsrun -p ${npm_package_config_testPkgs} -r test"
   },
   "config": {
