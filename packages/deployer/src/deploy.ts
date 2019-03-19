@@ -31,7 +31,7 @@ import { toWei, fromWei } from "web3-utils";
 
 import { logUtils } from '@0x/utils';
 
-
+import { AccountsConfig } from '@ohdex/multichain';
 
 const assert = require('assert');
 
@@ -80,9 +80,9 @@ async function deploy(configMgr: ConfigManager) {
     configMgr.save()
 }
 
+
 async function _deploy(configMgr: ConfigManager, network: string) {
     const config = configMgr.config[network];
-    const privateKey = require("@ohdex/config/accounts.json").deployAccountPrivateKey;
     
     let logger = winston.loggers.add(
         `deployer-${network}`, 
@@ -106,10 +106,13 @@ async function _deploy(configMgr: ConfigManager, network: string) {
     let accounts;
     let account;
 
+    let deploymentAccount = require("@ohdex/config").accounts.deployment;
+
     pe = new Web3ProviderEngine();
-    pe.addProvider(new PrivateKeyWalletSubprovider(privateKey));
+    pe.addProvider(new PrivateKeyWalletSubprovider(deploymentAccount.privateKey))
     pe.addProvider(new RPCSubprovider(config.rpcUrl));
     pe.start()
+    
     web3 = new Web3Wrapper(pe);
     accounts = await web3.getAvailableAddressesAsync();
     account = accounts[0];
@@ -120,10 +123,11 @@ async function _deploy(configMgr: ConfigManager, network: string) {
 
     if(balance.lessThan(toWei('1', 'ether'))) {
         try {
-            throw new Error(`Balance insufficent`)
+            throw new Error(`Balance may be insufficent`)
         } catch(ex) {
-            logger.error(""+ex)
-            throw ex;
+            logger.warn(""+ex)
+            // throw ex;
+            // It will fail anyways below. This is to support Ganache, where tx's are free.
         }
     }
 
