@@ -1,7 +1,6 @@
 import { writeFileSync } from 'fs';
 
-const env = process.env.NODE_ENV || 'production';
-console.log(`env: ${env}`)
+const env = process.env.NODE_ENV;
 class ConfigManager {
     configPath: string;
     config: any;
@@ -21,6 +20,8 @@ class ConfigManager {
             case 'production':
                 relpath = "@ohdex/config/networks.json";
                 break;
+            default:
+                throw new Error("NODE_ENV null")
         }
         
         return new ConfigManager(require.resolve(relpath))

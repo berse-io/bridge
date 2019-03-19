@@ -27,9 +27,17 @@ import {
     DemoERC20Contract
 }   from '@ohdex/contracts/lib/build/wrappers/demo_erc20';
 import { ConfigManager } from "./config";
+import { toWei, fromWei } from "web3-utils";
+
+import { logUtils } from '@0x/utils';
+
+
 
 const assert = require('assert');
 
+const winston = require('winston'); 
+const { format } = winston;
+const { combine, label, json, simple } = format;
 
 function getDeployArgs(name: string, pe: Web3ProviderEngine, from: string): [ string, AbiDefinition[], Provider, Partial<TxData>] {
     // let json = require(`@ohdex/contracts/lib/build/contracts/${name}.json`);
@@ -75,6 +83,24 @@ async function deploy(configMgr: ConfigManager) {
 async function _deploy(configMgr: ConfigManager, network: string) {
     const config = configMgr.config[network];
     const privateKey = require("@ohdex/config/accounts.json").deployAccountPrivateKey;
+    
+    let logger = winston.loggers.add(
+        `deployer-${network}`, 
+        {
+            format: require('./logger').logFormat([
+                label({ label: network })
+            ]),
+            transports: [
+                new winston.transports.Console()
+            ]
+        }
+    );
+
+    logUtils.log = (args) => {
+        logger.info(args)
+    }
+
+    logger.info(`Deploying to network (rpcUrl=${config.rpcUrl})`)
 
     let pe: Web3ProviderEngine, web3: Web3Wrapper;
     let accounts;
@@ -87,6 +113,19 @@ async function _deploy(configMgr: ConfigManager, network: string) {
     web3 = new Web3Wrapper(pe);
     accounts = await web3.getAvailableAddressesAsync();
     account = accounts[0];
+
+    // check the available balance
+    let balance = await web3.getBalanceInWeiAsync(account)
+    logger.info(`Using account ${account} (${fromWei(balance.toString(), 'ether')} ETH)`)
+
+    if(balance.lessThan(toWei('1', 'ether'))) {
+        try {
+            throw new Error(`Balance insufficent`)
+        } catch(ex) {
+            logger.error(""+ex)
+            throw ex;
+        }
+    }
 
     // 2 Deploy eventEmitter
 
