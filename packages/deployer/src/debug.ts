@@ -1,3 +1,4 @@
+import '@ohdex/config';
 import { Web3ProviderEngine } from "0x.js";
 import { PrivateKeyWalletSubprovider, RPCSubprovider } from "@0x/subproviders";
 import { ConfigManager } from "./config";
@@ -6,6 +7,7 @@ import { fromWei } from "web3-utils";
 import {
     zxWeb3Connected
 } from '@ohdex/shared';
+
 
 // checks balances on all networks
 

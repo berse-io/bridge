@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 require('make-promises-safe')
+import '@ohdex/config';
 
 // import program from 'commander';
 import { EthereumChain } from './ethereum/chain';
