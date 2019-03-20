@@ -8,7 +8,7 @@
   },
   "config": {
     "solPackages": "@ohdex/contracts @ohdex/typescript-solidity-merkle-tree",
-    "tsPackages": "@ohdex/contracts @ohdex/deployer @ohdex/multichain @ohdex/relayer @ohdex/bridge-ui @ohdex/typescript-solidity-merkle-tree",
+    "tsPackages": "@ohdex/shared @ohdex/contracts @ohdex/deployer @ohdex/multichain @ohdex/relayer @ohdex/bridge-ui @ohdex/typescript-solidity-merkle-tree",
     "testPkgs": "@ohdex/contracts @ohdex/typescript-solidity-merkle-tree @ohdex/bridge-ui"
   },
   "workspaces": {
@@ -19,7 +19,8 @@
       "packages/multichain",
       "packages/relayer",
       "packages/ts-merkle-tree",
-      "packages/config"
+      "packages/config",
+      "packages/shared"
     ],
     "nohoist": [
       "**/ganache-cli/**",

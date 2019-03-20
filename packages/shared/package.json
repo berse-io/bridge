@@ -2,5 +2,9 @@
     "name": "@ohdex/shared",
     "version": "0.1.0",
     "private": true,
-    "scripts": {}
+    "main": "lib/src/index.js",
+    "scripts": {
+      "build": "tsc -b",
+      "test": "echo 0"
+    }
 }
