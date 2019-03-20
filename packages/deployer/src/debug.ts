@@ -9,12 +9,15 @@ import {
 
 // checks balances on all networks
 
+
+
+
 (async () => {
     let configMgr = await ConfigManager.load();
     let networks = Object.keys(configMgr.config)
     let deploymentAccount = require("@ohdex/config").accounts.deployment;
 
-    for(let network of networks) {
+    await Promise.all(networks.map(async network => {
         let config = configMgr.config[network];
         
         let pe = new Web3ProviderEngine();
@@ -23,15 +26,18 @@ import {
         pe.start()
 
         let web3 = new Web3Wrapper(pe);
-        // let accounts = await web3.getAvailableAddressesAsync();
-        // let account = accounts[0];
+
         let account = deploymentAccount.address;
-        await zxWeb3Connected(pe)
+        try {
+            await zxWeb3Connected(pe)
+        } catch(ex) {
+            console.error(`${network}\t\t couldn't connect`)
+        }
 
         let balance = await web3.getBalanceInWeiAsync(account)
 
-        console.log(`${network}\t ${account} (${fromWei(balance.toString(), 'ether')} ETH)`)
+        console.log(`${network}\t\t ${account} (${fromWei(balance.toString(), 'ether')} ETH)`)
 
         pe.stop()
-    }
+    }))
 })().catch(ex => console.error(ex))
