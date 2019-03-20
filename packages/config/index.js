@@ -6,6 +6,7 @@ let env = process.env.NODE_ENV;
 let accounts;
 let networks;
 switch(env) {
+    case 'test':
     case 'development':
         accounts = require('./test_accounts.json')
         networks = require('./test_networks.json')
