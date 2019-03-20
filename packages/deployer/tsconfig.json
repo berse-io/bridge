@@ -24,6 +24,7 @@
     ],
     "references": [
         { "path": "../contracts" },
-        { "path": "../multichain" }
+        { "path": "../multichain" },
+        { "path": "../shared" }
     ]
 }
