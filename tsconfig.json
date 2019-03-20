@@ -3,6 +3,7 @@
     "references": [
         { "path": "./packages/multichain" },
         { "path": "./packages/contracts" },
-        { "path": "./packages/deployer" }
+        { "path": "./packages/deployer" },
+        { "path": "./packages/relayer" }
     ]
 }
