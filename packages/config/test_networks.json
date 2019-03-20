@@ -35,5 +35,15 @@
         "chainId": 3,
         "chainType": "ethereum",
         "rpcUrl": "https://ropsten.infura.io/v3/3049535d150e49729f54f6f8bef40a1b"
+    },
+    "poaSokol": {
+        "chainId": 77,
+        "chainType": "ethereum",
+        "rpcUrl": "https://sokol.poa.network"
+    },
+    "goerli": {
+        "chainId": 5,
+        "chainType": "ethereum",
+        "rpcUrl": "https://goerli.infura.io/v3/3049535d150e49729f54f6f8bef40a1b"
     }
 }

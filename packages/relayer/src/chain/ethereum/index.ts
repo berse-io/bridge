@@ -68,7 +68,7 @@ export class EthereumChainTracker extends ChainTracker {
     }
 
     async start() {
-        this.logger.info('Connecting')
+        this.logger.info(`Connecting to ${this.conf.rpcUrl}`)
 
         this.pe = new Web3ProviderEngine();
         this.pe.addProvider(new PrivateKeyWalletSubprovider("13d14e5f958796529e84827f6a62d8e19375019f8cf0110484bcef39c023edcc"));
@@ -130,7 +130,9 @@ export class EthereumChainTracker extends ChainTracker {
         let lastBlockhash = lastBlock.hash
         let lastBlockTimestamp = lastBlock.timestamp;
 
-
+        if(!this.conf.eventListenerAddress) {
+            this.logger.error("Not deployed");
+        }
 
         this.eventListener = new EventListenerContract(
             require('@ohdex/contracts/build/artifacts/EventListener.json').compilerOutput.abi,
@@ -479,8 +481,8 @@ export class EthereumChainTracker extends ChainTracker {
 class EventListenerWrapper {
     static updateStateRoot(eventListener: EventListenerContract, proof: MerkleTreeProof, leaf: EthereumStateLeaf) {
         return eventListener.updateStateRoot.sendTransactionAsync(
-            proof.proofs.map(hexify), 
-            proof.paths, 
+            proof.proofs.map(hexify),
+            proof.paths,
             hexify(proof.root),
             hexify(leaf.eventsRoot)
         )
