@@ -21,7 +21,7 @@ import { EtherscanProvider } from "ethers/providers";
 import { BaseContract } from "@0x/base-contract";
 import { CrosschainState, ChainStateLeaf } from "../../interchain";
 import { EthereumStateGadget, EthereumStateLeaf } from "./state";
-
+import { fromWei, toWei } from 'web3-utils';
 
 const AbiCoder = require('web3-eth-abi').AbiCoder();
 import Event from 'events'
@@ -101,6 +101,20 @@ export class EthereumChainTracker extends ChainTracker {
         let accounts = await this.web3Wrapper.getAvailableAddressesAsync();
         let account = accounts[0];
         this.account = account;
+
+        // check the available balance
+        let balance = await this.web3Wrapper.getBalanceInWeiAsync(account)
+        this.logger.info(`Using account ${account} (${fromWei(balance.toString(), 'ether')} ETH)`)
+
+        if(balance.lessThan(toWei('1', 'ether'))) {
+            try {
+                throw new Error(`Balance may be insufficent`)
+            } catch(ex) {
+                this.logger.warn(""+ex)
+                // throw ex;
+                // It will fail anyways below. This is to support Ganache, where tx's are free.
+            }
+        }
 
         
         let ethersProvider = new ethers.providers.JsonRpcProvider(this.conf.rpcUrl);
