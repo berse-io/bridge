@@ -20,30 +20,51 @@
         "chainType": "ethereum",
         "port": "10001",
         "rpcUrl": "http://localhost:10001",
-        "eventEmitterAddress": "0x2559d11bbcaf82b35848876e0bd66eddc8c337e5",
-        "eventListenerAddress": "0x7fa10b89dde2c050def85e17d9dd9cfc0cb3ffe3",
-        "escrowAddress": "0x3fc956bd7a2a861b23c816fa683a767db4c58585",
-        "bridgeAddress": "0xa1df06b078d4eca5d00a4ff0d753aeb690cfda37",
+        "eventEmitterAddress": "0xf221391daf799492e66907c7de546cc5f37fd248",
+        "eventListenerAddress": "0xe2960fcc356781ee50e5bfe22f3fca32afc58f09",
+        "escrowAddress": "0xe3d2beaa19fde96ec8f3254e611621342baade02",
+        "bridgeAddress": "0xa2706add0fedc0f1f5ac3881b2074f9bdbab244c",
         "confirmationsNeeded": 1,
         "batchSize": 1,
         "eventUtilAddress": "0xdb3205d73e0a885090279c601abf76a38a6af00c",
-        "wethToken": "0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66",
-        "aliceToken": "0xaba19d9dc85ece02661379521927bc3e8c3ec964",
-        "bobToken": "0x82ac0ab2db794ae1376ac18318ae3560f8dc40b6"
+        "wethToken": "0x984812975cc72c2a19e3ef0cdc7be35df895515b",
+        "aliceToken": "0x653653708670fb7fdcc6bdde0a9c17ffdf9765c6",
+        "bobToken": "0xb53db08046a46623c0b3e86cc47679af0d536387"
     },
     "ropsten": {
         "chainId": 3,
         "chainType": "ethereum",
-        "rpcUrl": "https://ropsten.infura.io/v3/3049535d150e49729f54f6f8bef40a1b"
+        "rpcUrl": "https://ropsten.infura.io/v3/3049535d150e49729f54f6f8bef40a1b",
+        "eventEmitterAddress": "0xc9a7062bdf4cbe23d7d7d1b515d3c03a09304c29",
+        "eventListenerAddress": "0xeded7f927720de4ce61f3e461b80b206832b9149",
+        "escrowAddress": "0xed39e1ed47807be347d3dc454355a618626a1285",
+        "bridgeAddress": "0x646ae45785dfa66da5f88e15094c1efc302a821e",
+        "wethToken": "0xc0867513db68eebea09119a23b42b0264b40160d",
+        "aliceToken": "0x44455b70f0959e02ac2eea5b755cf2e2feedeecc",
+        "bobToken": "0x609235a4802518350b4c700a33bf9d38afecc81e"
     },
     "poaSokol": {
         "chainId": 77,
         "chainType": "ethereum",
-        "rpcUrl": "https://sokol.poa.network"
+        "rpcUrl": "https://sokol.poa.network",
+        "eventEmitterAddress": "0x786705a2839583642f954640445b30af2d9cf42b",
+        "eventListenerAddress": "0x9e137da944ec0719ea65877dee2ad63bd72be6b0",
+        "escrowAddress": "0x087c142e517b29de40eb4a0296d4f2f86752269d",
+        "bridgeAddress": "0xc6965e5db1fdff26bef684d51e9462ce20688c3a",
+        "wethToken": "0xd36ebe3e2dec89feeae6d1afae5f213aa8cda050",
+        "aliceToken": "0x14fcf6e69b82466ecb7abf84a6513e277028dcdc",
+        "bobToken": "0x8275041cd9467c0adc8eecacaa96656e59ed1f3f"
     },
     "goerli": {
         "chainId": 5,
         "chainType": "ethereum",
-        "rpcUrl": "https://goerli.infura.io/v3/3049535d150e49729f54f6f8bef40a1b"
+        "rpcUrl": "https://goerli.infura.io/v3/3049535d150e49729f54f6f8bef40a1b",
+        "eventEmitterAddress": "0x2559d11bbcaf82b35848876e0bd66eddc8c337e5",
+        "eventListenerAddress": "0x7fa10b89dde2c050def85e17d9dd9cfc0cb3ffe3",
+        "escrowAddress": "0x3fc956bd7a2a861b23c816fa683a767db4c58585",
+        "bridgeAddress": "0xa1df06b078d4eca5d00a4ff0d753aeb690cfda37",
+        "wethToken": "0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66",
+        "aliceToken": "0xaba19d9dc85ece02661379521927bc3e8c3ec964",
+        "bobToken": "0x82ac0ab2db794ae1376ac18318ae3560f8dc40b6"
     }
 }
