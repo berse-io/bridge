@@ -185,7 +185,6 @@ export class EthereumChainTracker extends ChainTracker {
         
         // 2. Load all previously emitted events (including those that may not be ack'd on other chains yet)
         // 
-        // this.ethersProvider.resetEventsBlock(0);
         const EventEmitted = this.eventEmitter_sub.filters.EventEmitted(null);
         const logs = await this.ethersProvider.getLogs({
             fromBlock: 0,
@@ -193,13 +192,10 @@ export class EthereumChainTracker extends ChainTracker {
             address: this.eventEmitter_sub.address,
             topics: EventEmitted.topics
         });
-
-        let eventsEmitted: Buffer[] = [];
-
+        console.log(logs)
 
         for (const log of logs) {
             let eventHash = log.data;
-            eventsEmitted.push(dehexify(eventHash));
             this.state.addEvent(eventHash)
         }
 
