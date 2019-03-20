@@ -9,7 +9,7 @@ switch(env) {
         break;
     case 'production':
     default:
-        accounts = require('./accounts.json')
+        accounts = require('../secrets/accounts.json')
         networks = require('./networks.json')
         break;
 }

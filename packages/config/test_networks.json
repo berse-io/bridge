@@ -30,5 +30,10 @@
         "wethToken": "0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66",
         "aliceToken": "0xaba19d9dc85ece02661379521927bc3e8c3ec964",
         "bobToken": "0x82ac0ab2db794ae1376ac18318ae3560f8dc40b6"
+    },
+    "ropsten": {
+        "chainId": 3,
+        "chainType": "ethereum",
+        "rpcUrl": "https://ropsten.infura.io/v3/3049535d150e49729f54f6f8bef40a1b"
     }
 }
