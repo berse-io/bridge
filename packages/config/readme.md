@@ -8,3 +8,18 @@
 `*_networks.json` contains the config to join different networks. This pertains to:
  - deployment addresses of contracts
  - rpcUrl's for connecting to the network
+
+
+## todo
+```
+"mainnet": {
+    "chainId": 1,
+    "chainType": "ethereum",
+    "rpcUrl": "https://mainnet.infura.io/v3/3049535d150e49729f54f6f8bef40a1b"
+},
+"xdai": {
+    "chainId": 100,
+    "chainType": "ethereum",
+    "rpcUrl": "https://dai.poa.network"
+}
+```

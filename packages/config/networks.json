@@ -1,9 +1,4 @@
 {
-    "mainnet": {
-        "chainId": 1,
-        "chainType": "ethereum",
-        "rpcUrl": "https://mainnet.infura.io/v3/3049535d150e49729f54f6f8bef40a1b"
-    },
     "ropsten": {
         "chainId": 3,
         "chainType": "ethereum",
@@ -48,10 +43,5 @@
         "chainId": 5,
         "chainType": "ethereum",
         "rpcUrl": "https://goerli.infura.io/v3/3049535d150e49729f54f6f8bef40a1b"
-    },
-    "xdai": {
-        "chainId": 100,
-        "chainType": "ethereum",
-        "rpcUrl": "https://dai.poa.network"
     }
 }
