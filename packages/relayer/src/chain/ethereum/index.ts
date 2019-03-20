@@ -132,6 +132,7 @@ export class EthereumChainTracker extends ChainTracker {
 
         if(!this.conf.eventListenerAddress) {
             this.logger.error("Not deployed");
+            throw new Error("Not deployed");
         }
 
         this.eventListener = new EventListenerContract(

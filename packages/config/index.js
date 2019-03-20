@@ -1,3 +1,6 @@
+require('dotenv').config({
+    path: require.resolve('@ohdex/config/.env')
+})
 let env = process.env.NODE_ENV;
 
 let accounts;

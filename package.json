@@ -30,5 +30,8 @@
   "devDependencies": {
     "typescript": "^3.3.3333",
     "wsrun": "^3.6.4"
+  },
+  "dependencies": {
+    "dotenv": "^7.0.0"
   }
 }
