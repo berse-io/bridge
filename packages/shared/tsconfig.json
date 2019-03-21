@@ -15,7 +15,8 @@
         "moduleResolution": "node",
         "module": "commonjs",
         "inlineSourceMap": true,
-        "composite": true
+        "composite": true,
+        "declaration": true
     },
     "include": [
         "src"
