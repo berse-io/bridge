@@ -21,7 +21,6 @@ import sinon from 'sinon'
 const chai = require("chai");
 const sinonChai = require("sinon-chai");
 chai.use(sinonChai);
-import * as sleep from 'sleep';
 
 describe('EthereumChainTracker', function () {
     this.timeout(10000);
@@ -119,8 +118,8 @@ describe('EthereumChainTracker', function () {
     const _chainId = new BigNumber('0');
     const _salt = new BigNumber('5');
 
-    describe.only('TokensBridged event routing', async () => {
-        it('routes correctly for one event in one block', async() => {
+    describe('events', async () => {
+        it('correctly listens to events of EventEmitter and TokenBridge contracts', async() => {
             let chain1 = require('@ohdex/config').networks.kovan;
             let chain2 = require('@ohdex/config').networks.rinkeby;
 
@@ -151,11 +150,12 @@ describe('EthereumChainTracker', function () {
             let tracker1 = new EthereumChainTracker(chain1)
             await tracker1.start()
             tracker1.listen()
-
             
             let spy_onEventEmitted = sinon.spy(tracker1, 'onEventEmitted')
             let spy_onTokensBridgedEvent = sinon.spy(tracker1, 'onTokensBridgedEvent');
-            
+            let spy_eventsEmit = sinon.spy(tracker1.events, 'emit')
+
+
             // Expect 2 events
             //  1) generic EventEmitter
             //  2) an Escrow TokensBridged event            
@@ -182,30 +182,44 @@ describe('EthereumChainTracker', function () {
 
             // @ts-ignore
             expect(spy_onEventEmitted).to.have.been.calledOnce;
+            
+            // @ts-ignore
+            expect(spy_eventsEmit).to.have.been.calledWith(
+                'ITokenBridge.TokensBridgedEvent',
+                sinon.match({
+                    fromChain: tracker1.state.getId(),
+                    toBridge: chain2.bridgeAddress
+                })
+            )
 
-            // let chain1Contracts = ContractWrappers.from(chain1, pe);
+            // @ts-ignore
+            expect(spy_eventsEmit).to.have.been.calledWith(
+                'EventEmitter.EventEmitted',
+                sinon.match.any
+            )
             
             await tracker1.stop()
         })
-
-        it('routes correctly for 2 events in one block', async () => {
-            // since two events are in one block
-            // we need to verify that they are added to the tree in order
-            // and then also that 
-
-        })
     })
-
-    // describe('#onTokensBridgedEvent', () => {
-    //     it('routes events to other chains', async () => {
-            
-    //         // TokensBridgedEvent
-
-    //     })
-    // })
-    
 
     suiteTeardown(async () => {
         await pe.stop()
     })
 })
+
+
+// receive emitted event on one chain
+// route to another chain
+// update the state root of another chain
+// and then prove the event in the state
+
+
+
+// THERE COULD be a race condition wherein the event makes it into the StateGadget AFTER the cross chain update
+// ignoring this for now
+
+// describe('Relayer', async() => {
+//     it('routes interchain events correctly', async() => {
+
+//     })
+// })
