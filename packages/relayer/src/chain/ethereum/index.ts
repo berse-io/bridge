@@ -17,6 +17,7 @@ import { EthereumStateGadget, EthereumStateLeaf } from "./state";
 const AbiCoder = require('web3-eth-abi').AbiCoder();
 
 
+
 export class EthereumChainTracker extends ChainTracker {
     conf: any;
 
@@ -93,7 +94,7 @@ export class EthereumChainTracker extends ChainTracker {
         
         let ethersProvider = new ethers.providers.JsonRpcProvider(this.conf.rpcUrl);
         ethersProvider.polling = true;
-        ethersProvider.pollingInterval = 1000;
+        ethersProvider.pollingInterval = 200;
         await new Promise((res, rej) => {
             ethersProvider.on('block', res);
             setTimeout(
@@ -192,7 +193,6 @@ export class EthereumChainTracker extends ChainTracker {
             address: this.eventEmitter_sub.address,
             topics: EventEmitted.topics
         });
-        console.log(logs)
 
         for (const log of logs) {
             let eventHash = log.data;
@@ -251,16 +251,24 @@ export class EthereumChainTracker extends ChainTracker {
     listen() {
         this.logger.info(`listening to events on ${this.conf.eventEmitterAddress}`)
 
+        let self = this;
+
         // 1) Listen to any events emitted from this chain
-        this.eventEmitter_sub.on(EventEmitterEvents.EventEmitted, this.onEventEmitted.bind(this))
+        this.eventEmitter_sub.on(EventEmitterEvents.EventEmitted, function() {
+            self.onEventEmitted.apply(self, arguments)
+        })
 
         // 2) Listen to any state root updates that happen
         this.eventListener_sub.on(EventListenerEvents.StateRootUpdated, this.onStateRootUpdated.bind(this))
 
         // 3) Listen to the original events of the bridge/escrow contracts
         // So we can relay them later
-        this.bridgeContract_sub.on(BridgeEvents.TokensBridged, this.onTokensBridgedEvent.bind(this))
-        this.escrowContract_sub.on(EscrowEvents.TokensBridged, this.onTokensBridgedEvent.bind(this)) 
+        this.bridgeContract_sub.on(BridgeEvents.TokensBridged, function() {
+            self.onTokensBridgedEvent.apply(self, arguments)
+        })
+        this.escrowContract_sub.on(EscrowEvents.TokensBridged, function() {
+            self.onTokensBridgedEvent.apply(self, arguments)
+        })
     }
 
     private async onStateRootUpdated(root: string, ev: ethers.Event) {
@@ -337,7 +345,7 @@ export class EthereumChainTracker extends ChainTracker {
         }
     }
 
-    private async onEventEmitted(eventHash: string, ev: ethers.Event) {
+    onEventEmitted = async (eventHash: string, ev: ethers.Event) => {
         this.logger.info(`block #${ev.blockNumber}, event emitted - ${eventHash}`)
         this.state.addEvent(eventHash)
 
@@ -349,11 +357,7 @@ export class EthereumChainTracker extends ChainTracker {
         this.events.emit('EventEmitter.EventEmitted', eventEmittedEvent);
     }
 
-    private onTokensBridgedEvent() {
-        let args = Array.from(arguments)
-        let ev = Array.from(arguments).pop() as ethers.Event;
-        
-        let [ eventHash, targetBridge, chainId, receiver, token, amount, _salt ] = args;
+     onTokensBridgedEvent = (eventHash, targetBridge, chainId, receiver, token, amount, _salt, ev: ethers.Event) => {
         let data: ITokenBridgeEventArgs = {
             eventHash, targetBridge, chainId, receiver, token, amount, _salt
         }

@@ -168,10 +168,10 @@ async function _deploy(configMgr: ConfigManager, network: string) {
     )
     
 
-    config.eventEmitterAddress = eventEmitter.address;
-    config.eventListenerAddress = eventListener.address;
-    config.escrowAddress = escrow.address;
-    config.bridgeAddress = bridge.address;
+    config.eventEmitterAddress = eventEmitter.address.toLowerCase();
+    config.eventListenerAddress = eventListener.address.toLowerCase();
+    config.escrowAddress = escrow.address.toLowerCase();
+    config.bridgeAddress = bridge.address.toLowerCase();
 
     // @ts-ignore
     let aliceToken = await DemoERC20Contract.deployAsync(
@@ -194,9 +194,9 @@ async function _deploy(configMgr: ConfigManager, network: string) {
     let weth = await WETH9Contract.deployAsync(
         ...getDeployArgs('WETH9', pe, account)
     );
-    config.wethToken = weth.address;
-    config.aliceToken = aliceToken.address;
-    config.bobToken = bobToken.address;
+    config.wethToken = weth.address.toLowerCase();
+    config.aliceToken = aliceToken.address.toLowerCase();
+    config.bobToken = bobToken.address.toLowerCase();
     
 
     pe.stop();
