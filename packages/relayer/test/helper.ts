@@ -7,6 +7,49 @@ export interface MultichainInfo {
     snapshotId: number;
     config: any;
 }
+
+const ganache = require("ganache-core");
+
+export class Testchain {
+    port: string;
+    
+    get rpcUrl() {
+        return `http://localhost:${this.port}`
+    }
+}
+
+export class TestchainFactory {
+    static async fork(rpcUrl: string, port: string): Promise<Testchain> {
+        const server = ganache.server({ 
+            ws: true,
+            logger: {
+                log: () => false // console.log
+            },
+            total_accounts: 100,
+            s: "TestRPC is awesome!", // I didn't choose this
+            gasPrice: 0,
+            gas: 1,
+            // networkId: 420,
+            debug: false,
+            // defaultBalanceEther: '10000000000000000000',
+            unlock: [0, 1],
+            fork: rpcUrl
+        });
+
+        let blockchainState = await new Promise<any>((res, rej) => {
+            server.listen(port, (err, state) => {
+                if(err) rej(err);
+                
+                let chain = new Testchain()
+                chain.port = port;
+                res(chain)
+                // else res(state)
+            })
+        });
+        
+        return blockchainState;
+    }
+}
 export class MultichainProviderFactory {
     things: MultichainInfo[] = [];
 
@@ -54,4 +97,22 @@ export function get0xArtifact(name: string) {
 export function getContractAbi(name: string) {
     let json = require(`@ohdex/contracts/lib/build/artifacts/${name}.json`)
     return json.compilerOutput.abi;
+}
+
+export function caseInsensitiveEquals(str: string) {
+    return function(v: string) {
+        return v.toUpperCase() === str.toUpperCase();
+    }
+}
+
+import sinon from 'sinon'
+
+export function sinonStrEqual(str: string) {
+    return sinon.match(caseInsensitiveEquals(str), `${str}`)
+}
+
+export function sinonBignumEq(x: any) {
+    return sinon.match(function(v: any) {
+        return x.equals(v)
+    })
 }
