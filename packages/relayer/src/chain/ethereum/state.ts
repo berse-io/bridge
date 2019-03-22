@@ -1,6 +1,6 @@
-import { ChainStateLeaf } from "../../interchain";
+import { ChainStateLeaf } from "../../interchain/crosschain_state";
 import { MerkleTree } from "@ohdex/typescript-solidity-merkle-tree";
-import { StateGadget } from "../../interchain/gadget";
+import { StateGadget } from "../state_gadget";
 import { dehexify } from "../../utils";
 import { keccak256, hexify } from "../../utils";
 import { MerkleTreeProof } from "@ohdex/typescript-solidity-merkle-tree";

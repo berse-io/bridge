@@ -10,7 +10,7 @@ import { zxWeb3Connected } from '@ohdex/shared';
 import { MerkleTreeProof } from "@ohdex/typescript-solidity-merkle-tree";
 import { ethers } from 'ethers';
 import { fromWei, toWei } from 'web3-utils';
-import { ChainStateLeaf, CrosschainState } from "../../interchain";
+import { ChainStateLeaf, CrosschainState } from "../../interchain/crosschain_state";
 import { dehexify, hexify, shortToLongBridgeId } from "../../utils";
 import { ChainTracker, EventEmittedEvent, MessageSentEvent } from "../tracker";
 import { EthereumStateGadget, EthereumStateLeaf } from "./state";
