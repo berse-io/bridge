@@ -13,7 +13,7 @@ import { fromWei, toWei } from 'web3-utils';
 import { ChainStateLeaf, CrosschainState } from "../../interchain/crosschain_state";
 import { dehexify, hexify, shortToLongBridgeId } from "../../utils";
 import { ChainTracker, EventEmittedEvent, MessageSentEvent } from "../tracker";
-import { EthereumStateGadget, EthereumStateLeaf } from "./state";
+import { EthereumStateGadget, EthereumStateLeaf } from "./state_gadget";
 const AbiCoder = require('web3-eth-abi').AbiCoder();
 
 

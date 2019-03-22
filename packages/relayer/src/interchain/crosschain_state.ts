@@ -1,5 +1,5 @@
 import { MerkleTree, MerkleTreeProof } from "@ohdex/typescript-solidity-merkle-tree";
-import { StateGadget, ChainStateLeaf } from "../chain/state_gadget";
+import { StateGadget, ChainStateLeaf } from "../chain/abstract_state_gadget";
 import { keccak256, hexify } from "../utils";
 
 
@@ -12,7 +12,7 @@ class CrosschainState {
     tree: MerkleTree;
 
     leaves: ChainStateLeaf[] = [];
-    
+
     leafIdx: {
         [id: string]: number
     } = {};
@@ -52,6 +52,7 @@ class CrosschainState {
     }
 
     proveUpdate(chainId: string): CrosschainStateUpdateProof {
+        if(!this.tree) throw new Error('compute() was not called yet');
         if(!this.chains[chainId]) throw new Error(`no chain for id ${chainId}`)
         let leafIdx = this.leafIdx[chainId]
         let leaf = this.leaves[leafIdx]
@@ -64,18 +65,24 @@ class CrosschainState {
         }
     }
 
-    proveEvent(fromChain: string, eventId: string): CrosschainEventProof {
+    proveEvent(fromChain: string, eventHash: string): CrosschainEventProof {
+        if(!this.tree) throw new Error('compute() was not called yet');
         if(!this.chains[fromChain]) throw new Error(`no chain for id ${fromChain}`)
 
-        // Other chains can be on previous roots
-        // So we need to keep track
-
         let gadget = this.chains[fromChain]
-        let eventProof = gadget.proveEvent(eventId)
+        let eventProof = gadget.proveEvent(eventHash)
 
         let rootProof = this.tree.generateProof(
             this.leafIdx[fromChain]
         );
+        
+        // if(eventProof.root != this.leaves[fromChain].)
+        let leafIdx = this.leafIdx[fromChain]
+        if(!this.leaves[leafIdx].toBuffer().equals(gadget.getLeaf().toBuffer())) {
+            throw new Error("interchain state tree needs to be recomputed")
+        }
+
+        // if(!rootProof.leaf.equals(eventProof.root)) throw new Error("interchain state tree needs to be recomputed")
 
         return {
             eventProof,

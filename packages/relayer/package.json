@@ -5,7 +5,7 @@
         "build": "tsc -b",
         "start": "node lib/src/index.js",
         "test": "NODE_ENV=development mocha 'lib/test/**/*.spec.js' --bail --exit",
-        "test:specific": "mocha"
+        "test:specific": "NODE_ENV=development mocha lib/test/specs/relayer.spec.js --bail --exit"
     },
     "dependencies": {
         "0x.js": "^3.0.3",
