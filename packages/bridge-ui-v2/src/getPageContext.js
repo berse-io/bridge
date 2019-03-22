@@ -6,6 +6,13 @@ import green from '@material-ui/core/colors/green';
 // A theme with custom primary and secondary color.
 // It's optional.
 const theme = createMuiTheme({
+  overrides: {
+    MUIDataTableBodyRow: {
+      root: {
+        cursor: "pointer",
+      }
+    },
+  },
   palette: {
     primary: {
       light: purple[300],

@@ -5,17 +5,24 @@
   "license": "MIT",
   "scripts": {
     "dev": "node server.js",
+    "dev2": "next",
     "build": "next build",
     "start": "NODE_ENV=production node server.js"
   },
   "dependencies": {
     "@material-ui/core": "^3.9.2",
+    "@material-ui/icons": "^3.0.2",
     "@types/next": "^8.0.1",
     "@types/react": "^16.8.8",
     "@zeit/next-source-maps": "^0.0.3",
     "@zeit/next-typescript": "^1.1.1",
+    "axios": "^0.18.0",
+    "chains": "https://github.com/ethereum-lists/chains",
+    "ethereum-lists": "https://github.com/MyEtherWallet/ethereum-lists",
+    "mui-datatables": "^2.0.0-beta.58",
     "next": "^8.0.3",
     "react": "^16.8.4",
+    "web3": "^1.0.0-beta.50",
     "web3-utils": "^1.0.0-beta.48"
   }
 }

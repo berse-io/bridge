@@ -1,55 +1,115 @@
 import React from 'react';
-import { Grid, Typography, Button } from '@material-ui/core';
+import { Grid, Typography, Button, withStyles } from '@material-ui/core';
 import Container from '../../utils/Container';
-import TokenCard from '../../partials/TokenCard';
+import GridView from './GridView';
+import getTokens from '../../../utils/getTokens';
+import MUIDataTable from "mui-datatables";
+import Router from 'next/router'
 
-const dummyData = [
+const columns = [
     {
-        address: "",
-        network: "",
-        balance: "",
-        decimals: "",
-
-    }
+        name: "Symbol",
+        options: {
+            filter: false,
+        }
+    }, 
+    {
+        name: "Name",
+        options: {
+            filter: false,
+        }
+    }, 
+    {
+        name: "Network",
+        options: {
+            filter: true,
+            searchable: false,
+        }
+    }, 
+    {
+        name: "Balance",
+        options: {
+            filter: false,
+            searchable: false,
+        }
+    },
+    {
+        name: "Address",
+        options: {
+            filter: false,
+        }
+    } 
     
-]
+];
+
+const styles:any = (theme:any) => ({
+    table: {
+        width: "100% !important"
+    }
+})
+
 
 class TokenOverview  extends React.Component<any> {
 
+    state = {
+        tokens: [],
+    }
+
+    componentWillMount() {
+        this.getData();
+    }
+
     render() {
+        const{classes} = this.props;
+
+        const options =  {
+            filterType: 'dropdown',
+            selectableRows: false,
+            onRowClick: this.handleRowClick,
+        }
+        
         return (
             <> 
                 <Container>
                     <Grid container spacing={16} justify="flex-start">
-                        <Grid item xs={6}>
-                            <Typography component="h1" variant="h2" gutterBottom>
-                                My Tokens
-                            </Typography>
+                        <Grid item xs={12}>
+                            <Grid container alignItems="flex-start" justify="flex-end" direction="row">
+                                <Button variant="contained" color="primary">Add Token</Button>
+                            </Grid>
+
+
+                            
                         </Grid>
 
-                        <Grid item xs={6}>
-                            <Grid container alignItems="flex-start" justify="flex-end" direction="row">
-                                <Button variant="contained">Add Token</Button>
-                            </Grid>
+                        <Grid item xs={12}>
+                            {this.state.tokens.length != 0 &&
+                            <MUIDataTable 
+                                title={"Your Tokens"} 
+                                data={this.state.tokens} 
+                                columns={columns} 
+                                options={options} 
+                                className={classes.table}
+                            />}
                         </Grid>
-                    
-                        <TokenCard network="ethereum" address="0xd26114cd6EE289AccF82350c8d8487fedB8A0C07" name="OmiseGo" symbol="OMG" balance={"1000000000000000000000"} decimals="18"/>
-                        <TokenCard network="ethereum" address="0xd26114cd6EE289AccF82350c8d8487fedB8A0C07" name="Golem" symbol="GNT" balance={"10000000000000000"} decimals="18"/>
-                        <TokenCard network="ethereum" address="0xd26114cd6EE289AccF82350c8d8487fedB8A0C07" name="Golem" symbol="GNT" balance={"100000000000000"} decimals="18"/>
-                        <TokenCard network="ethereum" address="0xd26114cd6EE289AccF82350c8d8487fedB8A0C07" name="OmiseGo" symbol="OMG" balance={"1000000000000000000000"} decimals="18"/>
-                        <TokenCard network="ethereum" address="0xd26114cd6EE289AccF82350c8d8487fedB8A0C07" name="Golem" symbol="GNT" balance={"10000000000000000"} decimals="18"/>
-                        <TokenCard network="ethereum" address="0xd26114cd6EE289AccF82350c8d8487fedB8A0C07" name="Golem" symbol="GNT" balance={"100000000000000"} decimals="18"/>
-                        <TokenCard network="ethereum" address="0xd26114cd6EE289AccF82350c8d8487fedB8A0C07" name="OmiseGo" symbol="OMG" balance={"1000000000000000000000"} decimals="18"/>
-                        <TokenCard network="ethereum" address="0xd26114cd6EE289AccF82350c8d8487fedB8A0C07" name="Golem" symbol="GNT" balance={"10000000000000000"} decimals="18"/>
-                        <TokenCard network="ethereum" address="0xd26114cd6EE289AccF82350c8d8487fedB8A0C07" name="Golem" symbol="GNT" balance={"100000000000000"} decimals="18"/>
-                        <TokenCard network="ethereum" address="0xd26114cd6EE289AccF82350c8d8487fedB8A0C07" name="OmiseGo" symbol="OMG" balance={"1000000000000000000000"} decimals="18"/>
-                        <TokenCard network="ethereum" address="0xd26114cd6EE289AccF82350c8d8487fedB8A0C07" name="Golem" symbol="GNT" balance={"10000000000000000"} decimals="18"/>
-                        <TokenCard network="ethereum" address="0xd26114cd6EE289AccF82350c8d8487fedB8A0C07" name="Golem" symbol="GNT" balance={"100000000000000"} decimals="18"/>
+                        
                     </Grid>
                 </Container>
             </>
         )
     }
+
+    getData = async () => {
+        this.setState({
+            tokens: await getTokens()
+        })
+    }
+
+    handleRowClick = (rowData: string[], rowMeta: { dataIndex: number, rowIndex: number }) => {
+        console.log(rowData);
+        console.log(rowMeta);
+        // href={`/coin?network=${network}&address=${address}`} as={`/token/${network}/${address}`}
+        Router.push(`/coin?network=${rowData[2].toLowerCase()}&address=${rowData[4]}`, `/token/${rowData[2].toLowerCase()}/${rowData[4]}`);
+    }
 }
 
-export default TokenOverview;
+export default withStyles(styles)(TokenOverview);
