@@ -1,5 +1,5 @@
 import { MerkleTree, MerkleTreeProof } from "@ohdex/typescript-solidity-merkle-tree";
-import { StateGadget, ChainStateLeaf } from "./gadget";
+import { StateGadget, ChainStateLeaf } from "../chain/state_gadget";
 import { keccak256, hexify } from "../utils";
 
 
@@ -8,8 +8,11 @@ class CrosschainState {
     chains: {
         [id: string]: StateGadget
     } = {};
+
     tree: MerkleTree;
+
     leaves: ChainStateLeaf[] = [];
+    
     leafIdx: {
         [id: string]: number
     } = {};

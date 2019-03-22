@@ -12,7 +12,7 @@ import { MerkleTree, MerkleTreeProof } from "@ohdex/typescript-solidity-merkle-t
 import { ITokenBridgeEventArgs } from "@ohdex/contracts/lib/build/wrappers/i_token_bridge";
 import { EventEmitter } from "./declarations";
 import { dehexify } from "./utils";
-import { CrosschainState } from "./interchain";
+import { CrosschainState } from "./interchain/crosschain_state";
 import { defaultLogger } from "./logger";
 
 
@@ -21,12 +21,7 @@ interface ChainConfig {
     chainId: string;
 }
 
-function hexify(buf: Buffer): string {
-    return `0x${buf.toString('hex')}`;
-}
-
 const eventEmitter = require("events");
-const forward = require('forward-emitter');
 
 type chainId = string;
 interface CrosschainEventEvent {
@@ -48,9 +43,6 @@ export class Relayer {
 
     logger;
     config: any;
-
-    // roots: { [k: string]: Buffer } = {};
-    // state: MerkleTree;
 
     constructor(config: any) {
         this.chains = {};
@@ -80,10 +72,7 @@ export class Relayer {
         }
 
         await Promise.all(started)
-
-        // for(let chain of Object.values(this.chains)) {
-        //     this.roots[chain.id] = chain.getStateRoot();
-        // }
+        
 
         // start state update loop
         Object.values(this.chains).map(chain => {
