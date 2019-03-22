@@ -2,8 +2,6 @@ import { MerkleTree, MerkleTreeProof } from "@ohdex/typescript-solidity-merkle-t
 import { StateGadget, ChainStateLeaf } from "../chain/abstract_state_gadget";
 import { keccak256, hexify } from "../utils";
 
-
-
 class CrosschainState {
     chains: {
         [id: string]: StateGadget
@@ -23,6 +21,7 @@ class CrosschainState {
     }
 
     put(state: StateGadget) {
+        if(this.chains[state.getId()]) throw new Error('duplicate');
         this.chains[state.getId()] = state
     }
 
@@ -76,13 +75,11 @@ class CrosschainState {
             this.leafIdx[fromChain]
         );
         
-        // if(eventProof.root != this.leaves[fromChain].)
         let leafIdx = this.leafIdx[fromChain]
+        // if(!rootProof.leaf.equals(eventProof.root)) throw new Error("interchain state tree needs to be recomputed")
         if(!this.leaves[leafIdx].toBuffer().equals(gadget.getLeaf().toBuffer())) {
             throw new Error("interchain state tree needs to be recomputed")
         }
-
-        // if(!rootProof.leaf.equals(eventProof.root)) throw new Error("interchain state tree needs to be recomputed")
 
         return {
             eventProof,
