@@ -6,6 +6,7 @@ const eventEmitter = require("events");
 
 
 import Event from 'events'
+import { chainLogger } from "../logger";
 
 
 interface EventEmittedEvent {
@@ -37,9 +38,6 @@ abstract class IChainTracker {
     abstract async stop(): Promise<any>;
 }
 
-const winston = require('winston');
-const { format } = winston;
-const { combine, label, json, simple } = format;
 
 abstract class ChainTracker extends IChainTracker implements IChain {    
     constructor(chainId: chainId) {
@@ -47,14 +45,7 @@ abstract class ChainTracker extends IChainTracker implements IChain {
         this.id = chainId;
 
         this.events = new eventEmitter();
-        this.logger = winston.loggers.add(`chaintracker-${chainId}`, {
-            format: require('../logger').logFormat([
-                label({ label: chainId })
-            ]),
-            transports: [
-                new winston.transports.Console()
-            ]
-        });
+        this.logger = chainLogger(chainId)
     }
 
     abstract listen();

@@ -13,6 +13,7 @@ import { ITokenBridgeEventArgs } from "@ohdex/contracts/lib/build/wrappers/i_tok
 import { EventEmitter } from "./declarations";
 import { dehexify } from "./utils";
 import { CrosschainState } from "./interchain";
+import { defaultLogger } from "./logger";
 
 
 interface ChainConfig {
@@ -55,14 +56,7 @@ export class Relayer {
         this.chains = {};
         this.config = config;
         
-        this.logger = winston.loggers.add(`relayer`, {
-            format: require('./logger').logFormat([
-                label({ label: "Relayer" })
-            ]),
-            transports: [
-                new winston.transports.Console()
-            ]
-        });
+        this.logger = defaultLogger;
 
         this.crosschainEvents = new eventEmitter();
         this.state = new CrosschainState();
@@ -101,20 +95,16 @@ export class Relayer {
                 let found: boolean = false;
 
                 for(let chain2 of Object.values(this.chains)) {
-                    if(await chain2.receiveCrosschainMessage(msg)) return;
+                    if(await chain2.receiveCrosschainMessage(msg)) found = true;
                 }
 
                 if(!found) {
-                    this.logger.error(`Couldn't find bridge ${msg.toBridge} for cross-chain message`)
+                    this.logger.error(`Couldn't find a bridge ${msg.toBridge} for cross-chain message`)
                 }
             })
 
             chain.listen()
         });
-
-
-        // await this.updateStateRoots()
-
     }
 
     async updateStateRoots() {
