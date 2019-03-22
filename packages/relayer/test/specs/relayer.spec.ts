@@ -16,18 +16,28 @@ import { CrosschainState } from '../../src/interchain/crosschain_state';
 import { StateGadget } from '../../src/chain/abstract_state_gadget';
 import { EthereumStateGadget } from '../../src/chain/ethereum/state_gadget';
 
-    // it('updates crosschain state on new events', async() => {
-        // let chain1 = require('@ohdex/config').networks.kovan;
-        // let chain2 = require('@ohdex/config').networks.rinkeby;
 
-        // create two events
-        // update one chain
-        // update another chain
-        // wait for the bridge event to be processed
-            // event routed from one tracker to another tracker
-            // on the state root update, the tracker proves the event correctly
+describe('Relayer', async () => {
+    it(`shouldn't throw if event is not notarised yet`, async () => {
         
+    })
 
-        // another chain update
-        // the tracker 
-    // })
+    // create event on one chain
+    // update the state root of that chain
+    // route the event to the second chain
+    // update the second chain but not the state root of the first chain
+    // the update to the first chain shouldn't be processed if it doesnt ack all the events
+    // bridge event shouldn't be processed on the second chain if it hasnt been notarised
+
+
+    // the problem
+    // is that the crosschain state only stores one merkle root
+    // whereas we need one for every chain
+    // the events are always the same
+    // but we need to 
+
+    // update one 
+    // update the other
+    // we have to compute the event proof
+    // we then have to compute the state root proof for THIS current state root
+})

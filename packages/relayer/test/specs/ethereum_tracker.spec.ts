@@ -85,7 +85,7 @@ describe('EthereumChainTracker', function () {
             })
             await tracker.start()
     
-            expect(tracker.state.events.map(hexify)).to.have.ordered.members([
+            expect(tracker.stateGadget.events.map(hexify)).to.have.ordered.members([
                 ev_1,
                 ev_2,
                 ev_3
@@ -94,22 +94,6 @@ describe('EthereumChainTracker', function () {
             await tracker.stop()
         })
     })
-
-    // it('loads unprocessed past events from token bridge contracts', async () => {
-        // let eventEmitter = await EventEmitterContract.deployFrom0xArtifactAsync(
-        //     get0xArtifact('EventEmitter'), pe, txDefaults
-        // )
-
-        // tracker = new EthereumChainTracker({
-        //     ...config,
-        //     eventEmitterAddress: eventEmitter.address
-        // })
-        // await tracker.start()
-
-
-
-        // await tracker.stop()
-    // })
 
     const _chainId = new BigNumber('0');
     const _salt = new BigNumber('5');
@@ -183,7 +167,7 @@ describe('EthereumChainTracker', function () {
             expect(spy_eventsEmit).to.have.been.calledWith(
                 'ITokenBridge.TokensBridgedEvent',
                 sinon.match({
-                    fromChain: tracker1.state.getId(),
+                    fromChain: tracker1.stateGadget.getId(),
                     toBridge: chain2.bridgeAddress
                 })
             )

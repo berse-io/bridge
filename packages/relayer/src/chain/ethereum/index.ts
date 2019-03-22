@@ -43,8 +43,7 @@ export class EthereumChainTracker extends ChainTracker {
     
     account: string;
 
-
-    state: EthereumStateGadget;
+    stateGadget: EthereumStateGadget;
 
     constructor(conf: any) {
         super(`Ethereum (chainId=${conf.chainId})`);
@@ -126,7 +125,7 @@ export class EthereumChainTracker extends ChainTracker {
             this.ethersProvider
         )
 
-        this.state = new EthereumStateGadget(`${this.conf.chainId}-${this.eventListener.address}`)
+        this.stateGadget = new EthereumStateGadget(`${this.conf.chainId}-${this.eventListener.address}`)
 
         this.eventEmitter_sub = new ethers.Contract(
             this.conf.eventEmitterAddress,
@@ -162,9 +161,9 @@ export class EthereumChainTracker extends ChainTracker {
 
         await this.loadStateAndEvents()
 
-        this.logger.info(`Sync'd to block #${blockNum}, ${this.state.events.length} pending events`)
+        this.logger.info(`Sync'd to block #${blockNum}, ${this.stateGadget.events.length} pending events`)
         this.logger.info(`stateRoot = ${this.interchainStateRoot.toString('hex')}`)
-        this.logger.info(`eventsRoot = ${this.state.root.toString('hex')}`)
+        this.logger.info(`eventsRoot = ${this.stateGadget.root.toString('hex')}`)
 
         
         
@@ -195,13 +194,13 @@ export class EthereumChainTracker extends ChainTracker {
 
         for (const log of logs) {
             let eventHash = log.data;
-            this.state.addEvent(eventHash)
+            this.stateGadget.addEvent(eventHash)
         }
 
         this.interchainStateRoot = interchainStateRoot;
         
         // Ack any pending events
-        if(this.state.events.length) {
+        if(this.stateGadget.events.length) {
             // then get all the previous token bridge events
             const getPreviousBridgeEvents = async (contract_sub) => {
                 const TokensBridged = contract_sub.filters.TokensBridged();
@@ -221,7 +220,7 @@ export class EthereumChainTracker extends ChainTracker {
                     let data = decoded;
             
                     let tokensBridgedEv: MessageSentEvent = {
-                        fromChain: this.state.getId(),
+                        fromChain: this.stateGadget.getId(),
                         data,
                         toBridge: data.targetBridge,
                         eventHash: data.eventHash
@@ -279,11 +278,12 @@ export class EthereumChainTracker extends ChainTracker {
     async processBridgeEvents(
         crosschainState: CrosschainState
     ) {
+        
         // process all events
         try {
             // Now process any events on this bridge for the user
             for(let ev of this.pendingTokenBridgingEvs) {
-                let { rootProof, eventProof} = crosschainState.proveEvent(ev.fromChain, ev.eventHash)
+                let { rootProof, eventProof } = crosschainState.proveEvent(ev.fromChain, ev.eventHash)
                 let _proof = rootProof.proofs.map(hexify)
                 let _proofPaths = rootProof.paths
                 let _interchainStateRoot = hexify(rootProof.root)
@@ -291,7 +291,6 @@ export class EthereumChainTracker extends ChainTracker {
                 let _eventsPaths = eventProof.paths
                 let _eventsRoot = hexify(eventProof.root)
 
-                // if(ev.toBridge == await this.escrowContract.tokenBridgeId.callAsync()) {
                 if(ev.toBridge == shortToLongBridgeId(this.escrowContract.address)) {
                     await this.web3Wrapper.awaitTransactionSuccessAsync(
                         await this.escrowContract.claim.sendTransactionAsync(
@@ -313,7 +312,6 @@ export class EthereumChainTracker extends ChainTracker {
                     this.pendingTokenBridgingEvs.pop()
                 }
                 else if(ev.toBridge == shortToLongBridgeId(this.bridgeContract.address)) {
-                // else if(ev.toBridge == await this.bridgeContract.tokenBridgeId.callAsync()) {
                     await this.web3Wrapper.awaitTransactionSuccessAsync(
                         await this.bridgeContract.claim.sendTransactionAsync(
                             ev.data.token, 
@@ -345,7 +343,7 @@ export class EthereumChainTracker extends ChainTracker {
 
     onEventEmitted = async (eventHash: string, ev: ethers.Event) => {
         this.logger.info(`block #${ev.blockNumber}, event emitted - ${eventHash}`)
-        this.state.addEvent(eventHash)
+        this.stateGadget.addEvent(eventHash)
 
         let eventEmittedEvent: EventEmittedEvent = { 
             eventHash,
@@ -362,7 +360,7 @@ export class EthereumChainTracker extends ChainTracker {
 
         let tokensBridgedEv: MessageSentEvent = {
             data,
-            fromChain: this.state.getId(),
+            fromChain: this.stateGadget.getId(),
             toBridge: shortToLongBridgeId(data.targetBridge),
             eventHash
         };

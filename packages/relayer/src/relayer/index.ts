@@ -1,19 +1,12 @@
-import { EthereumChainTracker } from "./chain/ethereum";
-import { ChainTracker, EventEmittedEvent, MessageSentEvent } from "./chain/tracker";
+import { ITokenBridgeEventArgs } from "@ohdex/contracts/lib/build/wrappers/i_token_bridge";
+import { EthereumChainTracker } from "../chain/ethereum";
+import { EventEmittedEvent, MessageSentEvent } from "../chain/tracker";
+import { CrosschainState } from "../interchain/crosschain_state";
+import { defaultLogger } from "../logger";
 
 const winston = require('winston');
 const { format } = winston;
 const { combine, label, json, simple } = format;
-
-
-import Event from 'events';
-import { MerkleTree, MerkleTreeProof } from "@ohdex/typescript-solidity-merkle-tree";
-
-import { ITokenBridgeEventArgs } from "@ohdex/contracts/lib/build/wrappers/i_token_bridge";
-import { EventEmitter } from "./declarations";
-import { dehexify } from "./utils";
-import { CrosschainState } from "./interchain/crosschain_state";
-import { defaultLogger } from "./logger";
 
 
 interface ChainConfig {
@@ -30,16 +23,10 @@ interface CrosschainEventEvent {
     data: ITokenBridgeEventArgs;
 }
 
-interface CrosschainEvents {
-    "sent": CrosschainEventEvent
-}
-
 export class Relayer {
     chains: { [k: string]: EthereumChainTracker };
 
-    state: CrosschainState;
-
-    crosschainEvents: EventEmitter<CrosschainEvents>;
+    crosschainState: CrosschainState;
 
     logger;
     config: any;
@@ -50,8 +37,7 @@ export class Relayer {
         
         this.logger = defaultLogger;
 
-        this.crosschainEvents = new eventEmitter();
-        this.state = new CrosschainState();
+        this.crosschainState = new CrosschainState();
     }
 
     async start() {
@@ -65,19 +51,23 @@ export class Relayer {
             );
         }
 
+        // Start all chains.
         let started = [];
-
         for(let chain of Object.values(this.chains)) {
             started = [ ...started, chain.start() ]
         }
-
-        await Promise.all(started)
         
+        await Promise.all(started)
 
-        // start state update loop
+        // Add their state gadgets
+        Object.values(this.chains).map(chain => {
+            this.crosschainState.put(chain.stateGadget)
+        });
+
+        // Start state update loop
         Object.values(this.chains).map(chain => {
             chain.events.on('EventEmitter.EventEmitted', async (ev: EventEmittedEvent) => {
-                await this.updateStateRoots()
+                await this.updateChains()
             })
 
             chain.events.on('ITokenBridge.TokensBridgedEvent', async (msg: MessageSentEvent) => {
@@ -96,23 +86,15 @@ export class Relayer {
         });
     }
 
-    async updateStateRoots() {
-        this.state = new CrosschainState
+    async updateChains() {
+        this.crosschainState.compute()
 
-        Object.values(this.chains).map(chain => {
-            this.state.put(chain.state)
-        });
-
-        this.state.compute()
-
-        this.logger.info(`Computed new interchain state root: ${this.state.root}`)
-        
-        let chainsToUpdate = Object.values(this.chains)
+        this.logger.info(`Computed new interchain state root: ${this.crosschainState.root}`)
         
         await Promise.all(
-            chainsToUpdate.map(async chain => {
+            Object.values(this.chains).map(async chain => {
                 try {
-                    let { proof, leaf } = this.state.proveUpdate(chain.state.getId())
+                    let { proof, leaf } = this.crosschainState.proveUpdate(chain.stateGadget.getId())
                     await chain.updateStateRoot(
                         proof,
                         leaf
@@ -120,7 +102,7 @@ export class Relayer {
 
                     chain.events.once('StateRootUpdated', async () => {
                         await chain.processBridgeEvents(
-                            this.state
+                            this.crosschainState
                         )
                     })
                     
@@ -132,7 +114,7 @@ export class Relayer {
     }
 
     async stop() {
-        await Promise.all(Object.values(this.chains).map(chain => chain.stop));
+        await Promise.all(Object.values(this.chains).map(chain => chain.stop()));
     }
 }
 
