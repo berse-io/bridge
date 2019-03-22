@@ -1,23 +1,19 @@
-import {
-    suiteTeardown
-} from 'mocha'
-
-import { EthereumChainTracker } from "../src/chain/ethereum";
-import { Web3ProviderEngine, RPCSubprovider } from '0x.js';
-import { Web3Wrapper } from '@0x/web3-wrapper';
-
-import { EventEmitterContract, EventEmitterEvents } from "@ohdex/contracts/lib/build/wrappers/event_emitter";
-import { EventListenerContract, EventListenerEvents } from "@ohdex/contracts/lib/build/wrappers/event_listener";
-import { BridgedTokenContract } from "@ohdex/contracts/lib/build/wrappers/bridged_token";
-import { getContractAbi, get0xArtifact, TestchainFactory, caseInsensitiveEquals, sinonStrEqual, sinonBignumEq } from './helper';
-import { keccak256, hexify } from '../src/utils';
-import { expect, assert } from 'chai';
+import { RPCSubprovider, Web3ProviderEngine } from '0x.js';
+import { RevertTraceSubprovider, SolCompilerArtifactAdapter } from '@0x/sol-trace';
 import { BigNumber } from "@0x/utils";
+import { Web3Wrapper } from '@0x/web3-wrapper';
+import { BridgedTokenContract } from "@ohdex/contracts/lib/build/wrappers/bridged_token";
 import { EscrowContract } from '@ohdex/contracts/lib/build/wrappers/escrow';
-import { RevertTraceSubprovider } from '@0x/sol-trace';
-import { SolCompilerArtifactAdapter } from '@0x/sol-trace';
-import { ContractWrappers } from '@ohdex/shared'
-import sinon from 'sinon'
+import { EventEmitterContract } from "@ohdex/contracts/lib/build/wrappers/event_emitter";
+import { expect } from 'chai';
+import { suiteTeardown } from 'mocha';
+import sinon from 'sinon';
+import { EthereumChainTracker } from "../../src/chain/ethereum";
+import { MessageSentEvent } from '../../src/chain/tracker';
+import { hexify, keccak256 } from '../../src/utils';
+import { get0xArtifact, getContractAbi, sinonBignumEq, sinonStrEqual } from '../helper';
+
+
 const chai = require("chai");
 const sinonChai = require("sinon-chai");
 chai.use(sinonChai);
@@ -202,24 +198,46 @@ describe('EthereumChainTracker', function () {
         })
     })
 
+    describe('#receiveCrosschainMessage', async () => {
+        it('receives message', async () => {
+            let chain1 = require('@ohdex/config').networks.kovan;
+
+            let tracker1 = new EthereumChainTracker(chain1)
+            await tracker1.start()
+            tracker1.listen()
+    
+            let fakeMessage: MessageSentEvent = {
+                fromChain: "",
+                toBridge: chain1.bridgeAddress,
+                data: null,
+                eventHash: ""
+            }
+            expect(await tracker1.receiveCrosschainMessage(fakeMessage)).to.be.true;
+
+            expect(tracker1.pendingTokenBridgingEvs).to.have.members([
+                fakeMessage
+            ])
+        })
+
+        it('rejects message', async () => {
+            let chain1 = require('@ohdex/config').networks.kovan;
+
+            let tracker1 = new EthereumChainTracker(chain1)
+            await tracker1.start()
+            tracker1.listen()
+    
+            let fakeMessage: MessageSentEvent = {
+                fromChain: "",
+                toBridge: "I'm a stupid fake bridge, I don't exist",
+                data: null,
+                eventHash: ""
+            }
+            expect(await tracker1.receiveCrosschainMessage(fakeMessage)).to.be.false;
+        })
+        
+    })
+
     suiteTeardown(async () => {
         await pe.stop()
     })
 })
-
-
-// receive emitted event on one chain
-// route to another chain
-// update the state root of another chain
-// and then prove the event in the state
-
-
-
-// THERE COULD be a race condition wherein the event makes it into the StateGadget AFTER the cross chain update
-// ignoring this for now
-
-// describe('Relayer', async() => {
-//     it('routes interchain events correctly', async() => {
-
-//     })
-// })

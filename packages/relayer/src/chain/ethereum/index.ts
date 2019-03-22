@@ -172,7 +172,6 @@ export class EthereumChainTracker extends ChainTracker {
         this.logger.info(`\t${this.bridgeContract.address}`)
         this.logger.info(`\t${this.escrowContract.address}`)
 
-
         return;
     }
     
@@ -291,7 +290,6 @@ export class EthereumChainTracker extends ChainTracker {
                 let _eventsProof = eventProof.proofs.map(hexify)
                 let _eventsPaths = eventProof.paths
                 let _eventsRoot = hexify(eventProof.root)
-
 
                 // if(ev.toBridge == await this.escrowContract.tokenBridgeId.callAsync()) {
                 if(ev.toBridge == shortToLongBridgeId(this.escrowContract.address)) {
