@@ -1,6 +1,6 @@
 import { Web3Wrapper } from "@0x/web3-wrapper";
 import { Web3ProviderEngine, RPCSubprovider } from "0x.js";
-
+import { SolCompilerArtifactAdapter } from '@0x/sol-trace';
 export interface MultichainInfo {
     pe: Web3ProviderEngine;
     web3: Web3Wrapper;
@@ -106,6 +106,7 @@ export function caseInsensitiveEquals(str: string) {
 }
 
 import sinon from 'sinon'
+import { RevertTraceSubprovider } from "@0x/sol-trace";
 
 export function sinonStrEqual(str: string) {
     return sinon.match(caseInsensitiveEquals(str), `${str}`)
@@ -115,4 +116,31 @@ export function sinonBignumEq(x: any) {
     return sinon.match(function(v: any) {
         return x.equals(v)
     })
+}
+
+export async function loadWeb3(config: { rpcUrl: string }) {
+    let pe = new Web3ProviderEngine();
+    const artifactAdapter = new SolCompilerArtifactAdapter(
+        `${require("@ohdex/contracts")}/build/artifacts`,
+        `${require("@ohdex/contracts")}/contracts`
+    );
+    const revertTraceSubprovider = new RevertTraceSubprovider(
+        artifactAdapter, 
+        '0',
+        true
+    );
+    // pe.addProvider(revertTraceSubprovider);
+    pe.addProvider(new RPCSubprovider(config.rpcUrl))
+    pe.start()
+    let web3 = new Web3Wrapper(pe);
+    let accounts = await web3.getAvailableAddressesAsync()
+    let account = accounts[0]
+    let txDefaults = { from: account }
+    return {
+        pe,
+        web3,
+        accounts,
+        account,
+        txDefaults
+    }
 }
