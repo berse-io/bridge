@@ -221,6 +221,13 @@ describe('EthereumChainTracker', function () {
         
     })
 
+    describe('#stateGadget', async () => {
+        it('loads all previous events', async () => {
+            // emit 3 events
+            // events should be in state gadget store
+        })
+    })
+
     suiteTeardown(async () => {
         await pe.stop()
     })
