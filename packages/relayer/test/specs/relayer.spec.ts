@@ -11,7 +11,7 @@ import sinon from 'sinon';
 import { EthereumChainTracker } from "../../src/chain/ethereum";
 import { MessageSentEvent } from '../../src/chain/tracker';
 import { hexify, keccak256 } from '../../src/utils';
-import { get0xArtifact, getContractAbi, sinonBignumEq, sinonStrEqual, loadWeb3 } from '../helper';
+import { get0xArtifact, getContractAbi, sinonBignumEq, sinonStrEqual, loadWeb3, TestchainFactory, Testchain } from '../helper';
 import { CrosschainState } from '../../src/interchain/crosschain_state';
 import { StateGadget } from '../../src/chain/abstract_state_gadget';
 import { EthereumStateGadget } from '../../src/chain/ethereum/state_gadget';
@@ -42,14 +42,25 @@ describe('Relayer', function() {
     // try break it
     // observe and learn
 
-    describe.only('interchain state', async() => {
-        it('should load all previous events', async () => {
-
+    describe.only('interchain state', function() {
+        let testchain1: Testchain, testchain2: Testchain;
+        before(async () => {
+            // setup testchains
+            testchain1 = await TestchainFactory.fork(require('@ohdex/config').networks.kovan.rpcUrl, '11000')
+            testchain2 = await TestchainFactory.fork(require('@ohdex/config').networks.rinkeby.rpcUrl, '11001')
+            return;
         })
+
+        // it('should load all previous events', async () => {
+
+        // })
 
         it('should ack events', async() => {
             let chain1 = require('@ohdex/config').networks.kovan;
             let chain2 = require('@ohdex/config').networks.rinkeby;
+            chain1.rpcUrl = 'http://localhost:11000';
+            chain2.rpcUrl = 'http://localhost:11001';
+            console.log(chain1)
 
             consoleOpts.silent = false;
             let relayer = new Relayer({
