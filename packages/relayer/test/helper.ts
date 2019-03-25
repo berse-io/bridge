@@ -22,22 +22,24 @@ export class TestchainFactory {
     static async fork(rpcUrl: string, port: string): Promise<Testchain> {
         const server = ganache.server({ 
             ws: true,
-            logger: {
-                log: () => false // console.log
-            },
+            // logger: {
+            //     log: () => false // console.log
+            // },
+
             total_accounts: 100,
             s: "TestRPC is awesome!", // I didn't choose this
             gasPrice: 0,
             gas: 1,
             // networkId: 420,
-            debug: false,
-            // defaultBalanceEther: '10000000000000000000',
+            // debug: false,
+            defaultBalanceEther: '10000000000000000000',
             unlock: [0, 1],
             fork: rpcUrl
         });
 
-        let blockchainState = await new Promise<any>((res, rej) => {
+        return new Promise<any>((res, rej) => {
             server.listen(port, (err, state) => {
+                console.log(err)
                 if(err) rej(err);
                 
                 let chain = new Testchain()
@@ -47,7 +49,6 @@ export class TestchainFactory {
             })
         });
         
-        return blockchainState;
     }
 }
 export class MultichainProviderFactory {
