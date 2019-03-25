@@ -1,7 +1,7 @@
 
-import { BridgedTokenContract } from "@ohdex/contracts/build/wrappers/bridged_token";
-import { EscrowContract } from '@ohdex/contracts/build/wrappers/escrow';
-import { EventEmitterContract } from "@ohdex/contracts/build/wrappers/event_emitter";
+import { BridgedTokenContract } from "@ohdex/contracts/lib/build/wrappers/bridged_token";
+import { EscrowContract } from '@ohdex/contracts/lib/build/wrappers/escrow';
+import { EventEmitterContract } from "@ohdex/contracts/lib/build/wrappers/event_emitter";
 import { Web3ProviderEngine, RPCSubprovider, BigNumber } from '0x.js';
 
 export function getContractArtifact(name: string) {
