@@ -4,12 +4,11 @@ packages/contracts/devchain/keys
 *node_modules
 **/yarn-error.log
 
-packages/bridge-ui/.next
+packages/*/.next
 packages/deployer/yarn-error.log
 packages/contracts/.0x-artifacts
 packages/multichain/db
 yarn-error.log
-bridge-ui/.next
 contracts/build/
 contracts/devchain/keys
 
