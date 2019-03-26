@@ -60,6 +60,7 @@ describe('EthereumChainTracker', function () {
     describe('account', () => {
         it('uses the RELAYER_PRIVKEY env variable', async () => {
             let tracker = new EthereumChainTracker(config)
+            await tracker.start()
             await tracker.listen()
             expect(tracker.account).to.eq('0x0')
         })
@@ -229,7 +230,15 @@ describe('EthereumChainTracker', function () {
         
     })
 
-    describe('#stateGadget', async () => {
+    describe.only('#stateGadget', async () => {
+        it("loads the most recent state root update time", async () => {
+            let tracker1 = new EthereumChainTracker(config)
+            await tracker1.start()
+            tracker1.listen()
+
+            expect(tracker1.lastUpdated).to.eq(1);
+        })
+
         it('loads all previous events', async () => {
             // emit 3 events
             // events should be in state gadget store

@@ -1,25 +1,11 @@
-import { RPCSubprovider, Web3ProviderEngine } from '0x.js';
-import { RevertTraceSubprovider, SolCompilerArtifactAdapter } from '@0x/sol-trace';
 import { BigNumber } from "@0x/utils";
-import { Web3Wrapper } from '@0x/web3-wrapper';
 import { BridgedTokenContract } from "@ohdex/contracts/lib/build/wrappers/bridged_token";
-import { EscrowContract } from '@ohdex/contracts/lib/build/wrappers/escrow';
-import { EventEmitterContract } from "@ohdex/contracts/lib/build/wrappers/event_emitter";
-import { expect } from 'chai';
-import { suiteTeardown } from 'mocha';
-import sinon from 'sinon';
-import { EthereumChainTracker } from "../../src/chain/ethereum";
-import { MessageSentEvent } from '../../src/chain/tracker';
-import { hexify, keccak256 } from '../../src/utils';
-import { get0xArtifact, getContractAbi, sinonBignumEq, sinonStrEqual, loadWeb3, TestchainFactory, Testchain } from '../helper';
-import { CrosschainState } from '../../src/interchain/crosschain_state';
-import { StateGadget } from '../../src/chain/abstract_state_gadget';
-import { EthereumStateGadget } from '../../src/chain/ethereum/state_gadget';
-import { Relayer } from '../../src/relayer';
 import { ContractWrappers, _chainId, _salt } from '@ohdex/shared';
 import { consoleOpts } from '../../src/logger';
+import { Relayer } from '../../src/relayer';
+import { get0xArtifact, loadWeb3, Testchain, TestchainFactory } from '../helper';
 
-
+import chainlog from 'chainlog'
 
 describe('Relayer', function() {
     this.timeout(10000);
@@ -44,24 +30,28 @@ describe('Relayer', function() {
 
     describe.only('interchain state', function() {
         let testchain1: Testchain, testchain2: Testchain;
+        let chain1 = require('@ohdex/config').networks.kovan;
+        let chain2 = require('@ohdex/config').networks.rinkeby;
+
         before(async () => {
             // setup testchains
-            testchain1 = await TestchainFactory.fork(require('@ohdex/config').networks.kovan.rpcUrl, '11000')
-            testchain2 = await TestchainFactory.fork(require('@ohdex/config').networks.rinkeby.rpcUrl, '11001')
+            testchain1 = await TestchainFactory.fork(chain1.rpcUrl, '11000')
+            testchain2 = await TestchainFactory.fork(chain2.rpcUrl, '11001')
+            chain1.rpcUrl = testchain1.rpcUrl;
+            chain2.rpcUrl = testchain2.rpcUrl;
+
+            // await chainlog({ config: require.resolve('@ohdex/relayer/test/test2.yml') })
+            await chainlog({ config: require.resolve('@ohdex/relayer/test/test.yml') })
+
+            // add test funds to the relayer wallet
+
             return;
         })
 
         // it('should load all previous events', async () => {
-
         // })
 
         it('should ack events', async() => {
-            let chain1 = require('@ohdex/config').networks.kovan;
-            let chain2 = require('@ohdex/config').networks.rinkeby;
-            chain1.rpcUrl = 'http://localhost:11000';
-            chain2.rpcUrl = 'http://localhost:11001';
-            console.log(chain1)
-
             consoleOpts.silent = false;
             let relayer = new Relayer({
                 chain1,
@@ -113,42 +103,33 @@ describe('Relayer', function() {
                     _chainId, _salt,
                     txDefaults1
                 ),
-                wrappers1.Escrow.bridge.sendTransactionAsync(
-                    chain2.bridgeAddress, 
-                    bridgedToken1.address, 
-                    account1, new BigNumber('300'), 
-                    _chainId, _salt,
-                    txDefaults1
-                ),
-                wrappers2.Escrow.bridge.sendTransactionAsync(
-                    chain1.bridgeAddress, 
-                    bridgedToken2.address, 
-                    account2, new BigNumber('300'), 
-                    _chainId, _salt,
-                    txDefaults2
-                )
+                // wrappers1.Escrow.bridge.sendTransactionAsync(
+                //     chain2.bridgeAddress, 
+                //     bridgedToken1.address, 
+                //     account1, new BigNumber('300'), 
+                //     _chainId, _salt,
+                //     txDefaults1
+                // ),
+                // wrappers2.Escrow.bridge.sendTransactionAsync(
+                //     chain1.bridgeAddress, 
+                //     bridgedToken2.address, 
+                //     account2, new BigNumber('300'), 
+                //     _chainId, _salt,
+                //     txDefaults2
+                // )
             ])
             
 
             await new Promise((res,rej)=>setTimeout(res,7500))
             
-            // let eventEmitter1 = new EventEmitterContract(
-            //     getContractAbi('EventEmitter'),
-            //     chain1.eventEmitterAddress,
-            //     pe1
-            // );
-
-            // eventEmitter.emitEvent.sendTransactionAsync("123");
-
-
-            
-
-
-            // emit an event on another chain
-
-            
-            // call state update
         })
+
+        // now describe the bug
+
+        it("proves events with this chain's state root", async () => {
+            
+        })
+        it("updates a chain's state root")
     })
 
     // create event on one chain

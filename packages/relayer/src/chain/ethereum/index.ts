@@ -32,6 +32,7 @@ export class EthereumChainTracker extends ChainTracker {
     eventListener: EventListenerContract;
     eventListener_sub: ethers.Contract;
     interchainStateRoot: Buffer;
+    lastUpdated: Buffer;
 
 
     bridgeContract: BridgeContract;
@@ -54,7 +55,10 @@ export class EthereumChainTracker extends ChainTracker {
         this.logger.info(`Connecting to ${this.conf.rpcUrl}`)
 
         this.pe = new Web3ProviderEngine();
-        this.pe.addProvider(new PrivateKeyWalletSubprovider("13d14e5f958796529e84827f6a62d8e19375019f8cf0110484bcef39c023edcc"));
+        // if(process.env.NODE_ENV !== 'test') {
+
+        // }
+        // this.pe.addProvider(new PrivateKeyWalletSubprovider("13d14e5f958796529e84827f6a62d8e19375019f8cf0110484bcef39c023edcc"));
         this.pe.addProvider(new RPCSubprovider(this.conf.rpcUrl));
         this.pe.start()
 
@@ -177,9 +181,23 @@ export class EthereumChainTracker extends ChainTracker {
     private async loadStateAndEvents() {
         // 1. Load chain's state root
         // 
+        this.eventListener_sub.filters.StateRootUpdated();
+        // const logs = await this.ethersProvider.getLogs({
+        //     fromBlock: 0,
+        //     toBlock: "latest",
+        //     address: this.eventEmitter_sub.address,
+        //     topics: EventEmitted.topics
+        // });
+
         let interchainStateRoot = dehexify(
             (await this.eventListener.interchainStateRoot.callAsync())
         )
+        this.lastUpdated = dehexify('123');
+        // let latestBlockHash = await this.eventListener.lastUpdated.callAsync();
+        
+
+        // 1.1 load all the event roots of other chains
+        let t = 0;
 
         
         // 2. Load all previously emitted events (including those that may not be ack'd on other chains yet)
@@ -336,7 +354,7 @@ export class EthereumChainTracker extends ChainTracker {
                 }
             }
         } catch(ex) {
-            this.logger.error(`failed to do bridging`)
+            this.logger.error(`processBridgeEvents failed`)
             this.logger.error(ex)
         }
     }
@@ -378,6 +396,11 @@ export class EthereumChainTracker extends ChainTracker {
     // and add them to our pending queue here
     async receiveCrosschainMessage(tokensBridgedEv: MessageSentEvent): Promise<boolean> {
         this.logger.debug(JSON.stringify(tokensBridgedEv))
+
+        if(tokensBridgedEv.fromChain == this.stateGadget.id) {
+            this.logger.warn('receiveCrosschainMessage: ignoring event from own chain')
+            return;
+        }
 
         if(this.bridgeIds.includes(tokensBridgedEv.toBridge))
         {
