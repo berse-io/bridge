@@ -18,6 +18,9 @@ import {
     EventEmitterEventEmittedEventArgs
 } from '../build/wrappers/event_emitter';
 
+import {
+    WhitelistContract, WhitelistEvents
+} from '../build/wrappers/whitelist';
 
 import {
     EscrowContract
@@ -76,6 +79,7 @@ describe('Bridge', function(){
 
     let eventListener: EventListenerContract;
     let eventEmitter: EventEmitterContract;
+    let whitelist: WhitelistContract;
 
     let chainId = new BigNumber('1')
     let salt = new BigNumber('1')
@@ -123,9 +127,14 @@ describe('Bridge', function(){
         
         const txDefaults = { from: user };
 
+        whitelist = await WhitelistContract.deployFrom0xArtifactAsync(
+            getContractArtifact('Whitelist'), pe, txDefaults
+        )
+
         // @ts-ignore
         eventEmitter = await EventEmitterContract.deployFrom0xArtifactAsync(
-            getContractArtifact('EventEmitterContract'), pe, txDefaults
+            getContractArtifact('EventEmitterContract'), pe, txDefaults,
+            whitelist.address,
         )
         // @ts-ignore
         eventListener = await EventListenerContract.deployFrom0xArtifactAsync(
@@ -137,11 +146,16 @@ describe('Bridge', function(){
             getContractArtifact('EscrowContract'), pe, txDefaults,
             chainId, eventListener.address, eventEmitter.address
         )
+
+        await whitelist.addWhitelisted.sendTransactionAsync(bridgeOrigin.address, txDefaults);
+
         // @ts-ignore
         bridgeForeign = await BridgeContract.deployFrom0xArtifactAsync(
             getContractArtifact('BridgeContract'), pe, txDefaults,
             chainId, eventListener.address, eventEmitter.address
         )
+
+        await whitelist.addWhitelisted.sendTransactionAsync(bridgeForeign.address, txDefaults);
 
         // @ts-ignore
         bridgedToken = await BridgedTokenContract.deployFrom0xArtifactAsync(
