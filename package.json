@@ -20,7 +20,8 @@
       "packages/relayer",
       "packages/ts-merkle-tree",
       "packages/config",
-      "packages/shared"
+      "packages/shared",
+      "packages/chainlog"
     ],
     "nohoist": [
       "**/ganache-cli/**",
