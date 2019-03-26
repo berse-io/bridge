@@ -57,6 +57,14 @@ describe('EthereumChainTracker', function () {
         snapshotId = await web3.takeSnapshotAsync()
     })
 
+    describe('account', () => {
+        it('uses the RELAYER_PRIVKEY env variable', async () => {
+            let tracker = new EthereumChainTracker(config)
+            await tracker.listen()
+            expect(tracker.account).to.eq('0x0')
+        })
+    })
+
     describe('#start', () => {
         it('loads past events from EventEmitter', async () => {
             let eventEmitter = await EventEmitterContract.deployFrom0xArtifactAsync(
