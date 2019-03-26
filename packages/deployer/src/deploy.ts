@@ -8,6 +8,10 @@ import { Web3Wrapper, AbiDefinition, Provider, TxData } from '@0x/web3-wrapper';
 // } from '../../contracts/build/wrappers/event_util';
 
 import {
+    WhitelistContract
+} from '../../contracts/build/wrappers/whitelist';
+
+import {
     EventListenerContract
 } from '../../contracts/build/wrappers/event_listener';
 
@@ -92,6 +96,12 @@ async function _deploy(configMgr: ConfigManager, network: string) {
     accounts = await web3.getAvailableAddressesAsync();
     account = accounts[0];
 
+    // 0 Deploy whitelist
+
+    let whitelist = await WhitelistContract.deployAsync(
+        ...getDeployArgs('Whitelist', pe, account)
+    );
+
     // 1 Deploy event util
 
     // let eventUtil = await EventUtilContract.deployAsync(
@@ -99,11 +109,11 @@ async function _deploy(configMgr: ConfigManager, network: string) {
     // );
 
     // 2 Deploy eventEmitter
-
+    // @ts-ignore
     let eventEmitter = await EventEmitterContract.deployAsync(
-        ...getDeployArgs('EventEmitter', pe, account)
+        ...getDeployArgs('EventEmitter', pe, account),
+        whitelist.address
     );
-
 
     // 3 Deploy eventListener
     
@@ -124,6 +134,14 @@ async function _deploy(configMgr: ConfigManager, network: string) {
         eventEmitter.address
     );
 
+    // 4.1 add Escrow to whitelist
+
+    await whitelist.addWhitelisted.sendTransactionAsync(
+        escrow.address
+    )
+
+    console.log("whitelisted Escrow");
+
     // 5 Deploy Bridge
 
     // @ts-ignore
@@ -133,8 +151,15 @@ async function _deploy(configMgr: ConfigManager, network: string) {
         eventListener.address,
         eventEmitter.address,
     )
-    
 
+    // 5.1 add Bridge to whitelist
+
+    await whitelist.addWhitelisted.sendTransactionAsync(
+        bridge.address
+    )
+
+    console.log("whitelisted bridge");
+    
     // config.eventUtilAddress = eventUtil.address;
     config.eventEmitterAddress = eventEmitter.address;
     config.eventListenerAddress = eventListener.address;

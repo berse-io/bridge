@@ -104,6 +104,7 @@ contract EventListener is MerkleTreeVerifier {
 
         // TODO - Verify this chain's events are acknowledged        
         // bytes32 eventsRoot = MerkleProof.computeRoot(EventEmitter.getPendingEvents());
+        // TODO Skip generation of merkle proof onchain as it gets crazy expensive with large number of events and will run out of gas
         require(emitter.getEventsRoot() == _eventsRoot, "INVALID_STATE_CHRONOLOGY");
 
         bytes32 chainLeaf = _hashLeaf2(_eventsRoot);
