@@ -7,7 +7,7 @@ contract WhitelistUser {
     IWhitelist public whitelist;
 
     modifier onlyWhitelisted() {
-        require(whitelist.isWhitelisted(msg.sender));
+        require(whitelist.isWhitelisted(msg.sender), "MSG.SENDER_NOT_WHITELISTED");
         _;
     }
 

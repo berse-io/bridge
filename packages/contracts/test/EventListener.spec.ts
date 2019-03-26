@@ -10,6 +10,10 @@ import {
     EventListenerContract
 } from '../build/wrappers/event_listener';
 
+import {
+    WhitelistContract, WhitelistEvents
+} from '../build/wrappers/whitelist';
+
 import {MerkleTree} from "@ohdex/typescript-solidity-merkle-tree";
 
 import { Web3ProviderEngine, RPCSubprovider, BigNumber } from "0x.js";
@@ -76,7 +80,7 @@ describe('EventListener', function() {
             '0',
             true
         );
-        pe.addProvider(revertTraceSubprovider);
+        // pe.addProvider(revertTraceSubprovider);
 
         pe.addProvider(new RPCSubprovider('http://127.0.0.1:10000'))
         pe.start()
@@ -96,12 +100,21 @@ describe('EventListener', function() {
     });
 
     describe('EventEmitter', () => {
+        let whitelist: WhitelistContract;
         let eventEmitter: EventEmitterContract;
         beforeEach(async () => {
+            whitelist = await WhitelistContract.deployFrom0xArtifactAsync(
+                get0xArtifact('whitelist'),
+                pe, txDefaults,
+            );
+
             eventEmitter = await EventEmitterContract.deployFrom0xArtifactAsync(
                 get0xArtifact('EventEmitter'),
-                pe, txDefaults
+                pe, txDefaults,
+                whitelist.address,
             );
+
+            await whitelist.addWhitelisted.sendTransactionAsync(eventEmitter.address, txDefaults);
         })
 
         it('initially has 0 events', async() => {
@@ -156,19 +169,39 @@ describe('EventListener', function() {
     describe.only('EventListener', () => {
         let eventEmitter: EventEmitterContract;
         let eventListener: EventListenerContract;
+        let whitelist: WhitelistContract;
 
         beforeEach(async () => {
+
+            whitelist = await WhitelistContract.deployFrom0xArtifactAsync(
+                get0xArtifact('whitelist'),
+                pe, txDefaults,
+            );
+                
+            console.log("WHITELIST ADMIN");
+            console.log(await whitelist.isWhitelistAdmin.callAsync(user));
+
             eventEmitter = await EventEmitterContract.deployFrom0xArtifactAsync(
                 get0xArtifact('EventEmitter'),
-                pe, txDefaults
+                pe, txDefaults,
+                whitelist.address,
             );
 
+            console.log(2);
+
+            // await whitelist.addWhitelisted.sendTransactionAsync(eventEmitter.address, txDefaults);
+            console.log(txDefaults);
+            await whitelist.addWhitelisted.sendTransactionAsync(user, txDefaults);
+            
+            console.log(3);
             // @ts-ignore
             eventListener = await EventListenerContract.deployFrom0xArtifactAsync(
                 get0xArtifact('EventListener'),
                 pe, txDefaults,
-                eventEmitter.address
+                eventEmitter.address,
             );
+
+            console.log(4);
         })
 
         it('updates state root with 0 events', async () => {
@@ -267,8 +300,9 @@ describe('EventListener', function() {
         })
 
         it.only('updates the state root twice', async() => {
+            console.log("emitting event");
             await eventEmitter.emitEvent.sendTransactionAsync(hexify(keccak256('123')))
-            
+            console.log("emitted event");
             // construct new merkle root
             let interchainStateRoot = dehexify(await eventListener.interchainStateRoot.callAsync())
             let eventsRoot = dehexify(await eventEmitter.getEventsRoot.callAsync())
