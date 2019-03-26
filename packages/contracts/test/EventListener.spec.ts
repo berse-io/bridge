@@ -10,7 +10,7 @@ import {
     EventListenerContract
 } from '../build/wrappers/event_listener';
 
-import {MerkleTree} from "../../ts-merkle-tree/src";
+import {MerkleTree} from "@ohdex/typescript-solidity-merkle-tree";
 
 import { Web3ProviderEngine, RPCSubprovider, BigNumber } from "0x.js";
 import { Web3Wrapper, AbiDefinition, Provider, TxData } from '@0x/web3-wrapper';
@@ -23,22 +23,21 @@ function keccak256(x: any): Buffer {
 
 let $web3 = require('web3')
 
-function getDeployArgs(name, pe, from): [ string, AbiDefinition[],  Provider, Partial<TxData>] {
-    let json = require(`../build/contracts/${name}.json`);
-    let bytecode = json.bytecode;
-    let abi = json.abi;
+import { getContractAbi, get0xArtifact } from './helpers';
+
+function getDeployArgs(name, pe, from): [ string, AbiDefinition[], Partial<TxData>] {
+    let abi = getContractAbi(name)
     let provider = pe;
 
     return [
-        bytecode,
         abi,
         provider,
         { from }
     ]
 }
 
-import { TruffleArtifactAdapter } from '@0x/sol-trace';
-import { RevertTraceSubprovider } from '@0x/sol-trace';
+
+import { RevertTraceSubprovider, SolCompilerArtifactAdapter } from '@0x/sol-trace';
 import { EventEmitterContract } from '../build/wrappers/event_emitter';
 
 const TRUFFLE_DEFAULT_ADDR = `0x3ffafd6738f1823ea25b42ebe02aff44d022513e`
@@ -63,19 +62,23 @@ describe('EventListener', function() {
     let pe: Web3ProviderEngine, web3: Web3Wrapper;
     let accounts;
     let user;
+    let txDefaults;
 
     before(async () => {
         pe = new Web3ProviderEngine();
         
-        const artifactAdapter = new TruffleArtifactAdapter(require('path').dirname(require.resolve('..')), '0.5.0');
+        const artifactAdapter = new SolCompilerArtifactAdapter(
+            `${require("@ohdex/contracts")}/build/artifacts`,
+            `${require("@ohdex/contracts")}/contracts`
+        );
         const revertTraceSubprovider = new RevertTraceSubprovider(
             artifactAdapter, 
-            TRUFFLE_DEFAULT_ADDR,
+            '0',
             true
         );
         pe.addProvider(revertTraceSubprovider);
 
-        pe.addProvider(new RPCSubprovider('http://127.0.0.1:9545'))
+        pe.addProvider(new RPCSubprovider('http://127.0.0.1:10000'))
         pe.start()
 
         web3 = new Web3Wrapper(pe);
@@ -88,13 +91,17 @@ describe('EventListener', function() {
         
         accounts = await web3.getAvailableAddressesAsync();
         user = accounts[0]
+        txDefaults = { from: user }
         // user = '0xc8c4f0c7c02181daacf2bf0ed455f74e20a6208a'
     });
 
     describe('EventEmitter', () => {
         let eventEmitter: EventEmitterContract;
         beforeEach(async () => {
-            eventEmitter = await EventEmitterContract.deployAsync(...getDeployArgs('EventEmitter', pe, user));
+            eventEmitter = await EventEmitterContract.deployFrom0xArtifactAsync(
+                get0xArtifact('EventEmitter'),
+                pe, txDefaults
+            );
         })
 
         it('initially has 0 events', async() => {
@@ -151,9 +158,17 @@ describe('EventListener', function() {
         let eventListener: EventListenerContract;
 
         beforeEach(async () => {
-            eventEmitter = await EventEmitterContract.deployAsync(...getDeployArgs('EventEmitter', pe, user));
+            eventEmitter = await EventEmitterContract.deployFrom0xArtifactAsync(
+                get0xArtifact('EventEmitter'),
+                pe, txDefaults
+            );
+
             // @ts-ignore
-            eventListener = await EventListenerContract.deployAsync(...getDeployArgs('EventListener', pe, user), eventEmitter.address);
+            eventListener = await EventListenerContract.deployFrom0xArtifactAsync(
+                get0xArtifact('EventListener'),
+                pe, txDefaults,
+                eventEmitter.address
+            );
         })
 
         it('updates state root with 0 events', async () => {
@@ -179,7 +194,9 @@ describe('EventListener', function() {
                 keccak256
             );
 
-            let proof = tree.generateProof(items[0]);
+            let proof = tree.generateProof(
+                tree.findLeafIndex(items[0])
+            );
             tree.verifyProof(proof, tree.hashLeaf(items[0]))
 
             let newInterchainStateRoot = hexify(tree.root())
@@ -189,7 +206,6 @@ describe('EventListener', function() {
                     proof.proofs.map(hexify),
                     proof.paths,
                     newInterchainStateRoot, 
-                    interchainStateRoot,
                     eventsRoot
                 )
             )
@@ -223,7 +239,9 @@ describe('EventListener', function() {
                 keccak256
             );
 
-            let proof = tree.generateProof(state.chainA);
+            let proof = tree.generateProof(
+                tree.findLeafIndex(state.chainA)
+            );
             tree.verifyProof(proof, tree.hashLeaf(state.chainA))
 
             let newInterchainStateRoot = hexify(tree.root())
@@ -233,7 +251,6 @@ describe('EventListener', function() {
                     proof.proofs.map(hexify),
                     proof.paths,
                     newInterchainStateRoot, 
-                    hexify(interchainStateRoot),
                     hexify(eventsRoot)
                 )
             )
@@ -269,7 +286,9 @@ describe('EventListener', function() {
                 keccak256
             );
 
-            let proof = tree.generateProof(state.chainA);
+            let proof = tree.generateProof(
+                tree.findLeafIndex(state.chainA)
+            );
             tree.verifyProof(proof, tree.hashLeaf(state.chainA))
 
             let newInterchainStateRoot = hexify(tree.root())
@@ -278,7 +297,6 @@ describe('EventListener', function() {
                 proof.proofs.map(hexify),
                 proof.paths,
                 newInterchainStateRoot, 
-                hexify(interchainStateRoot),
                 hexify(eventsRoot)
             )
             
@@ -297,14 +315,15 @@ describe('EventListener', function() {
                 keccak256
             );
 
-            proof = tree.generateProof(state.chainA);
+            proof = tree.generateProof(
+                tree.findLeafIndex(state.chainA)
+            );
             tree.verifyProof(proof, tree.hashLeaf(state.chainA))
             newInterchainStateRoot = hexify(tree.root())
             await eventListener.updateStateRoot.sendTransactionAsync(
                 proof.proofs.map(hexify),
                 proof.paths,
                 newInterchainStateRoot, 
-                hexify(interchainStateRoot),
                 hexify(eventsRoot)
             )
             expect(await eventListener.interchainStateRoot.callAsync()).to.eq(newInterchainStateRoot);

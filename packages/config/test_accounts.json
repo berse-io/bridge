@@ -9,5 +9,10 @@
             "type": "donate",
             "address": "0xb2fbcD12c58Ef05E22de310885B3635E5C5E8C14"
         }
-    ]
+    ],
+    "deployment": {
+        "type": "PrivateKeyWalletSubprovider",
+        "privateKey": "04EA60B5D7E1ABDD2E96A36CCD07E272CF785EB5F65C8447FE6DCA6953EE3C80",
+        "address": "0xb2fbcD12c58Ef05E22de310885B3635E5C5E8C14"
+    }
 }

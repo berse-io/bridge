@@ -1,12 +1,11 @@
 {
-    "extends": "./tsconfig",
     "compilerOptions": {
+        "rootDir": ".",
+        "outDir": "lib/",
         "lib": [
             "es2018",
             "dom"
         ],
-        "rootDir": ".",
-        "outDir": "lib",
         "typeRoots": [
           "node_modules/@0x/typescript-typings/types",
           "node_modules/@types"
@@ -15,12 +14,17 @@
         "esModuleInterop": true,
         "moduleResolution": "node",
         "module": "commonjs",
-        "sourceMap": true
+        "inlineSourceMap": true,
+        "composite": true,
+        "declaration": true
     },
     "include": [
-        "test/"
+        "src"
     ],
     "exclude": [
-        "node_modules/**"
+        "node_modules"
+    ],
+    "references": [
+        { "path": "../contracts" }
     ]
 }

@@ -1,9 +1,9 @@
-import { ChainStateLeaf } from "../../interchain";
+import { ChainStateLeaf } from "../../interchain/crosschain_state";
 import { MerkleTree } from "@ohdex/typescript-solidity-merkle-tree";
-import { StateGadget } from "../../interchain/gadget";
+import { StateGadget } from "../abstract_state_gadget";
 import { dehexify } from "../../utils";
 import { keccak256, hexify } from "../../utils";
-import { MerkleTreeProof } from "@ohdex/typescript-solidity-merkle-tree/src";
+import { MerkleTreeProof } from "@ohdex/typescript-solidity-merkle-tree";
 
 
 class EthereumStateLeaf extends ChainStateLeaf {
@@ -39,7 +39,6 @@ class EthereumStateGadget extends StateGadget {
         return this.id
     }
 
-    // putChainState(chainId: string, oldRoot: string, )
     addEvent(eventHash: string) {
         this.events.push(dehexify(eventHash))
         this.eventsTree = new MerkleTree(
@@ -47,10 +46,6 @@ class EthereumStateGadget extends StateGadget {
             keccak256
         );
     }
-
-    // updateCurrentRoot(root: string) {
-    //     this.root = dehexify(root)
-    // }
     
     getLeaf(): EthereumStateLeaf {
         let leaf = new EthereumStateLeaf()

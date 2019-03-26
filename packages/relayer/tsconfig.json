@@ -6,10 +6,6 @@
             "es2018",
             "dom"
         ],
-        "typeRoots": [
-          "node_modules/@0x/typescript-typings/types",
-          "node_modules/@types"
-        ],
         "target": "es2018",
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": true,
@@ -18,9 +14,14 @@
         "sourceMap": true
     },
     "include": [
-        "./src/*"
+        "src",
+        "test",
     ],
     "exclude": [
-        "node_modules/**"
+        "**/node_modules"
+    ],
+    "references": [
+        { "path": "../contracts" },
+        { "path": "../multichain" }
     ]
 }

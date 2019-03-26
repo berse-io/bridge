@@ -1,6 +1,8 @@
 import { ConfigManager } from "./config";
 import { deploy } from "./deploy";
 
+import '@ohdex/config';
+
 const configMgr = ConfigManager.load()
 
 deploy(configMgr)

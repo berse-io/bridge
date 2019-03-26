@@ -1,11 +1,7 @@
-import Web3 from "web3";
 import { Web3ProviderEngine, RPCSubprovider, BigNumber} from "0x.js";
 import { PrivateKeyWalletSubprovider } from "@0x/subproviders";
 import { Web3Wrapper, AbiDefinition, Provider, TxData } from '@0x/web3-wrapper';
 
-// import{
-//     EventUtilContract,
-// } from '../../contracts/build/wrappers/event_util';
 
 import {
     WhitelistContract
@@ -13,35 +9,43 @@ import {
 
 import {
     EventListenerContract
-} from '../../contracts/build/wrappers/event_listener';
+} from '@ohdex/contracts/lib/build/wrappers/event_listener';
 
 import {
     EventEmitterContract,
-} from '../../contracts/build/wrappers/event_emitter';
+} from '@ohdex/contracts/lib/build/wrappers/event_emitter';
 
 import {
     EscrowContract
-}  from '../../contracts/build/wrappers/escrow'
+}  from '@ohdex/contracts/lib/build/wrappers/escrow'
 
 import {
     BridgeContract
-}   from '../../contracts/build/wrappers/bridge';
+}   from '@ohdex/contracts/lib/build/wrappers/bridge';
 
 import {
     WETH9Contract
-}   from '../../contracts/build/wrappers/weth9';
+}   from '@ohdex/contracts/lib/build/wrappers/weth9';
 
 import {
     DemoERC20Contract
-}   from '../../contracts/build/wrappers/demo_erc20';
+}   from '@ohdex/contracts/lib/build/wrappers/demo_erc20';
 import { ConfigManager } from "./config";
+import { toWei, fromWei } from "web3-utils";
+
+import { logUtils } from '@0x/utils';
+
+import { AccountsConfig } from '@ohdex/multichain';
 
 const assert = require('assert');
 
+const winston = require('winston'); 
+const { format } = winston;
+const { combine, label, json, simple } = format;
 
 function getDeployArgs(name: string, pe: Web3ProviderEngine, from: string): [ string, AbiDefinition[], Provider, Partial<TxData>] {
-    // let json = require(`../../contracts/build/contracts/${name}.json`);
-    let json = require(`../../contracts/build/artifacts/${name}.json`);
+    // let json = require(`@ohdex/contracts/lib/build/contracts/${name}.json`);
+    let json = require(`@ohdex/contracts/lib/build/artifacts/${name}.json`);
     let bytecode = json.compilerOutput.evm.bytecode.object;
     let abi = json.compilerOutput.abi;
     let provider = pe;
@@ -80,18 +84,39 @@ async function deploy(configMgr: ConfigManager) {
     configMgr.save()
 }
 
+
 async function _deploy(configMgr: ConfigManager, network: string) {
     const config = configMgr.config[network];
-    const privateKey = require("../../config/accounts.json").deployAccountPrivateKey;
+    
+    let logger = winston.loggers.add(
+        `deployer-${network}`, 
+        {
+            format: require('./logger').logFormat([
+                label({ label: network })
+            ]),
+            transports: [
+                new winston.transports.Console()
+            ]
+        }
+    );
+
+    logUtils.log = (args) => {
+        logger.info(args)
+    }
+
+    logger.info(`Deploying to network (rpcUrl=${config.rpcUrl})`)
 
     let pe: Web3ProviderEngine, web3: Web3Wrapper;
     let accounts;
     let account;
 
+    let deploymentAccount = require("@ohdex/config").accounts.deployment;
+
     pe = new Web3ProviderEngine();
-     pe.addProvider(new PrivateKeyWalletSubprovider(privateKey));
+    pe.addProvider(new PrivateKeyWalletSubprovider(deploymentAccount.privateKey))
     pe.addProvider(new RPCSubprovider(config.rpcUrl));
     pe.start()
+    
     web3 = new Web3Wrapper(pe);
     accounts = await web3.getAvailableAddressesAsync();
     account = accounts[0];
@@ -102,11 +127,19 @@ async function _deploy(configMgr: ConfigManager, network: string) {
         ...getDeployArgs('Whitelist', pe, account)
     );
 
-    // 1 Deploy event util
+    // check the available balance
+    let balance = await web3.getBalanceInWeiAsync(account)
+    logger.info(`Using account ${account} (${fromWei(balance.toString(), 'ether')} ETH)`)
 
-    // let eventUtil = await EventUtilContract.deployAsync(
-    //     ...getDeployArgs('EventUtil', pe, account)
-    // );
+    if(balance.lessThan(toWei('1', 'ether'))) {
+        try {
+            throw new Error(`Balance may be insufficent`)
+        } catch(ex) {
+            logger.warn(""+ex)
+            // throw ex;
+            // It will fail anyways below. This is to support Ganache, where tx's are free.
+        }
+    }
 
     // 2 Deploy eventEmitter
     // @ts-ignore
@@ -152,19 +185,10 @@ async function _deploy(configMgr: ConfigManager, network: string) {
         eventEmitter.address,
     )
 
-    // 5.1 add Bridge to whitelist
-
-    await whitelist.addWhitelisted.sendTransactionAsync(
-        bridge.address
-    )
-
-    console.log("whitelisted bridge");
-    
-    // config.eventUtilAddress = eventUtil.address;
-    config.eventEmitterAddress = eventEmitter.address;
-    config.eventListenerAddress = eventListener.address;
-    config.escrowAddress = escrow.address;
-    config.bridgeAddress = bridge.address;
+    config.eventEmitterAddress = eventEmitter.address.toLowerCase();
+    config.eventListenerAddress = eventListener.address.toLowerCase();
+    config.escrowAddress = escrow.address.toLowerCase();
+    config.bridgeAddress = bridge.address.toLowerCase();
 
     // @ts-ignore
     let aliceToken = await DemoERC20Contract.deployAsync(
@@ -187,9 +211,9 @@ async function _deploy(configMgr: ConfigManager, network: string) {
     let weth = await WETH9Contract.deployAsync(
         ...getDeployArgs('WETH9', pe, account)
     );
-    config.wethToken = weth.address;
-    config.aliceToken = aliceToken.address;
-    config.bobToken = bobToken.address;
+    config.wethToken = weth.address.toLowerCase();
+    config.aliceToken = aliceToken.address.toLowerCase();
+    config.bobToken = bobToken.address.toLowerCase();
     
 
     pe.stop();

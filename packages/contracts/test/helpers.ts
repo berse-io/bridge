@@ -71,6 +71,20 @@ function dehexify(str: string): Buffer {
     return Buffer.from(str, 'hex')
 }
 
+export function getContractArtifact(name: string) {
+    let json = require(`@ohdex/contracts/lib/build/artifacts/${name}.json`)
+    return json
+}
+
+export function getContractAbi(name: string) {
+    let json = require(`@ohdex/contracts/lib/build/artifacts/${name}.json`)
+    return json.compilerOutput.abi;
+}
+
+export function get0xArtifact(name: string) {
+    return require(`@ohdex/contracts/lib/build/artifacts/${name}.json`)
+}
+
 export {
     getDeployArgs,
     GanacheTestchain,

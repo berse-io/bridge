@@ -2,11 +2,10 @@
     "name": "@ohdex/relayer",
     "version": "0.1.0",
     "scripts": {
-        "build": "echo 0",
-        "start": "ts-node src/index.ts",
-        "test:watch": "",
-        "test": "mocha -r source-map-support -r ts-node/register -r make-promises-safe --bail --exit test/index.spec.ts",
-        "test:specific": "mocha -r source-map-support -r ts-node/register -r make-promises-safe --bail --exit"
+        "build": "tsc -b",
+        "start": "node lib/src/index.js",
+        "test": "NODE_ENV=development mocha 'lib/test/**/*.spec.js' --bail --exit",
+        "test:specific": "NODE_ENV=development mocha lib/test/specs/relayer.spec.js --bail --exit"
     },
     "dependencies": {
         "0x.js": "^3.0.3",
@@ -17,11 +16,7 @@
         "@0x/utils": "^3.0.1",
         "@0x/web3-wrapper": "^3.2.4",
         "@0xproject/abi-gen": "^1.0.13",
-        "@types/chai": "^4.1.7",
-        "@types/chai-as-promised": "^7.1.0",
-        "@types/ethereumjs-util": "^5.2.0",
-        "@types/lodash": "^4.14.120",
-        "@types/mocha": "^5.2.5",
+        "@types/sinon": "^7.0.10",
         "add": "^2.0.6",
         "bluebird": "^3.5.3",
         "chai": "^4.2.0",
@@ -38,17 +33,24 @@
         "mocha": "^5.2.0",
         "openzeppelin-solidity": "^2.1.2",
         "sinon": "^7.2.3",
+        "sinon-chai": "^3.3.0",
         "snarkjs": "^0.1.9",
         "source-map-support": "^0.5.10",
         "toml-js": "^0.0.8",
         "truffle-hdwallet-provider": "^1.0.2",
-        "ts-mocha": "^2.0.0",
-        "ts-node": "^7.0.1",
         "typescript": "^3.2.4",
         "typescript-solidity-merkle-tree": "^0.2.3",
         "web3": "^1.0.0-beta.37",
         "web3-eth-abi": "^1.0.0-beta.43",
-        "winston": "^3.2.1",
-        "yarn": "^1.13.0"
+        "winston": "^3.2.1"
+    },
+    "devDependencies": {
+        "@types/chai": "^4.1.7",
+        "@types/chai-as-promised": "^7.1.0",
+        "@types/ethereumjs-util": "^5.2.0",
+        "@types/lodash": "^4.14.120",
+        "@types/mocha": "^5.2.5",
+        "sinon": "^7.3.0",
+        "sleep": "^6.0.0"
     }
 }

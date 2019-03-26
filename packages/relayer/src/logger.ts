@@ -14,3 +14,30 @@ export const logFormat = (formats) => format.combine(
     format.align(),
     format.printf(info => `${info.level} ${info.label}: ${info.message}`)
 );
+
+
+const { combine, label, json, simple } = format;
+
+export let consoleOpts = {
+    silent: process.env.NODE_ENV !== 'test'
+}
+
+export function chainLogger(chainId: string) {
+    return winston.loggers.add(`chaintracker-${chainId}`, {
+        format: logFormat([
+            label({ label: chainId })
+        ]),
+        transports: [
+            new winston.transports.Console(consoleOpts)
+        ]
+    });
+}
+
+export const defaultLogger = winston.loggers.add(`relayer`, {
+    format: logFormat([
+        label({ label: "Relayer" })
+    ]),
+    transports: [
+        new winston.transports.Console(consoleOpts)
+    ]
+});
