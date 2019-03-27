@@ -5,6 +5,7 @@
         { "path": "./packages/contracts" },
         { "path": "./packages/deployer" },
         { "path": "./packages/relayer" },
-        { "path": "./packages/shared" }
+        { "path": "./packages/shared" },
+        { "path": "./packages/chainlog" }
     ]
 }
