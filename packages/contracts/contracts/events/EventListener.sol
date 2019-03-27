@@ -6,6 +6,7 @@ import "../MerkleTreeVerifier.sol";
 contract EventListener is MerkleTreeVerifier {
     // The interchain state root.
     bytes32 public interchainStateRoot;
+    bytes32 public lastUpdated;
     // bytes32 public acknowledgedEventsRoot;
     
     // The last recorded root of this chain on other chains.
@@ -35,7 +36,7 @@ contract EventListener is MerkleTreeVerifier {
         // stateRootToChainRoot[root] = block.timestamp;
         // stateRoots.push(root);
         // stateRoot = root;
-        // stateRootUpdated = block.timestamp;
+        lastUpdated = blockhash(block.number);
         interchainStateRoot = root;
         emit StateRootUpdated(root);
         // _ackPendingEvents();
