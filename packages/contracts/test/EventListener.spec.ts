@@ -178,30 +178,20 @@ describe('EventListener', function() {
                 pe, txDefaults,
             );
                 
-            console.log("WHITELIST ADMIN");
-            console.log(await whitelist.isWhitelistAdmin.callAsync(user));
-
             eventEmitter = await EventEmitterContract.deployFrom0xArtifactAsync(
                 get0xArtifact('EventEmitter'),
                 pe, txDefaults,
                 whitelist.address,
             );
 
-            console.log(2);
-
-            // await whitelist.addWhitelisted.sendTransactionAsync(eventEmitter.address, txDefaults);
-            console.log(txDefaults);
             await whitelist.addWhitelisted.sendTransactionAsync(user, txDefaults);
             
-            console.log(3);
             // @ts-ignore
             eventListener = await EventListenerContract.deployFrom0xArtifactAsync(
                 get0xArtifact('EventListener'),
                 pe, txDefaults,
                 eventEmitter.address,
             );
-
-            console.log(4);
         })
 
         it('updates state root with 0 events', async () => {
