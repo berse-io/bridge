@@ -18,8 +18,10 @@ export class Testchain {
     }
 }
 
+
 export class TestchainFactory {
     static async fork(rpcUrl: string, port: string): Promise<Testchain> {
+        let nonce = new Date;
         const server = ganache.server({ 
             ws: true,
             // logger: {
@@ -27,7 +29,7 @@ export class TestchainFactory {
             // },
 
             total_accounts: 100,
-            s: "TestRPC is awesome!", // I didn't choose this
+            s: "TestRPC is awesome! " + nonce, // I didn't choose this
             gasPrice: 0,
             gas: 1,
             // networkId: 420,
@@ -121,15 +123,15 @@ export function sinonBignumEq(x: any) {
 
 export async function loadWeb3(config: { rpcUrl: string }) {
     let pe = new Web3ProviderEngine();
-    const artifactAdapter = new SolCompilerArtifactAdapter(
-        `${require("@ohdex/contracts")}/build/artifacts`,
-        `${require("@ohdex/contracts")}/contracts`
-    );
-    const revertTraceSubprovider = new RevertTraceSubprovider(
-        artifactAdapter, 
-        '0',
-        true
-    );
+    // const artifactAdapter = new SolCompilerArtifactAdapter(
+    //     `${require("@ohdex/contracts")}/build/artifacts`,
+    //     `${require("@ohdex/contracts")}/contracts`
+    // );
+    // const revertTraceSubprovider = new RevertTraceSubprovider(
+    //     artifactAdapter, 
+    //     '0',
+    //     true
+    // );
     // pe.addProvider(revertTraceSubprovider);
     pe.addProvider(new RPCSubprovider(config.rpcUrl))
     pe.start()
