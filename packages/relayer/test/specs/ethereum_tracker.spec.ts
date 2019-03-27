@@ -66,43 +66,11 @@ describe('EthereumChainTracker', function () {
         })
     })
 
-    describe('#start', () => {
-        it('loads past events from EventEmitter', async () => {
-            let eventEmitter = await EventEmitterContract.deployFrom0xArtifactAsync(
-                get0xArtifact('EventEmitter'), pe, txDefaults
-            )
-    
-            let ev_1 = hexify(keccak256('1'))
-            let ev_2 = hexify(keccak256('2'))
-            let ev_3 = hexify(keccak256('3'))
-            
-            await eventEmitter.emitEvent.sendTransactionAsync(
-                ev_1
-            )
-    
-            await eventEmitter.emitEvent.sendTransactionAsync(
-                ev_2
-            )
-    
-            await eventEmitter.emitEvent.sendTransactionAsync(
-                ev_3
-            )
-    
-            let tracker = new EthereumChainTracker({
-                ...config,
-                eventEmitterAddress: eventEmitter.address
-            })
-            await tracker.start()
-    
-            expect(tracker.stateGadget.events.map(hexify)).to.have.ordered.members([
-                ev_1,
-                ev_2,
-                ev_3
-            ])
-            
-            await tracker.stop()
-        })
-    })
+    // describe('#start', () => {
+    //     it('only starts ', async () => {
+
+    //     })
+    // })
 
     const _chainId = new BigNumber('0');
     const _salt = new BigNumber('5');
@@ -230,6 +198,8 @@ describe('EthereumChainTracker', function () {
         
     })
 
+    
+
     describe.only('#stateGadget', async () => {
         it("loads the most recent state root update time", async () => {
             let tracker1 = new EthereumChainTracker(config)
@@ -239,10 +209,116 @@ describe('EthereumChainTracker', function () {
             expect(tracker1.lastUpdated).to.eq(1);
         })
 
+        // it('loads exchain checkpoints', async () => {
+        //     let tracker1 = new EthereumChainTracker(config)
+        //     await tracker1.start()
+
+        //     let tracker2 = new EthereumChainTracker(config)
+        //     await tracker2.start()
+
+        //     // tracker1.stateGadget.checkpoints
+
+        //     // checkpoint is the last acknowledged event of this chain on another chain
+            
+        //     // tracker1.stateGadget.checkpoints[]
+
+
+        //     // for each exchain
+        //     // compute the last ack'd state root
+        //     // based on the closest block before this time
+
+        //     // now we have the currentRoot's from each other chain
+        //     // we can compute the merkle tree for each checkpoint (lazily when we need it)
+        //     // based on a merkle tree of events.splice(0, latestEvent(blockhash))
+
+
+        // })
+
         it('loads all previous events', async () => {
-            // emit 3 events
-            // events should be in state gadget store
+            let eventEmitter = await EventEmitterContract.deployFrom0xArtifactAsync(
+                get0xArtifact('EventEmitter'), pe, txDefaults
+            )
+    
+            let ev_1 = hexify(keccak256('1'))
+            let ev_2 = hexify(keccak256('2'))
+            let ev_3 = hexify(keccak256('3'))
+            
+            await eventEmitter.emitEvent.sendTransactionAsync(
+                ev_1
+            )
+    
+            await eventEmitter.emitEvent.sendTransactionAsync(
+                ev_2
+            )
+    
+            await eventEmitter.emitEvent.sendTransactionAsync(
+                ev_3
+            )
+    
+            let tracker = new EthereumChainTracker({
+                ...config,
+                eventEmitterAddress: eventEmitter.address
+            })
+            await tracker.start()
+    
+            expect(tracker.stateGadget.events.map(hexify)).to.have.ordered.members([
+                ev_1,
+                ev_2,
+                ev_3
+            ])
+            
+            await tracker.stop()
         })
+    })
+
+    describe('#processBridgeEvents', async() => {
+        // we have an event from an exchain
+        // that we are proving after a state update to this chain
+        // generate a state proof
+        // proof = thischain.interchainState.prove(exchain_leaf)
+        // generate an event proof
+        // proof = thischain.interchainState.proveEvent(exchain, evHash)
+
+        // how do we know?
+        // interchainstate.roots = latest
+        // root2eventAck: string -> number
+        
+        // and to compute:
+        // eventsTree = new MerkleTree([ select * from events where chain == x ])
+        
+        
+
+        // LATEST
+        // interchainstate = new MerkleTree([
+        //      each eventsTree root
+        // ])
+
+        // CURRENT FOR CHAIN
+        // lastRoot = EventListener.lastRoot
+        // exchainRoots = 
+        //      select * from interchainStates 
+        //      where state.chain == exchain and 
+        //      state.blocktime < lastRoot 
+        //      order by state.blockctime desc limit 1
+        // interchainstate = new MerkleTree([
+        //      exchainRoots
+        // ])
+
+        // to prove event:
+        // eventsTree = new MerkleTree([ 
+        //      select * from events 
+        //      where chain == x and 
+        //      event.blocktime < interchainstate.leaves[exchain].blocktime
+        // ])
+        // eventsTree.prove
+        // interchainstate.prove
+
+
+        
+
+
+
+
     })
 
     suiteTeardown(async () => {
