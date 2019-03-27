@@ -269,7 +269,7 @@ describe.only('Query helpers', function() {
         expect(latest.stateRoot).to.eq(fixtures[2].stateRoot)
     })
 
-    it.only('Event', async () => {
+    it.only('ChainEvent.getEventsBeforeTime', async () => {
         // to prove event:
         // eventsTree = new MerkleTree([ 
         //      select * from events 
@@ -283,11 +283,12 @@ describe.only('Query helpers', function() {
         .createQueryBuilder()
         .insert()
         .values([
+            { chainId: 5 },
             { chainId: 42 }
         ])
         .execute()
 
-        let chain = await getRepository(Chain).findOne()
+        let chain = await getRepository(Chain).findOne({ chainId: 42 })
         let repo = getRepository(ChainEvent);
         
         let fixtures = [
@@ -300,6 +301,16 @@ describe.only('Query helpers', function() {
                 "blockTime": 1553695776 + 10,
                 chain,
                 "eventHash": "0x38b363bc579954571ec3cdd892e0056399381bf69a62d02bf64a99ca822504fb",
+            },
+            {
+                "blockTime": 1553695776 + 10,
+                chain: { chainId: 5 },
+                "eventHash": "0x38b363bc579954571ec3cdd892e0056399381bf69a62d02bf64a99ca822504fb",
+            },
+            {
+                "blockTime": 1553695776 + 15,
+                chain,
+                "eventHash": "0x38b363bc579954571ec3cdd892e0056399381bf69a62d02bf64a99ca822504fb",
             }
         ];
 
@@ -309,9 +320,13 @@ describe.only('Query helpers', function() {
         expect(latest).to.have.length(0);
 
         latest = await ChainEvent.getEventsBeforeTime(chain.chainId, 1553695776 + 10)
-        expect(latest).to.have.members(fixtures);
+        expect(latest).to.have.length(2)
+        expect(fixtures[0]).to.deep.include(latest[0])
+        expect(fixtures[1]).to.deep.include(latest[1])
 
         latest = await ChainEvent.getEventsBeforeTime(chain.chainId, 1553695776 + 11)
-        expect(latest).to.have.members(fixtures);
+        expect(latest).to.have.length(2)
+        expect(fixtures[0]).to.deep.include(latest[0])
+        expect(fixtures[1]).to.deep.include(latest[1])
     })
 })
