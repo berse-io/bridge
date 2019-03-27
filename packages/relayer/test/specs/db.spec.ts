@@ -4,7 +4,7 @@ import { ContractWrappers, hexify } from "@ohdex/shared";
 import { expect } from 'chai';
 import { getRepository } from "typeorm";
 import { DB } from "../../src/db";
-import { Event } from "../../src/db/entity/event";
+import { ChainEvent } from "../../src/db/entity/chain_event";
 import { Relayer } from "../../src/relayer";
 import { dehexify } from "../../src/utils";
 import { loadWeb3, TestchainFactory, getContractAbi } from "../helper";
@@ -227,29 +227,20 @@ describe.only('Query helpers', function() {
         .execute()
 
         let chain = await getRepository(Chain).findOne()
-
         let repo = getRepository(InterchainStateUpdate)
         
         let fixtures = [
             {
                 "blockTime": 1553695776,
                 "blockHash": "0xf21fa0398570971415a4166cb9284f595f81524767e3637082f2a6f5924803ff",
-                // "chain": {
-                //   "chainId": 42
-                // },
                 chain,
                 "stateRoot": "0xd8b363bc579954571ec3cdd892e0056399381bf69a62d02bf64a99ca822504fb",
-                // "id": 1
             },
             {
                 "blockTime": 1553695776 + 5,
                 "blockHash": "0x021fa0398570971415a4166cb9284f595f81524767e3637082f2a6f5924803ff",
-                // "chain": {
-                //   "chainId": 42
-                // },
                 chain,
                 "stateRoot": "0xe8b363bc579954571ec3cdd892e0056399381bf69a62d02bf64a99ca822504fb",
-                // "id": 2
             },
             {
                 "blockTime": 1553695776 + 10,
@@ -259,28 +250,26 @@ describe.only('Query helpers', function() {
                 // },
                 chain,
                 "stateRoot": "0x38b363bc579954571ec3cdd892e0056399381bf69a62d02bf64a99ca822504fb",
-                // "id": 3
             }
         ];
 
         await repo.save(fixtures, {})
 
         
-        let latest = await InterchainStateUpdate.getLatestStaterootAtTime(42, 1553695776 + 5)
+        let latest = await InterchainStateUpdate.getLatestStaterootAtTime(chain.chainId, 1553695776 + 5)
         expect(latest.blockHash).to.eq(fixtures[1].blockHash)
         expect(latest.stateRoot).to.eq(fixtures[1].stateRoot)
 
-        latest = await InterchainStateUpdate.getLatestStaterootAtTime(42, 1553695776 + 4)
+        latest = await InterchainStateUpdate.getLatestStaterootAtTime(chain.chainId, 1553695776 + 4)
         expect(latest.blockHash).to.eq(fixtures[0].blockHash)
         expect(latest.stateRoot).to.eq(fixtures[0].stateRoot)
 
-        latest = await InterchainStateUpdate.getLatestStaterootAtTime(42, 1553695776 + 20)
+        latest = await InterchainStateUpdate.getLatestStaterootAtTime(chain.chainId, 1553695776 + 20)
         expect(latest.blockHash).to.eq(fixtures[2].blockHash)
         expect(latest.stateRoot).to.eq(fixtures[2].stateRoot)
     })
 
-    describe('Event', async () => {
-        
+    it.only('Event', async () => {
         // to prove event:
         // eventsTree = new MerkleTree([ 
         //      select * from events 
@@ -289,5 +278,40 @@ describe.only('Query helpers', function() {
         // ])
         // eventsTree.prove
         // interchainstate.prove
+
+        await getRepository(Chain)
+        .createQueryBuilder()
+        .insert()
+        .values([
+            { chainId: 42 }
+        ])
+        .execute()
+
+        let chain = await getRepository(Chain).findOne()
+        let repo = getRepository(ChainEvent);
+        
+        let fixtures = [
+            {
+                "blockTime": 1553695776 + 10,
+                chain,
+                "eventHash": "0xa21fa0398570971415a4166cb9284f595f81524767e3637082f2a6f5924803ff",
+            },
+            {
+                "blockTime": 1553695776 + 10,
+                chain,
+                "eventHash": "0x38b363bc579954571ec3cdd892e0056399381bf69a62d02bf64a99ca822504fb",
+            }
+        ];
+
+        await repo.save(fixtures, {});
+
+        let latest = await ChainEvent.getEventsBeforeTime(chain.chainId, 1553695776)
+        expect(latest).to.have.length(0);
+
+        latest = await ChainEvent.getEventsBeforeTime(chain.chainId, 1553695776 + 10)
+        expect(latest).to.have.members(fixtures);
+
+        latest = await ChainEvent.getEventsBeforeTime(chain.chainId, 1553695776 + 11)
+        expect(latest).to.have.members(fixtures);
     })
 })
