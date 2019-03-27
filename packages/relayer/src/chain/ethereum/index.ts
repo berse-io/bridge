@@ -165,7 +165,7 @@ export class EthereumChainTracker extends ChainTracker {
 
         await this.loadStateAndEvents()
 
-        this.logger.info(`Sync'd to block #${blockNum}, ${this.stateGadget.events.length} pending events`)
+        this.logger.info(`Sync'd to block #${blockNum}, ${this.stateGadget.events.length} events`)
         this.logger.info(`stateRoot = ${this.interchainStateRoot.toString('hex')}`)
         this.logger.info(`eventsRoot = ${this.stateGadget.root.toString('hex')}`)
 
@@ -192,12 +192,17 @@ export class EthereumChainTracker extends ChainTracker {
         let interchainStateRoot = dehexify(
             (await this.eventListener.interchainStateRoot.callAsync())
         )
-        this.lastUpdated = dehexify('123');
-        // let latestBlockHash = await this.eventListener.lastUpdated.callAsync();
-        
-
+        this.lastUpdated = dehexify(await this.eventListener.lastUpdated.callAsync())
         // 1.1 load all the event roots of other chains
         let t = 0;
+        // for each exchain
+        // compute the last ack'd state root
+        // based on the closest block before this time
+
+        // now we have the currentRoot's from each other chain
+        // we can compute the merkle tree for each checkpoint (lazily when we need it)
+        // based on a merkle tree of events.splice(0, latestEvent(blockhash))
+
 
         
         // 2. Load all previously emitted events (including those that may not be ack'd on other chains yet)
@@ -437,7 +442,7 @@ export class EthereumChainTracker extends ChainTracker {
 }
 
 
-class EventListenerWrapper {
+export class EventListenerWrapper {
     static updateStateRoot(eventListener: EventListenerContract, proof: MerkleTreeProof, leaf: EthereumStateLeaf) {
         return eventListener.updateStateRoot.sendTransactionAsync(
             proof.proofs.map(hexify),
