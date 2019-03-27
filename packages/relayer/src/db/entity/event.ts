@@ -9,4 +9,11 @@ export class Event {
     @ManyToOne(type => Chain, chain => chain.events)
     @JoinColumn()
     chain: Chain;
+
+    @Column()
+    blockTime: string;
+    
+    static getEventsBeforeTime(chain: string, blocktime: string) {
+
+    }
 }
