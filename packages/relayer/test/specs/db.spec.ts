@@ -13,10 +13,10 @@ import { EventListenerContract } from "@ohdex/contracts/lib/build/wrappers/event
 import { CrosschainState } from "../../src/interchain/crosschain_state";
 import { EthereumStateGadget, EthereumStateLeaf } from "../../src/chain/ethereum/state_gadget";
 import { InterchainStateUpdate } from "../../src/db/entity/interchain_state_update";
+import { Chain } from "../../src/db/entity/chain";
 
 const keccak256 = (x: any) => require('web3-utils').keccak256(x);
 const keccak256Dehexed = (x: any) => dehexify(require('web3-utils').keccak256(x));
-
 
 
 describe("DB", function() {
@@ -37,6 +37,10 @@ describe("DB", function() {
     let web31: Web3Wrapper;
 
     before(async () => {
+
+        let db = new DB()
+        await db.connect();
+
         // setup testchains
         // let testchain1 = await TestchainFactory.fork(chain1.rpcUrl, '11000');
         // let testchain2 = await TestchainFactory.fork(chain2.rpcUrl, '11001')
@@ -62,6 +66,7 @@ describe("DB", function() {
 
         wrappers1 = ContractWrappers.from(chain1, pe1);
         // wrappers2 = ContractWrappers.from(chain2, pe2)
+        
     })
 
     let snapshotId;
@@ -129,9 +134,8 @@ describe("DB", function() {
     //     ])
     // })
 
-    it.only("loads all InterchainStateUpdate's from EventListener", async () => {
-        let db = new DB()
-        await db.connect()
+    it("loads all InterchainStateUpdate's from EventListener", async () => {
+        
 
         let repo = getRepository(InterchainStateUpdate)
         
@@ -195,13 +199,95 @@ describe("DB", function() {
 })
 
 
-describe('stuff', async () => {
-    let db = new DB()
-    await db.connect()
+describe.only('Query helpers', function() {
+    before(async () => {
+        let db = new DB()
+        await db.connect()
+    })
 
-    let repo = getRepository(InterchainStateUpdate)
+    
+    it('#InterchainStateUpdate.getLatestStaterootAtTime', async () => {
+        // CURRENT FOR CHAIN
+        // lastRoot = EventListener.lastRoot
+        // exchainRoots = 
+        //      select * from interchainStates 
+        //      where state.chain == exchain and 
+        //      state.blocktime < lastRoot 
+        //      order by state.blockctime desc limit 1
+        // interchainstate = new MerkleTree([
+        //      exchainRoots
+        // ])
 
-    // expect('Chain.getLatestRoot', async () => {
+        await getRepository(Chain)
+        .createQueryBuilder()
+        .insert()
+        .values([
+            { chainId: 42 }
+        ])
+        .execute()
 
-    // })
+        let chain = await getRepository(Chain).findOne()
+
+        let repo = getRepository(InterchainStateUpdate)
+        
+        let fixtures = [
+            {
+                "blockTime": 1553695776,
+                "blockHash": "0xf21fa0398570971415a4166cb9284f595f81524767e3637082f2a6f5924803ff",
+                // "chain": {
+                //   "chainId": 42
+                // },
+                chain,
+                "stateRoot": "0xd8b363bc579954571ec3cdd892e0056399381bf69a62d02bf64a99ca822504fb",
+                // "id": 1
+            },
+            {
+                "blockTime": 1553695776 + 5,
+                "blockHash": "0x021fa0398570971415a4166cb9284f595f81524767e3637082f2a6f5924803ff",
+                // "chain": {
+                //   "chainId": 42
+                // },
+                chain,
+                "stateRoot": "0xe8b363bc579954571ec3cdd892e0056399381bf69a62d02bf64a99ca822504fb",
+                // "id": 2
+            },
+            {
+                "blockTime": 1553695776 + 10,
+                "blockHash": "0xa21fa0398570971415a4166cb9284f595f81524767e3637082f2a6f5924803ff",
+                // "chain": {
+                //   "chainId": 42
+                // },
+                chain,
+                "stateRoot": "0x38b363bc579954571ec3cdd892e0056399381bf69a62d02bf64a99ca822504fb",
+                // "id": 3
+            }
+        ];
+
+        await repo.save(fixtures, {})
+
+        
+        let latest = await InterchainStateUpdate.getLatestStaterootAtTime(42, 1553695776 + 5)
+        expect(latest.blockHash).to.eq(fixtures[1].blockHash)
+        expect(latest.stateRoot).to.eq(fixtures[1].stateRoot)
+
+        latest = await InterchainStateUpdate.getLatestStaterootAtTime(42, 1553695776 + 4)
+        expect(latest.blockHash).to.eq(fixtures[0].blockHash)
+        expect(latest.stateRoot).to.eq(fixtures[0].stateRoot)
+
+        latest = await InterchainStateUpdate.getLatestStaterootAtTime(42, 1553695776 + 20)
+        expect(latest.blockHash).to.eq(fixtures[2].blockHash)
+        expect(latest.stateRoot).to.eq(fixtures[2].stateRoot)
+    })
+
+    describe('Event', async () => {
+        
+        // to prove event:
+        // eventsTree = new MerkleTree([ 
+        //      select * from events 
+        //      where chain == x and 
+        //      event.blocktime < interchainstate.leaves[exchain].blocktime
+        // ])
+        // eventsTree.prove
+        // interchainstate.prove
+    })
 })
