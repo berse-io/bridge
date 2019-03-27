@@ -1,9 +1,12 @@
-import {Entity, PrimaryColumn, Column, ManyToOne, OneToMany} from "typeorm";
+import {Entity, PrimaryColumn, Column, ManyToOne, OneToMany, PrimaryGeneratedColumn} from "typeorm";
 import { InterchainStateUpdate } from "./interchain_state_update";
 import { ChainEvent } from "./chain_event";
 
 @Entity()
 export class Chain {
+    // @PrimaryGeneratedColumn()
+    // id: number;
+    
     @PrimaryColumn()
     chainId: number;
 
