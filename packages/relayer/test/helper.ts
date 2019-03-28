@@ -110,6 +110,8 @@ export function caseInsensitiveEquals(str: string) {
 
 import sinon from 'sinon'
 import { RevertTraceSubprovider } from "@0x/sol-trace";
+import { options } from "../src/db";
+import { getRepository, getConnection } from "typeorm";
 
 export function sinonStrEqual(str: string) {
     return sinon.match(caseInsensitiveEquals(str), `${str}`)
@@ -146,4 +148,9 @@ export async function loadWeb3(config: { rpcUrl: string }) {
         account,
         txDefaults
     }
+}
+
+export async function clearDb() {
+    // getConnection().query('drop * from')
+    await getConnection().synchronize(true);
 }
