@@ -65,6 +65,18 @@ export class EthereumChainTracker extends ChainTracker {
     async start() {
         this.logger.info(`Connecting to ${this.conf.rpcUrl}`)
 
+        // await this.chain.insert({
+        //     chainId: this.conf.chainId
+        // })
+
+        await this.chain.createQueryBuilder()
+        .insert()
+        .values({
+            chainId: this.conf.chainId
+        })
+        .onConflict(`("chainId") DO NOTHING`)
+        .execute();
+
         this.pe = new Web3ProviderEngine();
         // if(process.env.NODE_ENV !== 'test') {
 
@@ -307,6 +319,13 @@ export class EthereumChainTracker extends ChainTracker {
         this.events.emit('StateRootUpdated');
         this.logger.info(`state root updated - ${root}`)
         this.interchainStateRoot = dehexify(root);
+
+        await this.stateUpdate.insert({
+            blockHash: ev.blockHash,
+            blockTime: (await ev.getBlock()).timestamp,
+            stateRoot: root,
+            chain: this.conf.chainId
+        })
     }
 
     async processBridgeEvents(
@@ -377,7 +396,8 @@ export class EthereumChainTracker extends ChainTracker {
 
     onEventEmitted = async (eventHash: string, ev: ethers.Event) => {
         this.logger.info(`block #${ev.blockNumber}, event emitted - ${eventHash}`)
-        this.stateGadget.addEvent(eventHash)
+        this.stateGadget.addEvent(eventHash);
+        
 
         let eventEmittedEvent: EventEmittedEvent = { 
             eventHash,
@@ -385,6 +405,12 @@ export class EthereumChainTracker extends ChainTracker {
             newChainIndex: ''+ev.blockNumber
         }
         this.events.emit('EventEmitter.EventEmitted', eventEmittedEvent);
+
+        await this.chainEvent.insert({
+            blockTime: (await ev.getBlock()).timestamp,
+            chain: this.conf.chainId,
+            eventHash
+        })
     }
 
      onTokensBridgedEvent = (eventHash, targetBridge, chainId, receiver, token, amount, _salt, ev: ethers.Event) => {
@@ -449,6 +475,11 @@ export class EthereumChainTracker extends ChainTracker {
 
     async stop() {
         this.pe.stop();
+        this.ethersProvider = null;
+        await this.eventEmitter_sub.removeAllListeners(EventEmitterEvents.EventEmitted)
+        await this.eventListener_sub.removeAllListeners(EventListenerEvents.StateRootUpdated)
+        await this.bridgeContract_sub.removeAllListeners(BridgeEvents.TokensBridged)
+        await this.escrowContract_sub.removeAllListeners(EscrowEvents.TokensBridged)
     }
 }
 

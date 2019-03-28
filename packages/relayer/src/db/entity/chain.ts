@@ -7,7 +7,7 @@ export class Chain {
     // @PrimaryGeneratedColumn()
     // id: number;
     
-    @PrimaryColumn()
+    @PrimaryColumn({ name: "chainId" })
     chainId: number;
 
     @OneToMany(type => ChainEvent, event => event.chain)

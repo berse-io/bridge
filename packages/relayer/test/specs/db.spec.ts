@@ -1,6 +1,6 @@
 import { Web3ProviderEngine } from "0x.js";
 import { Web3Wrapper } from "@0x/web3-wrapper";
-import { ContractWrappers, hexify } from "@ohdex/shared";
+import { ContractWrappers, hexify, wait } from "@ohdex/shared";
 import { expect } from 'chai';
 import { getRepository, Connection, ConnectionOptions } from "typeorm";
 import { ChainEvent } from "../../src/db/entity/chain_event";
@@ -13,6 +13,7 @@ import { CrosschainState } from "../../src/interchain/crosschain_state";
 import { EthereumStateGadget, EthereumStateLeaf } from "../../src/chain/ethereum/state_gadget";
 import { InterchainStateUpdate } from "../../src/db/entity/interchain_state_update";
 import { Chain } from "../../src/db/entity/chain";
+import { DbService } from "../../src/db";
 
 const keccak256 = (x: any) => require('web3-utils').keccak256(x);
 const keccak256Dehexed = (x: any) => dehexify(require('web3-utils').keccak256(x));
@@ -36,13 +37,13 @@ describe("DB", function() {
     let web31: Web3Wrapper;
 
     let tracker1: EthereumChainTracker;
+    let tracker2: EthereumChainTracker;
+
+    let conn: Connection;
 
     before(async () => {
         // let relayer = new Relayer()
-        let dbService = await givenDbService()
-        tracker1 = await givenEthereumChainTracker(chain1)
-        await tracker1.start()
-        await tracker1.listen();
+        conn = await givenDbService();
 
 
         // tracker needs to be connected to the database
@@ -86,54 +87,76 @@ describe("DB", function() {
     
     beforeEach(async () => {
         snapshotId = await web31.takeSnapshotAsync()
-        await givenEmptyDatabase()
+        await givenEmptyDatabase(conn)
     })
 
     afterEach(async () => {
+        await tracker1.stop()
+        // await tracker2.stop()
+        // tracker1 = null;
+        // tracker2 = null;
+
         let reverted = await web31.revertSnapshotAsync(snapshotId);
         if(!reverted) throw new Error('bad env')
     })
 
     after(async () => {
         pe1.stop()
-        await tracker1.stop()
     })
 
     it("loads all Chain's from networks.json", async () => {
-        let repo = getRepository(Chain)
-        relayer = new Relayer({
-            chain1, chain2
-        });
-        await relayer.start()
+        tracker1 = await givenEthereumChainTracker(conn, chain1)
+        await tracker1.start()
+        await tracker1.listen();
 
-        let chains = await repo.find()
+        tracker2 = await givenEthereumChainTracker(conn, chain2)
+        await tracker2.start()
+        await tracker2.listen();
+
+        let chainRepo = getRepository(Chain)
+
+        let chains = await chainRepo.find()
         
-        expect(chains).to.have.members([
-            { id: chain1.chainId },
-            { id: chain2.chainId }
+        expect(chains).to.have.deep.members([
+            { chainId: chain1.chainId },
+            { chainId: chain2.chainId }
         ])
+
+        await tracker2.stop()
     })
 
     it("loads all Event's from EventEmitter", async () => {
+        tracker1 = await givenEthereumChainTracker(conn, chain1)
+        await tracker1.start()
+        await tracker1.listen();
+
         let repo = getRepository(ChainEvent)
 
-        let evs = await repo.find()
+        let evs = await repo.find({ relations: ["chain"] })
         expect(evs).to.have.members([])
 
         const eventHash = keccak256("123")
-        await wrappers1.EventEmitter.emitEvent.sendTransactionAsync(eventHash, txDefaults1)
+        expect((await wrappers1.EventEmitter.getEventsCount.callAsync()).toString()).to.eq('0')
+        let emitEvent_txHash = await wrappers1.EventEmitter.emitEvent.sendTransactionAsync(eventHash, txDefaults1)
+        let receipt = await web31.getTransactionReceiptIfExistsAsync(emitEvent_txHash)
+        let blockTime = await web31.getBlockTimestampAsync(receipt.blockHash);
+
+        await wait(200)
 
         evs = await repo.find({ relations: ["chain"] })
-        
-        expect(evs).to.have.deep.members([
-            {
-                eventHash,
-                chain: { chainId: chain1.chainId }
-            }
-        ])
+
+        expect(evs).to.have.length(1)
+        let ev = evs[0]
+        expect(ev.blockTime).to.eq(blockTime)
+        expect(ev.eventHash).to.eq(eventHash)
+        expect(ev.chain).to.deep.eq({ chainId: chain1.chainId })
     })
 
     it("loads all InterchainStateUpdate's from EventListener", async () => {
+        tracker1 = await givenEthereumChainTracker(conn, chain1)
+        await tracker1.start()
+        await tracker1.listen();
+
         let repo = getRepository(InterchainStateUpdate)
         
         let updates = await repo.find()
@@ -141,23 +164,15 @@ describe("DB", function() {
 
         const eventHash = keccak256("123")
 
-
-
         expect((await wrappers1.EventEmitter.getEventsCount.callAsync()).toString()).to.eq('0')
-
         await wrappers1.EventEmitter.emitEvent.sendTransactionAsync(eventHash, txDefaults1)
-        
         expect((await wrappers1.EventEmitter.getEventsCount.callAsync()).toString()).to.eq('1')
-        
-
 
         let eventListener = new EventListenerContract(
             getContractAbi('EventListener'),
             chain1.eventListenerAddress,
             pe1, txDefaults1
         );
-        
-        
 
         let crosschainState = new CrosschainState()
         let stateGadget1 = new EthereumStateGadget(chain1.chainId)
@@ -167,67 +182,64 @@ describe("DB", function() {
         stateGadget1.addEvent(eventHash)
         crosschainState.compute()
 
-        let update = crosschainState.proveUpdate(chain1.chainId)
+        let updateProof = crosschainState.proveUpdate(chain1.chainId)
         // let eventProof = crosschainState.proveEvent(chain1.chainId, eventHash)
         
         let updateStateRoot_txHash = await EventListenerWrapper.updateStateRoot(
             eventListener, 
-            update.proof, 
-            update.leaf as EthereumStateLeaf
+            updateProof.proof, 
+            updateProof.leaf as EthereumStateLeaf
         )
         
-        expect(await eventListener.interchainStateRoot.callAsync()).to.eq(hexify(update.proof.root));
+        expect(await eventListener.interchainStateRoot.callAsync()).to.eq(hexify(updateProof.proof.root));
 
         let receipt = await web31.getTransactionReceiptIfExistsAsync(updateStateRoot_txHash)
+        let blocktime = await web31.getBlockTimestampAsync(receipt.blockHash);
+
+        await wait(300)
 
         updates = await repo.find({ relations: ["chain"] })
-
-        let blocktime = await web31.getBlockTimestampAsync(receipt.blockHash);
         
-        expect(updates).to.have.deep.members([
-            {
-                chain: { chainId: chain1.chainId },
-                blockTime: blocktime,
-                blockHash: receipt.blockHash,
-                stateRoot: hexify(update.proof.root),
-            }
-        ])
+        expect(updates).to.have.length(1)
+        let update = updates[0]
+        expect(update.blockHash).to.eq(receipt.blockHash)
+        expect(update.chain).to.deep.eq({ chainId: chain1.chainId })
+        expect(update.blockTime).to.eq(blocktime)
+        expect(update.stateRoot).to.eq(hexify(updateProof.proof.root))
     })
 
+    // describe('random inserts', function() {
+    //     before(givenEmptyDatabase)
 
-
-
-
-    describe('random inserts', function() {
-        it('adds Event', async () => {
-            let repo = getRepository(ChainEvent)
+    //     it('adds Event', async () => {
+    //         let repo = getRepository(ChainEvent)
             
-            let evs = await repo.find()
-            expect(evs).to.have.members([
-            ])
+    //         let evs = await repo.find()
+    //         expect(evs).to.have.members([
+    //         ])
     
-            const chainRecord = new Chain()
-            chainRecord.chainId = 42
-            await getRepository(Chain).save(chainRecord)
+    //         const chainRecord = new Chain()
+    //         chainRecord.chainId = 42
+    //         await getRepository(Chain).save(chainRecord)
     
-            const ev = new ChainEvent()
-            ev.eventHash = "123"
-            ev.blockTime = 123
-            ev.chain = chainRecord
-            await repo.save(ev)
+    //         const ev = new ChainEvent()
+    //         ev.eventHash = "123"
+    //         ev.blockTime = 123
+    //         ev.chain = chainRecord
+    //         await repo.save(ev)
     
-            const eventHash = keccak256("123")
-            // await wrappers1.EventEmitter.emitEvent.sendTransactionAsync(eventHash, txDefaults1)
+    //         const eventHash = keccak256("123")
+    //         // await wrappers1.EventEmitter.emitEvent.sendTransactionAsync(eventHash, txDefaults1)
     
-            evs = await repo.find({ relations: ["chain"] })
+    //         evs = await repo.find({ relations: ["chain"] })
             
-            expect(evs).to.have.deep.members([
-                {
-                    eventHash,
-                    chain: { chainId: chain1.chainId }
-                }
-            ])
-        })
-    })
+    //         expect(evs).to.have.deep.members([
+    //             {
+    //                 eventHash,
+    //                 chain: { chainId: chain1.chainId }
+    //             }
+    //         ])
+    //     })
+    // })
 })
 

@@ -111,7 +111,7 @@ export function caseInsensitiveEquals(str: string) {
 import sinon from 'sinon'
 import { RevertTraceSubprovider } from "@0x/sol-trace";
 import { options, DbService } from "../src/db";
-import { getRepository, getConnection } from "typeorm";
+import { getRepository, getConnection, Connection } from "typeorm";
 import { Chain } from "../src/db/entity/chain";
 import { ChainEvent } from "../src/db/entity/chain_event";
 import { InterchainStateUpdate } from "../src/db/entity/interchain_state_update";
@@ -159,24 +159,25 @@ export async function clearDb() {
     await getConnection().synchronize(true);
 }
 
-export async function givenDbService() {
+export async function givenDbService(): Promise<Connection> {
     const testConnOpts = options;
     let db = new DbService(testConnOpts)
     return await db.value()
 }
 
-export async function givenEmptyDatabase() {
-    let conn = getConnection();
-    (await conn.getRepository<Chain>(Chain)).clear();
-    (await conn.getRepository<ChainEvent>(ChainEvent)).clear();
-    (await conn.getRepository<InterchainStateUpdate>(InterchainStateUpdate)).clear();
+export async function givenEmptyDatabase(conn: Connection) {
+    // let conn = getConnection();
+    await conn.synchronize(true)
+    await conn.getRepository<InterchainStateUpdate>(InterchainStateUpdate).delete({})
+    await conn.getRepository<ChainEvent>(ChainEvent).delete({})
+    await conn.getRepository<Chain>(Chain).delete({})
 }
 
-export async function givenEthereumChainTracker(conf: any) {
+export async function givenEthereumChainTracker(conn: Connection, conf: any) {
     let tracker = new EthereumChainTracker(conf)
-    tracker.chain = getRepository(Chain)
-    tracker.chainEvent = getRepository(ChainEvent)
-    tracker.stateUpdate = getRepository(InterchainStateUpdate)
+    tracker.chain = conn.getRepository(Chain)
+    tracker.chainEvent = conn.getRepository(ChainEvent)
+    tracker.stateUpdate = conn.getRepository(InterchainStateUpdate)
     tracker.crosschainStateService = {}
     return tracker
 }
