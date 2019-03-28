@@ -2,8 +2,8 @@ import { createConnection, ConnectionOptions, Connection } from "typeorm";
 import { Chain } from "./entity/chain";
 import { InterchainStateUpdate } from "./entity/interchain_state_update";
 import { ChainEvent } from "./entity/chain_event";
+import { Provider } from '@loopback/context'
 
-// get all events
 export let options: ConnectionOptions = {
     "type": "sqlite",
     "database": ":memory:",
@@ -18,21 +18,23 @@ export let options: ConnectionOptions = {
     ]
 }
 
-export let conn: Connection;
 
-var AsyncLock = require('async-lock');
-var lock = new AsyncLock();
 export class DB {
     async connect() {
-        conn = await createConnection(options);
-        // await lock.acquire('key', new Promise((res,rej) => {
-        //     const f = async () => {
-        //         if(!conn) {
-        //             conn = await createConnection(options);
-        //         }
-        //     }
-        //     // @ts-ignore
-        //     f().then(res).catch(rej)
-        // }))
+        
+    }
+}
+
+export class DbService implements Provider<Connection> {
+    conn: Connection;
+    connOpts: any;
+
+    constructor(connOpts: any) {
+        this.connOpts = connOpts;
+    }
+
+    async value() {
+        this.conn = await createConnection(this.connOpts);
+        return this.conn;
     }
 }

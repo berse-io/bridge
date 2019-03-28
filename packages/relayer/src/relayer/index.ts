@@ -4,6 +4,10 @@ import { EventEmittedEvent, MessageSentEvent } from "../chain/tracker";
 import { CrosschainState } from "../interchain/crosschain_state";
 import { defaultLogger } from "../logger";
 
+import { ctx } from './context';
+import { ChainTrackerFactory } from "../chain/factory";
+
+
 const winston = require('winston');
 const { format } = winston;
 const { combine, label, json, simple } = format;
@@ -45,10 +49,14 @@ export class Relayer {
 
         this.logger.info('Loading chains...')
 
+        let factory = await ctx.get<ChainTrackerFactory>('trackers.ProviderFactory');
+
         for(let conf of networks) {
-            this.chains[conf.chainId] = (
-                new EthereumChainTracker(conf)
-            );
+            // this.chains[conf.chainId] = (
+            //     ctx.get<EthereumChainTracker>('trackers.EthereumChainTracker')
+            //     // new EthereumChainTracker(conf)
+            // );
+            this.chains[conf.chainId] = await factory.create(conf)
         }
 
         // Start all chains.

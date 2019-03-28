@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { getRepository, createConnection, Connection } from "typeorm";
-import { DB, conn, options } from "../../src/db";
+import { options } from "../../src/db";
 import { Chain } from "../../src/db/entity/chain";
 import { ChainEvent } from "../../src/db/entity/chain_event";
 import { InterchainStateUpdate } from "../../src/db/entity/interchain_state_update";
@@ -15,11 +15,9 @@ describe('Query helpers', function() {
     let conn: Connection;
     
     before(async () => {
-        // conn = await createConnection(testDbOpts)
     })
 
     beforeEach(async () => {
-        // await clearDb()
         conn = await createConnection(testDbOpts)
     })
 

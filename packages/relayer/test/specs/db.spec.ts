@@ -3,12 +3,11 @@ import { Web3Wrapper } from "@0x/web3-wrapper";
 import { ContractWrappers, hexify } from "@ohdex/shared";
 import { expect } from 'chai';
 import { getRepository, Connection, ConnectionOptions } from "typeorm";
-import { DB, conn } from "../../src/db";
 import { ChainEvent } from "../../src/db/entity/chain_event";
 import { Relayer } from "../../src/relayer";
 import { dehexify } from "../../src/utils";
-import { loadWeb3, TestchainFactory, getContractAbi, clearDb } from "../helper";
-import { EventListenerWrapper } from "../../src/chain/ethereum";
+import { loadWeb3, TestchainFactory, getContractAbi, clearDb, givenEmptyDatabase, givenEthereumChainTracker, givenDbService } from "../helper";
+import { EventListenerWrapper, EthereumChainTracker } from "../../src/chain/ethereum";
 import { EventListenerContract } from "@ohdex/contracts/lib/build/wrappers/event_listener";
 import { CrosschainState } from "../../src/interchain/crosschain_state";
 import { EthereumStateGadget, EthereumStateLeaf } from "../../src/chain/ethereum/state_gadget";
@@ -36,11 +35,25 @@ describe("DB", function() {
 
     let web31: Web3Wrapper;
 
+    let tracker1: EthereumChainTracker;
+
     before(async () => {
+        // let relayer = new Relayer()
+        let dbService = await givenDbService()
+        tracker1 = await givenEthereumChainTracker(chain1)
+        await tracker1.start()
+        await tracker1.listen();
+
+
+        // tracker needs to be connected to the database
+        // basically it needs to connect to it 1)
+        // but only once (not all of them)
+        // and then it needs to emit these events into i t
+
 
         // TODO replace this with relayer, which will connect when done
-        let db = new DB()
-        await db.connect();
+        // let db = new DB()
+        // await db.connect();
 
         // setup testchains
         // let testchain1 = await TestchainFactory.fork(chain1.rpcUrl, '11000');
@@ -73,7 +86,7 @@ describe("DB", function() {
     
     beforeEach(async () => {
         snapshotId = await web31.takeSnapshotAsync()
-        await clearDb()
+        await givenEmptyDatabase()
     })
 
     afterEach(async () => {
@@ -83,6 +96,7 @@ describe("DB", function() {
 
     after(async () => {
         pe1.stop()
+        await tracker1.stop()
     })
 
     it("loads all Chain's from networks.json", async () => {

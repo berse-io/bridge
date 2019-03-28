@@ -14,9 +14,13 @@ import { ChainStateLeaf, CrosschainState } from "../../interchain/crosschain_sta
 import { dehexify, hexify, shortToLongBridgeId } from "../../utils";
 import { ChainTracker, EventEmittedEvent, MessageSentEvent } from "../tracker";
 import { EthereumStateGadget, EthereumStateLeaf } from "./state_gadget";
+import { Repository } from "typeorm";
+import { Chain } from "../../db/entity/chain";
+import { ChainEvent } from "../../db/entity/chain_event";
+import { InterchainStateUpdate } from "../../db/entity/interchain_state_update";
 const AbiCoder = require('web3-eth-abi').AbiCoder();
 
-
+import { inject } from '@loopback/context'
 
 export class EthereumChainTracker extends ChainTracker {
     conf: any;
@@ -46,7 +50,14 @@ export class EthereumChainTracker extends ChainTracker {
 
     stateGadget: EthereumStateGadget;
 
-    constructor(conf: any) {
+    @inject('repositories.Chain') chain: Repository<Chain>
+    @inject('repositories.ChainEvent') chainEvent: Repository<ChainEvent>
+    @inject('repositories.InterchainStateUpdate') stateUpdate: Repository<InterchainStateUpdate>
+    @inject('interchain.CrosschainStateService') crosschainStateService;
+
+    constructor(
+        conf: any
+    ) {
         super(`Ethereum (chainId=${conf.chainId})`);
         this.conf = conf;
     }

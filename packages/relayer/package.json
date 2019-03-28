@@ -5,7 +5,7 @@
         "build": "tsc -b",
         "start": "node lib/src/index.js",
         "test": "NODE_ENV=development mocha 'lib/test/**/*.spec.js'",
-        "test:specific": "NODE_ENV=development mocha 'lib/test/specs/db*.js'"
+        "test:specific": "NODE_ENV=development mocha 'lib/test/specs/db.spec.js'"
     },
     "dependencies": {
         "0x.js": "^3.0.3",
@@ -16,6 +16,7 @@
         "@0x/utils": "^3.0.1",
         "@0x/web3-wrapper": "^3.2.4",
         "@0xproject/abi-gen": "^1.0.13",
+        "@loopback/context": "^1.8.1",
         "@types/sinon": "^7.0.10",
         "add": "^2.0.6",
         "bluebird": "^3.5.3",
