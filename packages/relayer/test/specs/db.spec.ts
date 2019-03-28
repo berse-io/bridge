@@ -2,12 +2,12 @@ import { Web3ProviderEngine } from "0x.js";
 import { Web3Wrapper } from "@0x/web3-wrapper";
 import { ContractWrappers, hexify } from "@ohdex/shared";
 import { expect } from 'chai';
-import { getRepository } from "typeorm";
-import { DB } from "../../src/db";
+import { getRepository, Connection, ConnectionOptions } from "typeorm";
+import { DB, conn } from "../../src/db";
 import { ChainEvent } from "../../src/db/entity/chain_event";
 import { Relayer } from "../../src/relayer";
 import { dehexify } from "../../src/utils";
-import { loadWeb3, TestchainFactory, getContractAbi } from "../helper";
+import { loadWeb3, TestchainFactory, getContractAbi, clearDb } from "../helper";
 import { EventListenerWrapper } from "../../src/chain/ethereum";
 import { EventListenerContract } from "@ohdex/contracts/lib/build/wrappers/event_listener";
 import { CrosschainState } from "../../src/interchain/crosschain_state";
@@ -38,6 +38,7 @@ describe("DB", function() {
 
     before(async () => {
 
+        // TODO replace this with relayer, which will connect when done
         let db = new DB()
         await db.connect();
 
@@ -66,17 +67,17 @@ describe("DB", function() {
 
         wrappers1 = ContractWrappers.from(chain1, pe1);
         // wrappers2 = ContractWrappers.from(chain2, pe2)
-        
     })
 
     let snapshotId;
     
     beforeEach(async () => {
         snapshotId = await web31.takeSnapshotAsync()
+        await clearDb()
     })
 
     afterEach(async () => {
-        let reverted =  await web31.revertSnapshotAsync(snapshotId);
+        let reverted = await web31.revertSnapshotAsync(snapshotId);
         if(!reverted) throw new Error('bad env')
     })
 
@@ -84,59 +85,41 @@ describe("DB", function() {
         pe1.stop()
     })
 
-    // it("loads all Chain's from networks.json", async () => {
-    //     let db = new DB()
-    //     await db.connect()
+    it("loads all Chain's from networks.json", async () => {
+        let repo = getRepository(Chain)
+        relayer = new Relayer({
+            chain1, chain2
+        });
+        await relayer.start()
 
-    //     let repo = getRepository(Chain)
-    //     relayer = new Relayer({
-    //         chain1, chain2
-    //     });
-    //     await relayer.start()
-
-    //     let chains = await repo.find()
+        let chains = await repo.find()
         
-    //     expect(chains).to.have.members([
-    //         { id: chain1.chainId },
-    //         { id: chain2.chainId }
-    //     ])
-    // })
+        expect(chains).to.have.members([
+            { id: chain1.chainId },
+            { id: chain2.chainId }
+        ])
+    })
 
-    // it("loads all Event's from EventEmitter", async () => {
-    //     let db = new DB()
-    //     await db.connect()
+    it("loads all Event's from EventEmitter", async () => {
+        let repo = getRepository(ChainEvent)
 
-    //     let repo = getRepository(Event)
+        let evs = await repo.find()
+        expect(evs).to.have.members([])
+
+        const eventHash = keccak256("123")
+        await wrappers1.EventEmitter.emitEvent.sendTransactionAsync(eventHash, txDefaults1)
+
+        evs = await repo.find({ relations: ["chain"] })
         
-    //     let evs = await repo.find()
-    //     expect(evs).to.have.members([
-    //     ])
-
-    //     // const chainRecord = new Chain()
-    //     // chainRecord.chainId = "42"
-    //     // await getRepository(Chain).save(chainRecord)
-
-    //     // const ev = new Event()
-    //     // ev.eventHash = "123"
-    //     // ev.chain = chainRecord
-    //     // await repo.save(ev)
-
-    //     const eventHash = keccak256("123")
-    //     // await wrappers1.EventEmitter.emitEvent.sendTransactionAsync(eventHash, txDefaults1)
-
-    //     evs = await repo.find({ relations: ["chain"] })
-        
-    //     expect(evs).to.have.deep.members([
-    //         {
-    //             eventHash,
-    //             chain: { chainId: chain1.chainId }
-    //         }
-    //     ])
-    // })
+        expect(evs).to.have.deep.members([
+            {
+                eventHash,
+                chain: { chainId: chain1.chainId }
+            }
+        ])
+    })
 
     it("loads all InterchainStateUpdate's from EventListener", async () => {
-        
-
         let repo = getRepository(InterchainStateUpdate)
         
         let updates = await repo.find()
@@ -196,137 +179,41 @@ describe("DB", function() {
             }
         ])
     })
-})
 
 
-describe.only('Query helpers', function() {
-    before(async () => {
-        let db = new DB()
-        await db.connect()
-    })
 
+
+
+    describe('random inserts', function() {
+        it('adds Event', async () => {
+            let repo = getRepository(ChainEvent)
+            
+            let evs = await repo.find()
+            expect(evs).to.have.members([
+            ])
     
-    it('#InterchainStateUpdate.getLatestStaterootAtTime', async () => {
-        // CURRENT FOR CHAIN
-        // lastRoot = EventListener.lastRoot
-        // exchainRoots = 
-        //      select * from interchainStates 
-        //      where state.chain == exchain and 
-        //      state.blocktime < lastRoot 
-        //      order by state.blockctime desc limit 1
-        // interchainstate = new MerkleTree([
-        //      exchainRoots
-        // ])
-
-        await getRepository(Chain)
-        .createQueryBuilder()
-        .insert()
-        .values([
-            { chainId: 42 }
-        ])
-        .execute()
-
-        let chain = await getRepository(Chain).findOne()
-        let repo = getRepository(InterchainStateUpdate)
-        
-        let fixtures = [
-            {
-                "blockTime": 1553695776,
-                "blockHash": "0xf21fa0398570971415a4166cb9284f595f81524767e3637082f2a6f5924803ff",
-                chain,
-                "stateRoot": "0xd8b363bc579954571ec3cdd892e0056399381bf69a62d02bf64a99ca822504fb",
-            },
-            {
-                "blockTime": 1553695776 + 5,
-                "blockHash": "0x021fa0398570971415a4166cb9284f595f81524767e3637082f2a6f5924803ff",
-                chain,
-                "stateRoot": "0xe8b363bc579954571ec3cdd892e0056399381bf69a62d02bf64a99ca822504fb",
-            },
-            {
-                "blockTime": 1553695776 + 10,
-                "blockHash": "0xa21fa0398570971415a4166cb9284f595f81524767e3637082f2a6f5924803ff",
-                // "chain": {
-                //   "chainId": 42
-                // },
-                chain,
-                "stateRoot": "0x38b363bc579954571ec3cdd892e0056399381bf69a62d02bf64a99ca822504fb",
-            }
-        ];
-
-        await repo.save(fixtures, {})
-
-        
-        let latest = await InterchainStateUpdate.getLatestStaterootAtTime(chain.chainId, 1553695776 + 5)
-        expect(latest.blockHash).to.eq(fixtures[1].blockHash)
-        expect(latest.stateRoot).to.eq(fixtures[1].stateRoot)
-
-        latest = await InterchainStateUpdate.getLatestStaterootAtTime(chain.chainId, 1553695776 + 4)
-        expect(latest.blockHash).to.eq(fixtures[0].blockHash)
-        expect(latest.stateRoot).to.eq(fixtures[0].stateRoot)
-
-        latest = await InterchainStateUpdate.getLatestStaterootAtTime(chain.chainId, 1553695776 + 20)
-        expect(latest.blockHash).to.eq(fixtures[2].blockHash)
-        expect(latest.stateRoot).to.eq(fixtures[2].stateRoot)
-    })
-
-    it.only('ChainEvent.getEventsBeforeTime', async () => {
-        // to prove event:
-        // eventsTree = new MerkleTree([ 
-        //      select * from events 
-        //      where chain == x and 
-        //      event.blocktime < interchainstate.leaves[exchain].blocktime
-        // ])
-        // eventsTree.prove
-        // interchainstate.prove
-
-        await getRepository(Chain)
-        .createQueryBuilder()
-        .insert()
-        .values([
-            { chainId: 5 },
-            { chainId: 42 }
-        ])
-        .execute()
-
-        let chain = await getRepository(Chain).findOne({ chainId: 42 })
-        let repo = getRepository(ChainEvent);
-        
-        let fixtures = [
-            {
-                "blockTime": 1553695776 + 10,
-                chain,
-                "eventHash": "0xa21fa0398570971415a4166cb9284f595f81524767e3637082f2a6f5924803ff",
-            },
-            {
-                "blockTime": 1553695776 + 10,
-                chain,
-                "eventHash": "0x38b363bc579954571ec3cdd892e0056399381bf69a62d02bf64a99ca822504fb",
-            },
-            {
-                "blockTime": 1553695776 + 10,
-                chain: { chainId: 5 },
-                "eventHash": "0x38b363bc579954571ec3cdd892e0056399381bf69a62d02bf64a99ca822504fb",
-            },
-            {
-                "blockTime": 1553695776 + 15,
-                chain,
-                "eventHash": "0x38b363bc579954571ec3cdd892e0056399381bf69a62d02bf64a99ca822504fb",
-            }
-        ];
-
-        await repo.save(fixtures, {});
-
-        let latest = await ChainEvent.getEventsBeforeTime(chain.chainId, 1553695776)
-        expect(latest).to.have.length(0);
-
-        latest = await ChainEvent.getEventsBeforeTime(chain.chainId, 1553695776 + 10)
-        expect(latest).to.have.length(2)
-        expect(fixtures[0]).to.deep.include(latest[0])
-        expect(fixtures[1]).to.deep.include(latest[1])
-
-        latest = await ChainEvent.getEventsBeforeTime(chain.chainId, 1553695776 + 11)
-        expect(latest).to.have.length(2)
-        expect(fixtures[0]).to.deep.include(latest[0])
-        expect(fixtures[1]).to.deep.include(latest[1])
+            const chainRecord = new Chain()
+            chainRecord.chainId = 42
+            await getRepository(Chain).save(chainRecord)
+    
+            const ev = new ChainEvent()
+            ev.eventHash = "123"
+            ev.blockTime = 123
+            ev.chain = chainRecord
+            await repo.save(ev)
+    
+            const eventHash = keccak256("123")
+            // await wrappers1.EventEmitter.emitEvent.sendTransactionAsync(eventHash, txDefaults1)
+    
+            evs = await repo.find({ relations: ["chain"] })
+            
+            expect(evs).to.have.deep.members([
+                {
+                    eventHash,
+                    chain: { chainId: chain1.chainId }
+                }
+            ])
+        })
     })
 })
+
