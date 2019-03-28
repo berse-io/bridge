@@ -4,7 +4,7 @@ import { InterchainStateUpdate } from "./entity/interchain_state_update";
 import { ChainEvent } from "./entity/chain_event";
 
 // get all events
-let options: ConnectionOptions = {
+export let options: ConnectionOptions = {
     "type": "sqlite",
     "database": ":memory:",
     "synchronize": true,
@@ -18,7 +18,7 @@ let options: ConnectionOptions = {
     ]
 }
 
-let conn: Connection;
+export let conn: Connection;
 
 var AsyncLock = require('async-lock');
 var lock = new AsyncLock();
