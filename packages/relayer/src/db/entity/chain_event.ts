@@ -1,12 +1,13 @@
 import {Entity, PrimaryColumn, Column, ManyToOne, OneToMany, JoinColumn, BaseEntity, PrimaryGeneratedColumn} from "typeorm";
 import { Chain } from "./chain";
+import { dehexify } from "@ohdex/shared";
 
 @Entity()
 export class ChainEvent extends BaseEntity {
-    @PrimaryGeneratedColumn()
-    id: number;
+    // @PrimaryGeneratedColumn()
+    // id: number;
 
-    @Column()
+    @PrimaryColumn({ name: "eventHash" })
     eventHash: string;
 
     @ManyToOne(type => Chain, chain => chain.events)
@@ -23,7 +24,11 @@ export class ChainEvent extends BaseEntity {
         .leftJoinAndSelect("event.chain", "chain")
         .where('chain.chainId = :chainId', { chainId })
         .andWhere('event.blockTime <= :blockTime', { blockTime })
-        .orderBy('blockTime', 'DESC')
+        .orderBy('event.blockTime', 'ASC')
         .getMany()
+    }
+
+    toBuf(): Buffer {
+        return dehexify(this.eventHash)
     }
 }

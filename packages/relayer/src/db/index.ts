@@ -17,24 +17,3 @@ export let options: ConnectionOptions = {
         ChainEvent
     ]
 }
-
-
-export class DB {
-    async connect() {
-        
-    }
-}
-
-export class DbService implements Provider<Connection> {
-    conn: Connection;
-    connOpts: any;
-
-    constructor(connOpts: any) {
-        this.connOpts = connOpts;
-    }
-
-    async value() {
-        this.conn = await createConnection(this.connOpts);
-        return this.conn;
-    }
-}

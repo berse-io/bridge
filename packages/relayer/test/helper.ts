@@ -34,7 +34,7 @@ export class TestchainFactory {
             gas: 1,
             // networkId: 420,
             // debug: false,
-            defaultBalanceEther: '10000000000000000000',
+            defaultBalanceEther: '1000000000',
             unlock: [0, 1],
             fork: rpcUrl
         });
@@ -110,12 +110,14 @@ export function caseInsensitiveEquals(str: string) {
 
 import sinon from 'sinon'
 import { RevertTraceSubprovider } from "@0x/sol-trace";
-import { options, DbService } from "../src/db";
+import { options } from "../src/db";
 import { getRepository, getConnection, Connection } from "typeorm";
 import { Chain } from "../src/db/entity/chain";
 import { ChainEvent } from "../src/db/entity/chain_event";
 import { InterchainStateUpdate } from "../src/db/entity/interchain_state_update";
 import { EthereumChainTracker } from "../src/chain/ethereum";
+import { CrosschainStateService } from "../src/interchain/xchain_state_service";
+import { DbConnProvider } from "../src/db/provider";
 
 export function sinonStrEqual(str: string) {
     return sinon.match(caseInsensitiveEquals(str), `${str}`)
@@ -161,16 +163,16 @@ export async function clearDb() {
 
 export async function givenDbService(): Promise<Connection> {
     const testConnOpts = options;
-    let db = new DbService(testConnOpts)
+    let db = new DbConnProvider(testConnOpts)
     return await db.value()
 }
 
 export async function givenEmptyDatabase(conn: Connection) {
     // let conn = getConnection();
     await conn.synchronize(true)
-    await conn.getRepository<InterchainStateUpdate>(InterchainStateUpdate).delete({})
-    await conn.getRepository<ChainEvent>(ChainEvent).delete({})
-    await conn.getRepository<Chain>(Chain).delete({})
+    await conn.getRepository<InterchainStateUpdate>(InterchainStateUpdate).clear()
+    await conn.getRepository<ChainEvent>(ChainEvent).clear()
+    await conn.getRepository<Chain>(Chain).clear()
 }
 
 export async function givenEthereumChainTracker(conn: Connection, conf: any) {
@@ -178,6 +180,6 @@ export async function givenEthereumChainTracker(conn: Connection, conf: any) {
     tracker.chain = conn.getRepository(Chain)
     tracker.chainEvent = conn.getRepository(ChainEvent)
     tracker.stateUpdate = conn.getRepository(InterchainStateUpdate)
-    tracker.crosschainStateService = {}
+    tracker.crosschainStateService = {} as CrosschainStateService
     return tracker
 }

@@ -100,7 +100,8 @@ describe('EventListener', function() {
         beforeEach(async () => {
             eventEmitter = await EventEmitterContract.deployFrom0xArtifactAsync(
                 get0xArtifact('EventEmitter'),
-                pe, txDefaults
+                pe, txDefaults,
+                "nonce"
             );
         })
 
@@ -160,7 +161,8 @@ describe('EventListener', function() {
         beforeEach(async () => {
             eventEmitter = await EventEmitterContract.deployFrom0xArtifactAsync(
                 get0xArtifact('EventEmitter'),
-                pe, txDefaults
+                pe, txDefaults,
+                "nonce"
             );
 
             // @ts-ignore

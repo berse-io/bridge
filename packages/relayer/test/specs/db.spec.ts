@@ -13,7 +13,6 @@ import { CrosschainState } from "../../src/interchain/crosschain_state";
 import { EthereumStateGadget, EthereumStateLeaf } from "../../src/chain/ethereum/state_gadget";
 import { InterchainStateUpdate } from "../../src/db/entity/interchain_state_update";
 import { Chain } from "../../src/db/entity/chain";
-import { DbService } from "../../src/db";
 
 const keccak256 = (x: any) => require('web3-utils').keccak256(x);
 const keccak256Dehexed = (x: any) => dehexify(require('web3-utils').keccak256(x));

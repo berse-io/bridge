@@ -11,7 +11,8 @@ import sinon from 'sinon';
 import { EthereumChainTracker } from "../../src/chain/ethereum";
 import { MessageSentEvent } from '../../src/chain/tracker';
 import { hexify, keccak256 } from '../../src/utils';
-import { get0xArtifact, getContractAbi, sinonBignumEq, sinonStrEqual } from '../helper';
+import { get0xArtifact, getContractAbi, sinonBignumEq, sinonStrEqual, givenEthereumChainTracker, givenDbService, givenEmptyDatabase } from '../helper';
+import { Connection } from 'typeorm';
 
 
 const chai = require("chai");
@@ -29,10 +30,13 @@ describe('EthereumChainTracker', function () {
 
     let snapshotId;
     let config = require('@ohdex/config').networks['kovan'];
+    let conn: Connection;
 
     before(async () => {
         // let chain1 = await TestchainFactory.fork(config.rpcUrl, '9000')
 
+        conn = await givenDbService();
+        
         pe = new Web3ProviderEngine();
         const artifactAdapter = new SolCompilerArtifactAdapter(
             `${require("@ohdex/contracts")}/build/artifacts`,
@@ -55,6 +59,7 @@ describe('EthereumChainTracker', function () {
     beforeEach(async () => {
         if(snapshotId) await web3.revertSnapshotAsync(snapshotId);
         snapshotId = await web3.takeSnapshotAsync()
+        await givenEmptyDatabase(conn)
     })
 
     describe('account', () => {
@@ -104,7 +109,7 @@ describe('EthereumChainTracker', function () {
             )
 
             // start relayer beforehand
-            let tracker1 = new EthereumChainTracker(chain1)
+            let tracker1 = await givenEthereumChainTracker(conn, chain1)
             await tracker1.start()
             tracker1.listen()
             
@@ -169,6 +174,7 @@ describe('EthereumChainTracker', function () {
     
             let fakeMessage: MessageSentEvent = {
                 fromChain: "",
+                fromChainId: 0,
                 toBridge: chain1.bridgeAddress,
                 data: null,
                 eventHash: ""
@@ -189,6 +195,7 @@ describe('EthereumChainTracker', function () {
     
             let fakeMessage: MessageSentEvent = {
                 fromChain: "",
+                fromChainId: 0,
                 toBridge: "I'm a stupid fake bridge, I don't exist",
                 data: null,
                 eventHash: ""
@@ -202,41 +209,19 @@ describe('EthereumChainTracker', function () {
 
     describe.only('#stateGadget', async () => {
         it("loads the most recent state root update time", async () => {
-            let tracker1 = new EthereumChainTracker(config)
+            let tracker1 = await givenEthereumChainTracker(conn, config)
             await tracker1.start()
             tracker1.listen()
 
-            expect(tracker1.lastUpdated).to.eq(1);
+            expect(tracker1.lastUpdated).to.deep.eq(
+                new Buffer(32)
+            );
         })
-
-        // it('loads exchain checkpoints', async () => {
-        //     let tracker1 = new EthereumChainTracker(config)
-        //     await tracker1.start()
-
-        //     let tracker2 = new EthereumChainTracker(config)
-        //     await tracker2.start()
-
-        //     // tracker1.stateGadget.checkpoints
-
-        //     // checkpoint is the last acknowledged event of this chain on another chain
-            
-        //     // tracker1.stateGadget.checkpoints[]
-
-
-        //     // for each exchain
-        //     // compute the last ack'd state root
-        //     // based on the closest block before this time
-
-        //     // now we have the currentRoot's from each other chain
-        //     // we can compute the merkle tree for each checkpoint (lazily when we need it)
-        //     // based on a merkle tree of events.splice(0, latestEvent(blockhash))
-
-
-        // })
 
         it('loads all previous events', async () => {
             let eventEmitter = await EventEmitterContract.deployFrom0xArtifactAsync(
-                get0xArtifact('EventEmitter'), pe, txDefaults
+                get0xArtifact('EventEmitter'), pe, txDefaults,
+                "nonce"
             )
     
             let ev_1 = hexify(keccak256('1'))
@@ -255,7 +240,7 @@ describe('EthereumChainTracker', function () {
                 ev_3
             )
     
-            let tracker = new EthereumChainTracker({
+            let tracker = await givenEthereumChainTracker(conn, {
                 ...config,
                 eventEmitterAddress: eventEmitter.address
             })

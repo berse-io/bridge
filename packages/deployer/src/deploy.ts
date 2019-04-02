@@ -73,9 +73,12 @@ async function deploy(configMgr: ConfigManager) {
 
     console.log(`Deploying to ${networks.length} networks`)
 
-    await Promise.all(networks.map(net => {
-        return _deploy(configMgr, net)
-    }));
+    for(let net of networks) {
+        await _deploy(configMgr, net)
+    }
+    // await Promise.all(networks.map(net => {
+    //     return _deploy(configMgr, net)
+    // }));
 
     configMgr.save()
 }
@@ -132,9 +135,10 @@ async function _deploy(configMgr: ConfigManager, network: string) {
     }
 
     // 2 Deploy eventEmitter
-
+    // @ts-ignore
     let eventEmitter = await EventEmitterContract.deployAsync(
-        ...getDeployArgs('EventEmitter', pe, account)
+        ...getDeployArgs('EventEmitter', pe, account),
+        network
     );
 
 

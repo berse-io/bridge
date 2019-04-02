@@ -3,5 +3,5 @@ contracts:
   artifacts: ./../../packages/contracts/build/artifacts/*.json
   addresses:
     - Escrow: '0x5f728299dbea6538c0415352be79ff7c17cdf16b'
-    - EventListener: '0x99349f177fa95d5db73cf873b82ba6c79d2254df'
+    - EventListener: '0xd89f2e1baa14dd3638af3aadad4fb4e4da550854'
   watch_new: true
