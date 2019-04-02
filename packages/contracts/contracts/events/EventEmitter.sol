@@ -7,8 +7,13 @@ contract EventEmitter is MerkleTreeVerifier {
     bytes32[] public events;
 
     event EventEmitted(bytes32 eventHash); 
+    
+    bytes32 public nonce;
 
-    constructor() public {
+    // key is a temporary parameter to ensure uniqueness
+    // when we use a KV merkle tree, we won't need it.
+    constructor(string memory key) public {
+        nonce = keccak256(abi.encodePacked(this, blockhash(1), key));
     }
 
     function emitEvent(bytes32 _eventHash) public returns(bool) {
@@ -29,7 +34,7 @@ contract EventEmitter is MerkleTreeVerifier {
     }
 
     function getEventsRoot() public view returns(bytes32) {
-        if(events.length == 0) return 0x0000000000000000000000000000000000000000000000000000000000000000;
+        if(events.length == 0) return nonce;
         return _computeMerkleRoot(events);
     }
 

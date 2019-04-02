@@ -13,7 +13,6 @@ contract EventListener is MerkleTreeVerifier {
     bytes32 public lastAttestedStateRoot;
 
     // bytes32 public bridgeId;
-
     EventEmitter emitter;
 
     // bytes32 public stateRoot;
@@ -23,30 +22,25 @@ contract EventListener is MerkleTreeVerifier {
 
     mapping(uint256 => bytes32[]) chainIdToProofs; 
 
-    event StateRootUpdated(bytes32 indexed root);
+    event StateRootUpdated(bytes32 indexed root, bytes32 eventRoot);
     event ProofSubmitted(uint256 indexed chainId, bytes32 indexed proof);
 
     constructor(address _emitter) public {
-        bytes32 nonce = keccak256(abi.encodePacked(this, blockhash(1)));
-        _updateStateRoot(nonce);
+        // bytes32 nonce = keccak256(abi.encodePacked(this, blockhash(1), _emitter));
         emitter = EventEmitter(_emitter);
+        emitter.emitEvent(emitter.nonce());
+        _updateStateRoot(emitter.nonce());
     }
 
     function _updateStateRoot(bytes32 root) internal {
-        // stateRootToChainRoot[root] = block.timestamp;
-        // stateRoots.push(root);
-        // stateRoot = root;
         lastUpdated = blockhash(block.number);
         interchainStateRoot = root;
-        emit StateRootUpdated(root);
-        // _ackPendingEvents();
+        emit StateRootUpdated(root, emitter.getEventsRoot());
     }
 
     function checkEvent(
         bytes32[] memory proof, 
-        bool[] memory paths, 
-        // bytes32 _bridgeInterchainStateRoot, 
-        
+        bool[] memory paths,         
         bytes32[] memory _eventsProof,
         bool[] memory _eventsPaths,
         bytes32 _eventsRoot,
@@ -54,13 +48,13 @@ contract EventListener is MerkleTreeVerifier {
     ) public returns (bool) {
         bytes32 _eventLeaf = _hashLeaf(_eventHash);
         // Verify the event hash
-        require(_verify(_eventsProof, _eventsPaths, _eventsRoot, _eventLeaf), "EVENT_PROOF_INVALID");
+        require(_verify(_eventsProof, _eventsPaths, _eventsRoot, _eventLeaf), "INVALID_EVENT_PROOF");
 
         // Verify the events root for that chain's bridge.
         // bytes32 bridgeLeaf = _hashLeaf2(_bridgeInterchainStateRoot, _eventsRoot);
-        bytes32 bridgeLeaf = _hashLeaf2(_eventsRoot);
+        bytes32 bridgeLeaf = _hashLeaf(_eventsRoot);
 
-        require(_verify(proof, paths, interchainStateRoot, bridgeLeaf), "INVALID_INTERSTATE_2_EVENT_PROOF");
+        require(_verify(proof, paths, interchainStateRoot, bridgeLeaf), "INVALID_STATE_PROOF");
 
         return true;
     }
