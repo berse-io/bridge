@@ -22,9 +22,6 @@ import {
     WhitelistContract, WhitelistEvents
 } from '../build/wrappers/whitelist';
 
-import {
-    EscrowContract
-}  from '../build/wrappers/escrow'
 
 import {
     BridgeContract
@@ -72,8 +69,7 @@ describe('Bridge', function(){
         )
     }
 
-
-    let bridgeOrigin: EscrowContract;
+    let bridgeOrigin: BridgeContract;
     let bridgeForeign: BridgeContract;
     let bridgedToken: BridgedTokenContract;
 
@@ -130,33 +126,35 @@ describe('Bridge', function(){
         whitelist = await WhitelistContract.deployFrom0xArtifactAsync(
             getContractArtifact('Whitelist'), pe, txDefaults
         )
-
+        
         // @ts-ignore
         eventEmitter = await EventEmitterContract.deployFrom0xArtifactAsync(
             getContractArtifact('EventEmitterContract'), pe, txDefaults,
             whitelist.address,
+            chainId,
         )
+
         // @ts-ignore
         eventListener = await EventListenerContract.deployFrom0xArtifactAsync(
             getContractArtifact('EventListenerContract'), pe, txDefaults,
             eventEmitter.address
         )
         // @ts-ignore
-        bridgeOrigin = await EscrowContract.deployFrom0xArtifactAsync(
-            getContractArtifact('EscrowContract'), pe, txDefaults,
-            chainId, eventListener.address, eventEmitter.address
+        bridgeOrigin = await BridgeContract.deployFrom0xArtifactAsync(
+            getContractArtifact('BridgeContract'), pe, txDefaults,
+            eventListener.address, eventEmitter.address
         )
 
         await whitelist.addWhitelisted.sendTransactionAsync(bridgeOrigin.address, txDefaults);
-
+        
         // @ts-ignore
         bridgeForeign = await BridgeContract.deployFrom0xArtifactAsync(
             getContractArtifact('BridgeContract'), pe, txDefaults,
-            chainId, eventListener.address, eventEmitter.address
+            eventListener.address, eventEmitter.address
         )
 
         await whitelist.addWhitelisted.sendTransactionAsync(bridgeForeign.address, txDefaults);
-
+ 
         // @ts-ignore
         bridgedToken = await BridgedTokenContract.deployFrom0xArtifactAsync(
             getContractArtifact('BridgedTokenContract'), pe, txDefaults,
@@ -164,7 +162,7 @@ describe('Bridge', function(){
     });
 
 
-    describe('escrow', async () => {
+    describe('Bridge', async () => {
 
         
 
@@ -193,34 +191,28 @@ describe('Bridge', function(){
 
             let eventEmitterAddr = await bridgeOrigin.eventEmitter.callAsync()
             expect(eventEmitterAddr).to.eq(eventEmitter.address)
-
+            
             await bridgeOrigin.bridge.sendTransactionAsync(
-                _targetBridge, 
-                _token, 
-                _receiver, _amount, _chainId, _salt,
+                _token, _receiver, _amount, _salt, _chainId, bridgeForeign.address, {gas: 1000000}
             )
+            
 
             let TokensBridged_evHash = await TokensBridged_ev
-
             expect(
-                await eventEmitter.events.callAsync(toBN(0))
+                await eventEmitter.events.callAsync(toBN(0)),
             ).to.eq(TokensBridged_evHash)
 
-            
-            expect(
-                await bridgeOrigin._getTokensBridgedEventHash.callAsync(
-                    _targetBridge, _receiver, _token, _amount, _chainId, _salt
-                )
-            ).to.eq(TokensBridged_evHash)
+            let tokenBridgedEvent = await bridgeOrigin._getTokensBridgedEventHash.callAsync(
+                _token, _receiver, _amount, _salt, _chainId, false
+            )
+
+            tokenBridgedEvent = await bridgeOrigin.markEvent.callAsync(tokenBridgedEvent, bridgeOrigin.address, chainId);
 
             expect(
-                await bridgeForeign._getTokensBridgedEventHash.callAsync(
-                    _targetBridge, _receiver, _token, _amount, _chainId, _salt
-                )
+                tokenBridgedEvent
             ).to.eq(TokensBridged_evHash)
-            
-            
-            
+
+ 
             let state = new MockCrosschainState()
             
             let origin = new MockEthereumChainStateGadget()
@@ -288,19 +280,7 @@ describe('Bridge', function(){
             expect(_interchainStateRoot).to.eq(
                 (await eventListener.interchainStateRoot.callAsync())
             )
-            
-            await bridgeForeign.claim.sendTransactionAsync(
-                _token, _receiver, _amount, _chainId, _salt, 
-
-                _proof, _proofPaths, _interchainStateRoot, 
-                _eventsProof, _eventsPaths, _eventsRoot,
-                TokensBridged_evHash
-            )
-            
-            
-            
-
-            
+             
             
             // check an event has been emitted
 

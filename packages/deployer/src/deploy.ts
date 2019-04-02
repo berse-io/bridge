@@ -15,9 +15,9 @@ import {
     EventEmitterContract,
 } from '@ohdex/contracts/lib/build/wrappers/event_emitter';
 
-import {
-    EscrowContract
-}  from '@ohdex/contracts/lib/build/wrappers/escrow'
+// import {
+//     EscrowContract
+// }  from '@ohdex/contracts/lib/build/wrappers/escrow'
 
 import {
     BridgeContract
@@ -145,7 +145,8 @@ async function _deploy(configMgr: ConfigManager, network: string) {
     // @ts-ignore
     let eventEmitter = await EventEmitterContract.deployAsync(
         ...getDeployArgs('EventEmitter', pe, account),
-        whitelist.address
+        whitelist.address,
+        config.chainId
     );
 
     // 3 Deploy eventListener
@@ -157,37 +158,36 @@ async function _deploy(configMgr: ConfigManager, network: string) {
     )
 
 
-    // 4 Deploy Escrow
+    // // 4 Deploy Escrow
 
-    // @ts-ignore
-    let escrow = await EscrowContract.deployAsync(
-        ...getDeployArgs('Escrow', pe, account),
-        config.chainId,
-        eventListener.address,
-        eventEmitter.address
-    );
+    // // @ts-ignore
+    // let escrow = await EscrowContract.deployAsync(
+    //     ...getDeployArgs('Escrow', pe, account),
+    //     config.chainId,
+    //     eventListener.address,
+    //     eventEmitter.address
+    // );
 
-    // 4.1 add Escrow to whitelist
+    // // 4.1 add Escrow to whitelist
 
-    await whitelist.addWhitelisted.sendTransactionAsync(
-        escrow.address
-    )
+    // await whitelist.addWhitelisted.sendTransactionAsync(
+    //     escrow.address
+    // )
 
-    console.log("whitelisted Escrow");
+    // console.log("whitelisted Escrow");
 
     // 5 Deploy Bridge
 
     // @ts-ignore
     let bridge = await BridgeContract.deployAsync(
         ...getDeployArgs('Bridge', pe, account),
-        config.chainId,
         eventListener.address,
         eventEmitter.address,
     )
 
     config.eventEmitterAddress = eventEmitter.address.toLowerCase();
     config.eventListenerAddress = eventListener.address.toLowerCase();
-    config.escrowAddress = escrow.address.toLowerCase();
+    // config.escrowAddress = escrow.address.toLowerCase();
     config.bridgeAddress = bridge.address.toLowerCase();
 
     // @ts-ignore

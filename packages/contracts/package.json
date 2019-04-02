@@ -51,6 +51,7 @@
     "ethereum-types": "^1.1.6",
     "ethereumjs-util": "^6.0.0",
     "ethers": "^4.0.21",
+    "ganache-core": "^2.5.3",
     "lodash": "^4.17.11",
     "make-promises-safe": "^4.0.0",
     "merkle-patricia-tree": "^3.0.0",
@@ -69,11 +70,11 @@
     "yarn": "^1.13.0"
   },
   "devDependencies": {
-    "npm-watch": "^0.5.0",
     "@types/chai-as-promised": "^7.1.0",
     "@types/ethereumjs-util": "^5.2.0",
     "@types/lodash": "^4.14.120",
     "@types/mocha": "^5.2.5",
-    "@types/node": "^11.9.4"
+    "@types/node": "^11.9.4",
+    "npm-watch": "^0.5.0"
   }
 }

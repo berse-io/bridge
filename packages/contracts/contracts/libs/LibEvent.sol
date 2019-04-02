@@ -1,16 +1,9 @@
-pragma experimental ABIEncoderV2;
 pragma solidity ^0.5.0;
 
 library LibEvent {
 
-    struct Event {
-        address origin;
-        uint256 chainId;
-        bytes data;
-    }
-
-    function getEventHash(Event memory _event) public pure returns(bytes32) {
-        return keccak256(abi.encode(_event));
+    function getMarkedEvent(bytes32 _eventHash, address _triggerAddress, uint256 _triggerChain) internal pure returns (bytes32) {
+        return keccak256(abi.encodePacked(_eventHash, _triggerAddress, _triggerChain));
     }
 
 }

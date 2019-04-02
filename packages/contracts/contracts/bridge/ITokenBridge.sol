@@ -27,36 +27,36 @@ contract ITokenBridge {
     }
     
     function _createBridgeTokenEvent(
-        address _targetBridge, address _receiver, address _token, uint256 _amount, uint256 _chainId, uint256 _salt
-    ) public {
+        address _targetBridge, address _receiver, address _token, uint256 _amount, uint256 _chainId, uint256 _salt, bool _bridgingBack
+    ) internal {
         bytes32 eventHash = _getTokensBridgedEventHash(
-            _targetBridge, _receiver, _token, _amount, _chainId, _salt
+            _token, _receiver, _amount, _salt, _chainId, _bridgingBack
         );
-        eventEmitter.emitEvent(eventHash);
+        eventHash = eventEmitter.emitEvent(eventHash); //Emit and return marked event reusing the variable
         emit TokensBridged(eventHash, _targetBridge, _chainId, _receiver, _token, _amount, _salt);
     }
 
+    // function _getTokensBridgedEventHash(
+    //     address _targetBridge, address _receiver, address _token, uint256 _amount, uint256 _chainId, uint256 _salt
+    // ) public pure returns (bytes32) {
+    //     return keccak256(abi.encodePacked(
+    //         _targetBridge, _receiver, _token, _amount, _chainId, _salt
+    //     ));
+    // }
+
+
     function _getTokensBridgedEventHash(
-        address _targetBridge, address _receiver, address _token, uint256 _amount, uint256 _chainId, uint256 _salt
+       address _token, 
+       address _receiver,
+       uint256 _amount,
+       uint256 _salt,
+       uint256 _targetChainId,
+       bool _bridgingBack
     ) public pure returns (bytes32) {
         return keccak256(abi.encodePacked(
-            _targetBridge, _receiver, _token, _amount, _chainId, _salt
+            _receiver, _token, _amount, _salt, _targetChainId, _bridgingBack
         ));
     }
-
-    // function claim(
-    //     address _token,
-    //     address _receiver,
-    //     uint256 _amount,
-    //     uint256 _chainId,
-    //     uint256 _salt,
-    //     bytes32[] memory _proof,
-    //     bool[] memory _proofPaths,
-    //     bytes32 _interchainStateRoot,
-    //     bytes32[] memory _eventsProof,
-    //     bool[] memory _eventsPaths,
-    //     bytes32 _eventsRoot
-    // ) public;
 
     function _checkEventProcessed(bytes32 eventHash) internal {
         require(!processedEvents[eventHash], "EVENT_ALREADY_PROCESSED");

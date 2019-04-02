@@ -1,31 +1,31 @@
 pragma solidity ^0.5.0;
 
+import "../libs/LibEvent.sol";
 import "../MerkleTreeVerifier.sol";
 import "../whitelist/WhiteListUser.sol";
 
 
 contract EventEmitter is MerkleTreeVerifier, WhitelistUser {
+
+    using LibEvent for bytes32;
+
     // Events pending acknowledgement on other chains.
     bytes32[] public events;
-    // uint256 public chainId;
+    uint256 public chainId;
     event EventEmitted(bytes32 eventHash); 
     
-    constructor(address _whitelist) WhitelistUser(_whitelist) public {
-        
+    constructor(address _whitelist, uint256 _chainId) WhitelistUser(_whitelist) public {
+        chainId = _chainId;
     }
 
-    function emitEvent(bytes32 _eventHash) public onlyWhitelisted returns(bool) {
+    function emitEvent(bytes32 _eventHash) public onlyWhitelisted returns(bytes32) {
         require(_eventHash != 0x00, "INVALID_EVENT");
-        // TODO add msg.sender to event hash (https://gitlab.com/berse.io/monorepo/issues/4)
-        // TODO add chain ID of current chain to event
-        
-        // bytes32 markedEventHash = keccak256(abi.encodePacked(msg.sender, _eventHash));
-        
-        events.push(_eventHash);
-        emit EventEmitted(_eventHash);
-        // keccak256(abi.encodePacked(msg.sender, _eventHash)) is whats added to the merkle tree of that chain
+        // TODO implement some way of checking from which chain a event came
+        bytes32 markedEventHash = _eventHash.getMarkedEvent(msg.sender, chainId);
+        events.push(markedEventHash);
+        emit EventEmitted(markedEventHash);
         // TODO: Implement fee system
-        return true;
+        return markedEventHash;
     }
 
     function acknowledgeEvents() public {

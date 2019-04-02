@@ -67,6 +67,7 @@ describe('EventListener', function() {
     let accounts;
     let user;
     let txDefaults;
+    let chainId = new BigNumber(1);
 
     before(async () => {
         pe = new Web3ProviderEngine();
@@ -107,11 +108,13 @@ describe('EventListener', function() {
                 get0xArtifact('whitelist'),
                 pe, txDefaults,
             );
+            
 
             eventEmitter = await EventEmitterContract.deployFrom0xArtifactAsync(
                 get0xArtifact('EventEmitter'),
                 pe, txDefaults,
                 whitelist.address,
+                chainId
             );
 
             await whitelist.addWhitelisted.sendTransactionAsync(eventEmitter.address, txDefaults);
@@ -182,6 +185,7 @@ describe('EventListener', function() {
                 get0xArtifact('EventEmitter'),
                 pe, txDefaults,
                 whitelist.address,
+                chainId
             );
 
             await whitelist.addWhitelisted.sendTransactionAsync(user, txDefaults);
