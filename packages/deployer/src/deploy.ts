@@ -58,7 +58,7 @@ function getDeployArgs(name: string, pe: Web3ProviderEngine, from: string): [ st
         bytecode,
         abi,
         provider,
-        { from }
+        { from, gas: 10000000 }
     ]
 }
 

@@ -44,7 +44,6 @@ export class EthereumChainTracker extends ChainTracker {
 
     bridgeContract: BridgeContract;
     bridgeContract_sub: ethers.Contract;
-    escrowContract_sub: ethers.Contract;
     pendingTokenBridgingEvs: MessageSentEvent[] = [];
 
     
@@ -170,11 +169,6 @@ export class EthereumChainTracker extends ChainTracker {
             require('@ohdex/contracts/build/artifacts/Bridge.json').compilerOutput.abi,
             this.ethersProvider
         )
-        this.escrowContract_sub = new ethers.Contract(
-            this.conf.escrowAddress,
-            require('@ohdex/contracts/build/artifacts/Escrow.json').compilerOutput.abi,
-            this.ethersProvider
-        )
 
 
         await this.loadStateAndEvents()
@@ -288,7 +282,6 @@ export class EthereumChainTracker extends ChainTracker {
             }
 
             await getPreviousBridgeEvents(this.bridgeContract_sub)
-            await getPreviousBridgeEvents(this.escrowContract_sub)
         }
         
     }

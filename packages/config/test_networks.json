@@ -4,31 +4,31 @@
         "chainType": "ethereum",
         "port": "10000",
         "rpcUrl": "http://localhost:10000",
-        "eventEmitterAddress": "0x8923eae5296e21ecff275dd62f4f2767d9de4cf0",
-        "eventListenerAddress": "0xcdd9a8c328b17649a116c8cc06d4ca58b58c7bae",
+        "eventEmitterAddress": "0x7fa10b89dde2c050def85e17d9dd9cfc0cb3ffe3",
+        "eventListenerAddress": "0x3fc956bd7a2a861b23c816fa683a767db4c58585",
         "escrowAddress": "0x02924e6ef06efdc84bd7e3c1ed6e9308196c58c3",
-        "bridgeAddress": "0x76f28b921c1dc86a2a108fd8639862ea41eb80ce",
+        "bridgeAddress": "0xa1df06b078d4eca5d00a4ff0d753aeb690cfda37",
         "confirmationsNeeded": 1,
         "batchSize": 1,
         "eventUtilAddress": "0x7de4f930c8465f230525715c7a7bb5cffeb6272d",
-        "wethToken": "0xaf529e911751189228372992d2afacfb15d9eb3f",
-        "aliceToken": "0xc039dcb5c4b0739b667fb7ae1c9755aeb54d5ad9",
-        "bobToken": "0x6371ad5078a0e8575812ca242eef06df8f1eacf3"
+        "wethToken": "0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66",
+        "aliceToken": "0xaba19d9dc85ece02661379521927bc3e8c3ec964",
+        "bobToken": "0x82ac0ab2db794ae1376ac18318ae3560f8dc40b6"
     },
     "rinkeby": {
         "chainId": 4,
         "chainType": "ethereum",
         "port": "10001",
         "rpcUrl": "http://localhost:10001",
-        "eventEmitterAddress": "0x62392827a6aba48bceef1dd433f44d5909b6feb9",
-        "eventListenerAddress": "0x7d460a7790e8c696650afae0ab35b4bd58a9b319",
+        "eventEmitterAddress": "0x7fa10b89dde2c050def85e17d9dd9cfc0cb3ffe3",
+        "eventListenerAddress": "0x3fc956bd7a2a861b23c816fa683a767db4c58585",
         "escrowAddress": "0x02924e6ef06efdc84bd7e3c1ed6e9308196c58c3",
-        "bridgeAddress": "0xb8ed386520c9f20cd64445ff6893b9eb3d72f4b5",
+        "bridgeAddress": "0xa1df06b078d4eca5d00a4ff0d753aeb690cfda37",
         "confirmationsNeeded": 1,
         "batchSize": 1,
         "eventUtilAddress": "0xdb3205d73e0a885090279c601abf76a38a6af00c",
-        "wethToken": "0xcdd9a8c328b17649a116c8cc06d4ca58b58c7bae",
-        "aliceToken": "0x67385595ad689f698cb2a0a788666b939d63bf43",
-        "bobToken": "0x8923eae5296e21ecff275dd62f4f2767d9de4cf0"
+        "wethToken": "0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66",
+        "aliceToken": "0xaba19d9dc85ece02661379521927bc3e8c3ec964",
+        "bobToken": "0x82ac0ab2db794ae1376ac18318ae3560f8dc40b6"
     }
 }

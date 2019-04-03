@@ -64,8 +64,8 @@ describe('Relayer', function() {
             await ({ web3: web32 } = await loadWeb3(chain2));
 
             
-            snapshotId1 = await web31.takeSnapshotAsync()
-            snapshotId2 = await web32.takeSnapshotAsync()
+            // snapshotId1 = await web31.takeSnapshotAsync()
+            // snapshotId2 = await web32.takeSnapshotAsync()
 
             // await chainlog({ config: require.resolve('@ohdex/relayer/test/test.yml') })
         })
@@ -76,10 +76,10 @@ describe('Relayer', function() {
         })
 
         afterEach(async () => {
-            await Promise.all([
-                web31.revertSnapshotAsync(snapshotId1),
-                web32.revertSnapshotAsync(snapshotId2)
-            ])
+            // await Promise.all([
+                // web31.revertSnapshotAsync(snapshotId1),
+                // web32.revertSnapshotAsync(snapshotId2)
+            // ])
         })
 
         it.only('should ack events', async() => {
