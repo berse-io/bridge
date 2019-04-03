@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+geth --nodiscover --networkid 4 --datadir=devChain --unlock 7ef5a6135f1fd6a02593eedc869c6d41d934aef8 --password _pw.txt --rpc --rpcaddr localhost --rpcport 10000 --rpccorsdomain '0.0.0.0' --ws --wsapi 'eth,net,web3,admin,debug,personal,miner,txpool' --mine
