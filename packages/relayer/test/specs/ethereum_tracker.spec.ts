@@ -3,8 +3,8 @@ import { RevertTraceSubprovider, SolCompilerArtifactAdapter } from '@0x/sol-trac
 import { BigNumber } from "@0x/utils";
 import { Web3Wrapper } from '@0x/web3-wrapper';
 import { BridgedTokenContract } from "@ohdex/contracts/lib/build/wrappers/bridged_token";
-import { EscrowContract } from '@ohdex/contracts/lib/build/wrappers/escrow';
 import { EventEmitterContract } from "@ohdex/contracts/lib/build/wrappers/event_emitter";
+import { BridgeContract } from "@ohdex/contracts/lib/build/wrappers/bridge";
 import { expect } from 'chai';
 import { suiteTeardown } from 'mocha';
 import sinon from 'sinon';
@@ -103,8 +103,8 @@ describe('EthereumChainTracker', function () {
             )
 
             // 3) Bridge
-            let escrow = new EscrowContract(
-                getContractAbi('Escrow'), chain1.escrowAddress,
+            let bridge = new BridgeContract(
+                getContractAbi('Bridge'), chain1.escrowAddress,
                 pe
             )
 
@@ -122,9 +122,8 @@ describe('EthereumChainTracker', function () {
             //  1) generic EventEmitter
             //  2) an Escrow TokensBridged event            
 
-            await escrow.bridge.sendTransactionAsync(
-                chain2.bridgeAddress, 
-                bridgedToken.address, accounts[1], bridgeAmount, _chainId, _salt,
+            await bridge.bridge.sendTransactionAsync( 
+                bridgedToken.address, accounts[1], bridgeAmount, _salt, _chainId, chain2.bridgeAddress,
                 { from: accounts[1], gas: 1000000 }
             )
             
@@ -219,8 +218,11 @@ describe('EthereumChainTracker', function () {
         })
 
         it('loads all previous events', async () => {
+            const WHITELIST_ADDR = hexify(Buffer.alloc(32))
             let eventEmitter = await EventEmitterContract.deployFrom0xArtifactAsync(
                 get0xArtifact('EventEmitter'), pe, txDefaults,
+                WHITELIST_ADDR,
+                config.chainId,
                 "nonce"
             )
     

@@ -36,15 +36,6 @@ contract ITokenBridge {
         emit TokensBridged(eventHash, _targetBridge, _chainId, _receiver, _token, _amount, _salt);
     }
 
-    // function _getTokensBridgedEventHash(
-    //     address _targetBridge, address _receiver, address _token, uint256 _amount, uint256 _chainId, uint256 _salt
-    // ) public pure returns (bytes32) {
-    //     return keccak256(abi.encodePacked(
-    //         _targetBridge, _receiver, _token, _amount, _chainId, _salt
-    //     ));
-    // }
-
-
     function _getTokensBridgedEventHash(
        address _token, 
        address _receiver,
@@ -52,6 +43,7 @@ contract ITokenBridge {
        uint256 _salt,
        uint256 _targetChainId,
        bool _bridgingBack
+       
     ) public pure returns (bytes32) {
         return keccak256(abi.encodePacked(
             _receiver, _token, _amount, _salt, _targetChainId, _bridgingBack

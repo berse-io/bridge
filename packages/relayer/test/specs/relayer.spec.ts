@@ -5,7 +5,7 @@ import { consoleOpts } from '../../src/logger';
 import { Relayer } from '../../src/relayer';
 import { get0xArtifact, loadWeb3, Testchain, TestchainFactory, givenEmptyDatabase } from '../helper';
 import { expect } from 'chai'
-import chainlog from 'chainlog'
+// import chainlog from 'chainlog'
 import { Web3Wrapper } from "@0x/web3-wrapper";
 import { Connection } from "typeorm";
 
@@ -121,29 +121,29 @@ describe('Relayer', function() {
             const bridgeAmt = new BigNumber('10000');
             
             await bridgedToken1.mint.sendTransactionAsync(account1, bridgeAmt, txDefaults1);
-            await bridgedToken1.approve.sendTransactionAsync(wrappers1.Escrow.address, bridgeAmt, txDefaults1);
+            await bridgedToken1.approve.sendTransactionAsync(wrappers1.Bridge.address, bridgeAmt, txDefaults1);
             
             await bridgedToken2.mint.sendTransactionAsync(account2, bridgeAmt, txDefaults2);
-            await bridgedToken2.approve.sendTransactionAsync(wrappers2.Escrow.address, bridgeAmt, txDefaults2);
+            await bridgedToken2.approve.sendTransactionAsync(wrappers2.Bridge.address, bridgeAmt, txDefaults2);
 
             console.log(generateSalt())
 
             await Promise.all([
-                wrappers1.Escrow.bridge.sendTransactionAsync(
+                wrappers1.Bridge.bridge.sendTransactionAsync(
                     chain2.bridgeAddress, 
                     bridgedToken1.address, 
                     account1, new BigNumber('300'), 
                     _chainId, generateSalt(),
                     txDefaults1
                 ),
-                wrappers1.Escrow.bridge.sendTransactionAsync(
+                wrappers1.Bridge.bridge.sendTransactionAsync(
                     chain2.bridgeAddress, 
                     bridgedToken1.address, 
                     account1, new BigNumber('300'), 
                     _chainId, generateSalt(),
                     txDefaults1
                 ),
-                wrappers2.Escrow.bridge.sendTransactionAsync(
+                wrappers2.Bridge.bridge.sendTransactionAsync(
                     chain1.bridgeAddress, 
                     bridgedToken2.address, 
                     account2, new BigNumber('300'), 

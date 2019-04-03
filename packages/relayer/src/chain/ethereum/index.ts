@@ -3,7 +3,6 @@ import { PrivateKeyWalletSubprovider } from "@0x/subproviders";
 import { Web3Wrapper } from '@0x/web3-wrapper';
 import { EventListenerContract, EventListenerEvents } from '@ohdex/contracts/lib//build/wrappers/event_listener';
 import { BridgeContract, BridgeEvents } from '@ohdex/contracts/lib/build/wrappers/bridge';
-import { EscrowContract, EscrowEvents } from '@ohdex/contracts/lib/build/wrappers/escrow';
 import { EventEmitterEvents } from '@ohdex/contracts/lib/build/wrappers/event_emitter';
 import { ITokenBridgeEventArgs } from '@ohdex/contracts/lib/build/wrappers/i_token_bridge';
 import { zxWeb3Connected } from '@ohdex/shared';
@@ -45,7 +44,6 @@ export class EthereumChainTracker extends ChainTracker {
 
     bridgeContract: BridgeContract;
     bridgeContract_sub: ethers.Contract;
-    escrowContract: EscrowContract;
     escrowContract_sub: ethers.Contract;
     pendingTokenBridgingEvs: MessageSentEvent[] = [];
 
@@ -166,12 +164,6 @@ export class EthereumChainTracker extends ChainTracker {
             this.pe,
             { from: account }
         )
-        this.escrowContract = new EscrowContract(
-            require('@ohdex/contracts/build/artifacts/Escrow.json').compilerOutput.abi,
-            this.conf.escrowAddress,
-            this.pe,
-            { from: account }
-        )
 
         this.bridgeContract_sub = new ethers.Contract(
             this.conf.bridgeAddress,
@@ -198,7 +190,6 @@ export class EthereumChainTracker extends ChainTracker {
         
         this.logger.info("Bridges:")
         this.logger.info(`\t${this.bridgeContract.address}`)
-        this.logger.info(`\t${this.escrowContract.address}`)
 
         return;
     }
@@ -320,9 +311,6 @@ export class EthereumChainTracker extends ChainTracker {
         this.bridgeContract_sub.on(BridgeEvents.TokensBridged, function() {
             self.onTokensBridgedEvent.apply(self, arguments)
         })
-        this.escrowContract_sub.on(EscrowEvents.TokensBridged, function() {
-            self.onTokensBridgedEvent.apply(self, arguments)
-        })
     }
 
     processBridgeEvents_mutex = locks.createMutex();
@@ -349,41 +337,23 @@ export class EthereumChainTracker extends ChainTracker {
                 let _eventsPaths = eventProof.paths
                 let _eventsRoot = hexify(eventProof.root)
 
-                if(ev.toBridge == shortToLongBridgeId(this.escrowContract.address)) {
-                    await this.web3Wrapper.awaitTransactionSuccessAsync(
-                        await this.escrowContract.claim.sendTransactionAsync(
-                            ev.data.token, 
-                            ev.data.receiver, 
-                            ev.data.amount, 
-                            ev.data.chainId, 
-                            ev.data._salt, 
-                            _proof, 
-                            _proofPaths, 
-                            _interchainStateRoot, 
-                            _eventsProof, 
-                            _eventsPaths, 
-                            _eventsRoot,
-                            { from: this.account }
-                        )
-                    );
-                    this.logger.info(`bridged ev: ${ev.eventHash} for bridge ${ev.toBridge}`)
-                    this.pendingTokenBridgingEvs.shift()
-                }
-                else if(ev.toBridge == shortToLongBridgeId(this.bridgeContract.address)) {
+              
+                if(ev.toBridge == shortToLongBridgeId(this.bridgeContract.address)) {
                     await this.web3Wrapper.awaitTransactionSuccessAsync(
                         await this.bridgeContract.claim.sendTransactionAsync(
                             ev.data.token, 
                             ev.data.receiver, 
                             ev.data.amount, 
-                            ev.data.chainId, 
                             ev.data._salt, 
+                            ev.data.triggerAddress,
+                            ev.data.chainId,
+                            false, //need to fix this for bridging back
                             _proof, 
                             _proofPaths, 
                             _interchainStateRoot, 
                             _eventsProof, 
                             _eventsPaths, 
                             _eventsRoot,
-                            ev.eventHash,
                             { from: this.account }
                         )
                     );
@@ -437,6 +407,13 @@ export class EthereumChainTracker extends ChainTracker {
         let data: ITokenBridgeEventArgs = {
             eventHash, targetBridge, chainId, receiver, token, amount, _salt
         }
+        data.triggerAddress = ev.address;
+        data.from = {
+            chainId: this.conf.chainId,
+        }
+        // data.to = {
+        //     chainId: 
+        // }
 
         let tokensBridgedEv: MessageSentEvent = {
             data,
@@ -450,7 +427,6 @@ export class EthereumChainTracker extends ChainTracker {
     
     get bridgeIds(): string[] {
         return [
-            shortToLongBridgeId(this.escrowContract.address),
             shortToLongBridgeId(this.bridgeContract.address)
         ]
     }
@@ -505,7 +481,6 @@ export class EthereumChainTracker extends ChainTracker {
         await this.eventEmitter_sub.removeAllListeners(EventEmitterEvents.EventEmitted)
         await this.eventListener_sub.removeAllListeners(EventListenerEvents.StateRootUpdated)
         await this.bridgeContract_sub.removeAllListeners(BridgeEvents.TokensBridged)
-        await this.escrowContract_sub.removeAllListeners(EscrowEvents.TokensBridged)
     }
 }
 
