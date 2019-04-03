@@ -34,6 +34,9 @@ class MerkleTree {
 	constructor(items: Buffer[], hashFn: HashFunction) {
 		let leaves = items;
 		this.items = items;
+		items.map((x,i) => {
+			if(i !== firstIndexOf(x, items)) throw new Error(`duplicate at ${i}`)
+		})
 		this.hashFn = hashFn;
 		this.hashSizeBytes = hashFn(BRANCH_PREFIX).byteLength;
 
@@ -125,8 +128,17 @@ class MerkleTree {
 	}
 
 	private computeTree(leaves: Buffer[]) {
-		// 0th layer is the leaves
-		this.nLayers = Math.ceil(Math.log2(leaves.length)) + 1;
+		if(leaves.length > 0) {
+			// 0th layer is the leaves
+			this.nLayers = Math.ceil(Math.log2(leaves.length)) + 1;
+		} else {
+			this.nLayers = 1;
+			let layers = [
+				[ Buffer.alloc(this.hashSizeBytes) ]
+			]
+			return layers;
+		}
+		
 		let layers: Buffer[][] = new Array<Buffer[]>(this.nLayers);
 
 		for (let i = 0; i < this.nLayers; i++) {

@@ -19,9 +19,13 @@ export function get0xArtifact(name: string) {
 }
 
 export const _salt = new BigNumber(0);
+export const generateSalt = () => BigNumber.random();
 export const _chainId = new BigNumber(0);
 
 export class ContractWrappers { 
+    EventEmitter: EventEmitterContract;
+    Escrow: EscrowContract;
+
     static from(networkConf: any, pe: Web3ProviderEngine) {
         const EventEmitter = new EventEmitterContract(
             getContractAbi('EventEmitter'),
@@ -38,6 +42,6 @@ export class ContractWrappers {
         return {
             EventEmitter,
             Escrow,
-        }
+        } as ContractWrappers
     }
 }

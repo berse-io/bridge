@@ -14,7 +14,12 @@ contract EventEmitter is MerkleTreeVerifier, WhitelistUser {
     uint256 public chainId;
     event EventEmitted(bytes32 eventHash); 
     
-    constructor(address _whitelist, uint256 _chainId) WhitelistUser(_whitelist) public {
+    bytes32 public nonce;
+
+    // key is a temporary parameter to ensure uniqueness
+    // when we use a KV merkle tree, we won't need it.
+    constructor(address _whitelist, uint256 _chainId, string memory key) WhitelistUser(_whitelist) public {
+        nonce = keccak256(abi.encodePacked(this, blockhash(block.number - 1), key));
         chainId = _chainId;
     }
 
@@ -37,7 +42,7 @@ contract EventEmitter is MerkleTreeVerifier, WhitelistUser {
     }
 
     function getEventsRoot() public view returns(bytes32) {
-        if(events.length == 0) return 0x0000000000000000000000000000000000000000000000000000000000000000;
+        if(events.length == 0) return nonce;
         return _computeMerkleRoot(events);
     }
 

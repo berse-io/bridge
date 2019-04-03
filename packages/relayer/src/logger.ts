@@ -33,7 +33,7 @@ export function chainLogger(chainId: string) {
     });
 }
 
-export const defaultLogger = winston.loggers.add(`relayer`, {
+export const defaultLogger = () => winston.loggers.add(`relayer`, {
     format: logFormat([
         label({ label: "Relayer" })
     ]),

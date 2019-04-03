@@ -14,8 +14,16 @@ import { ChainStateLeaf, CrosschainState } from "../../interchain/crosschain_sta
 import { dehexify, hexify, shortToLongBridgeId } from "../../utils";
 import { ChainTracker, EventEmittedEvent, MessageSentEvent } from "../tracker";
 import { EthereumStateGadget, EthereumStateLeaf } from "./state_gadget";
+import { Repository } from "typeorm";
+import { Chain } from "../../db/entity/chain";
+import { ChainEvent } from "../../db/entity/chain_event";
+import { InterchainStateUpdate } from "../../db/entity/interchain_state_update";
 const AbiCoder = require('web3-eth-abi').AbiCoder();
 
+import { inject } from '@loopback/context'
+import { CrosschainStateService } from "../../interchain/xchain_state_service";
+import { getCurrentBlocktime } from "../../interchain/helpers";
+const locks = require('locks');
 
 
 export class EthereumChainTracker extends ChainTracker {
@@ -46,7 +54,14 @@ export class EthereumChainTracker extends ChainTracker {
 
     stateGadget: EthereumStateGadget;
 
-    constructor(conf: any) {
+    @inject('repositories.Chain') chain: Repository<Chain>
+    @inject('repositories.ChainEvent') chainEvent: Repository<ChainEvent>
+    @inject('repositories.InterchainStateUpdate') stateUpdate: Repository<InterchainStateUpdate>
+    @inject('interchain.CrosschainStateService') crosschainStateService: CrosschainStateService;
+    
+    constructor(
+        conf: any
+    ) {
         super(`Ethereum (chainId=${conf.chainId})`);
         this.conf = conf;
     }
@@ -54,9 +69,16 @@ export class EthereumChainTracker extends ChainTracker {
     async start() {
         this.logger.info(`Connecting to ${this.conf.rpcUrl}`)
 
+        await this.chain.createQueryBuilder()
+        .insert()
+        .values({
+            chainId: this.conf.chainId
+        })
+        .onConflict(`("chainId") DO NOTHING`)
+        .execute();
+
         this.pe = new Web3ProviderEngine();
         // if(process.env.NODE_ENV !== 'test') {
-
         // }
         // this.pe.addProvider(new PrivateKeyWalletSubprovider("13d14e5f958796529e84827f6a62d8e19375019f8cf0110484bcef39c023edcc"));
         this.pe.addProvider(new RPCSubprovider(this.conf.rpcUrl));
@@ -165,9 +187,12 @@ export class EthereumChainTracker extends ChainTracker {
 
         await this.loadStateAndEvents()
 
-        this.logger.info(`Sync'd to block #${blockNum}, ${this.stateGadget.events.length} pending events`)
-        this.logger.info(`stateRoot = ${this.interchainStateRoot.toString('hex')}`)
-        this.logger.info(`eventsRoot = ${this.stateGadget.root.toString('hex')}`)
+        this.logger.info(`Sync'd to block #${blockNum}, ${this.stateGadget.events.length} events`)
+        this.logger.info(``)
+        
+        let update = await InterchainStateUpdate.getLatestStaterootAtTime(this.conf.chainId, getCurrentBlocktime())
+        this.logger.info(`stateRoot = ${update.stateRoot}`)
+        this.logger.info(`eventsRoot = ${update.eventRoot}`)
 
         
         
@@ -181,41 +206,63 @@ export class EthereumChainTracker extends ChainTracker {
     private async loadStateAndEvents() {
         // 1. Load chain's state root
         // 
-        this.eventListener_sub.filters.StateRootUpdated();
-        // const logs = await this.ethersProvider.getLogs({
-        //     fromBlock: 0,
-        //     toBlock: "latest",
-        //     address: this.eventEmitter_sub.address,
-        //     topics: EventEmitted.topics
-        // });
+        const StateRootUpdated = this.eventListener_sub.filters.StateRootUpdated();
+        const StateRootUpdated_logs = await this.ethersProvider.getLogs({
+            fromBlock: 0,
+            toBlock: "latest",
+            address: this.eventListener_sub.address,
+            topics: StateRootUpdated.topics
+        });
 
-        let interchainStateRoot = dehexify(
-            (await this.eventListener.interchainStateRoot.callAsync())
-        )
-        this.lastUpdated = dehexify('123');
-        // let latestBlockHash = await this.eventListener.lastUpdated.callAsync();
-        
+        for (const log of StateRootUpdated_logs) {
+            let blockTime = (await this.ethersProvider.getBlock(log.blockHash)).timestamp
+            // let stateRoot = log.data;
+            
+            let { root: stateRoot, eventRoot } = this.eventListener_sub.interface.events.StateRootUpdated.decode(log.data, log.topics)
 
-        // 1.1 load all the event roots of other chains
-        let t = 0;
+            // let eventHash = log.data;
+            // this.stateGadget.addEvent(eventHash)
+            await this.stateUpdate.insert({
+                blockHash: log.blockHash,
+                blockTime,
+                stateRoot,
+                eventRoot,
+                chain: this.conf.chainId
+            })
 
-        
+            this.interchainStateRoot = dehexify(stateRoot);
+            
+        }
+
+
+
+
+        this.lastUpdated = dehexify(await this.eventListener.lastUpdated.callAsync())
+
         // 2. Load all previously emitted events (including those that may not be ack'd on other chains yet)
         // 
         const EventEmitted = this.eventEmitter_sub.filters.EventEmitted(null);
-        const logs = await this.ethersProvider.getLogs({
+        const EventEmitted_logs = await this.ethersProvider.getLogs({
             fromBlock: 0,
             toBlock: "latest",
             address: this.eventEmitter_sub.address,
             topics: EventEmitted.topics
         });
 
-        for (const log of logs) {
+        for (const log of EventEmitted_logs) {
             let eventHash = log.data;
-            this.stateGadget.addEvent(eventHash)
+            // this.stateGadget.addEvent(eventHash)
+            
+            await this.chainEvent.insert({
+                blockTime: (await this.ethersProvider.getBlock(log.blockHash)).timestamp,
+                chain: this.conf.chainId,
+                eventHash
+            })
         }
 
-        this.interchainStateRoot = interchainStateRoot;
+
+
+        this.logger.info(`pastEvents=${EventEmitted_logs.length} pastStateUpdates=${StateRootUpdated_logs.length}`)
         
         // Ack any pending events
         if(this.stateGadget.events.length) {
@@ -239,27 +286,18 @@ export class EthereumChainTracker extends ChainTracker {
             
                     let tokensBridgedEv: MessageSentEvent = {
                         fromChain: this.stateGadget.getId(),
+                        fromChainId: this.conf.chainId,
                         data,
                         toBridge: data.targetBridge,
                         eventHash: data.eventHash
                     };
                     this.events.emit('ITokenBridge.TokensBridgedEvent', tokensBridgedEv);
-
-                    // this.onTokensBridgedEvent.call(this, decoded.push(fakeEthersEvent))
                 }
 
             }
 
             await getPreviousBridgeEvents(this.bridgeContract_sub)
             await getPreviousBridgeEvents(this.escrowContract_sub)
-            // TODO
-
-            // let eventEmittedEvent: EventEmittedEvent = {
-            //     eventHash: '',
-            //     newChainRoot: '',
-            //     newChainIndex: ''
-            // }
-            // this.events.emit('EventEmitter.EventEmitted', eventEmittedEvent);
         }
         
     }
@@ -287,21 +325,23 @@ export class EthereumChainTracker extends ChainTracker {
         })
     }
 
-    private async onStateRootUpdated(root: string, ev: ethers.Event) {
-        this.events.emit('StateRootUpdated');
-        this.logger.info(`state root updated - ${root}`)
-        this.interchainStateRoot = dehexify(root);
-    }
+    processBridgeEvents_mutex = locks.createMutex();
 
     async processBridgeEvents(
-        crosschainState: CrosschainState
+        _: CrosschainState
     ) {
-        
+        await new Promise((res,rej) => this.processBridgeEvents_mutex.lock(res))
+
         // process all events
         try {
             // Now process any events on this bridge for the user
+            
             for(let ev of this.pendingTokenBridgingEvs) {
-                let { rootProof, eventProof } = crosschainState.proveEvent(ev.fromChain, ev.eventHash)
+                let { rootProof, eventProof } = await this.crosschainStateService.proveEvent(
+                    this.conf.chainId, 
+                    ev.fromChainId, 
+                    ev.eventHash
+                )
                 let _proof = rootProof.proofs.map(hexify)
                 let _proofPaths = rootProof.paths
                 let _interchainStateRoot = hexify(rootProof.root)
@@ -327,7 +367,7 @@ export class EthereumChainTracker extends ChainTracker {
                         )
                     );
                     this.logger.info(`bridged ev: ${ev.eventHash} for bridge ${ev.toBridge}`)
-                    this.pendingTokenBridgingEvs.pop()
+                    this.pendingTokenBridgingEvs.shift()
                 }
                 else if(ev.toBridge == shortToLongBridgeId(this.bridgeContract.address)) {
                     await this.web3Wrapper.awaitTransactionSuccessAsync(
@@ -348,7 +388,7 @@ export class EthereumChainTracker extends ChainTracker {
                         )
                     );
                     this.logger.info(`bridged ev: ${ev.eventHash} for bridge ${ev.toBridge}`)
-                    this.pendingTokenBridgingEvs.pop()
+                    this.pendingTokenBridgingEvs.shift()
                 } else {
                     this.logger.error(`couldn't find bridge ${ev.toBridge} for event ${ev.eventHash}`)
                 }
@@ -356,22 +396,44 @@ export class EthereumChainTracker extends ChainTracker {
         } catch(ex) {
             this.logger.error(`processBridgeEvents failed`)
             this.logger.error(ex)
+            this.processBridgeEvents_mutex.unlock()
+            throw ex;
         }
+        this.processBridgeEvents_mutex.unlock()
+    }
+
+    private async onStateRootUpdated(root: string, eventRoot: string, ev: ethers.Event) {
+        this.logger.info(`StateRootUpdated root=${root}`)
+        this.interchainStateRoot = dehexify(root);
+
+        await this.stateUpdate.insert({
+            blockHash: ev.blockHash,
+            blockTime: (await ev.getBlock()).timestamp,
+            stateRoot: root,
+            eventRoot,
+            chain: this.conf.chainId
+        })
+        this.events.emit('StateRootUpdated');
     }
 
     onEventEmitted = async (eventHash: string, ev: ethers.Event) => {
-        this.logger.info(`block #${ev.blockNumber}, event emitted - ${eventHash}`)
-        this.stateGadget.addEvent(eventHash)
+        this.logger.info(`EventEmitted, block=#${ev.blockNumber} eventHash=${eventHash}`)
+        this.stateGadget.addEvent(eventHash);
 
         let eventEmittedEvent: EventEmittedEvent = { 
             eventHash,
             newChainRoot: ev.blockHash,
             newChainIndex: ''+ev.blockNumber
         }
+        await this.chainEvent.insert({
+            blockTime: (await ev.getBlock()).timestamp,
+            chain: this.conf.chainId,
+            eventHash
+        })
         this.events.emit('EventEmitter.EventEmitted', eventEmittedEvent);
     }
 
-     onTokensBridgedEvent = (eventHash, targetBridge, chainId, receiver, token, amount, _salt, ev: ethers.Event) => {
+    onTokensBridgedEvent = (eventHash, targetBridge, chainId, receiver, token, amount, _salt, ev: ethers.Event) => {
         let data: ITokenBridgeEventArgs = {
             eventHash, targetBridge, chainId, receiver, token, amount, _salt
         }
@@ -379,6 +441,7 @@ export class EthereumChainTracker extends ChainTracker {
         let tokensBridgedEv: MessageSentEvent = {
             data,
             fromChain: this.stateGadget.getId(),
+            fromChainId: this.conf.chainId,
             toBridge: shortToLongBridgeId(data.targetBridge),
             eventHash
         };
@@ -404,7 +467,7 @@ export class EthereumChainTracker extends ChainTracker {
 
         if(this.bridgeIds.includes(tokensBridgedEv.toBridge))
         {
-            this.logger.info(`Received ${tokensBridgedEv.eventHash} from chain ${tokensBridgedEv.fromChain}`)
+            this.logger.info(`receiveCrosschainMessage fromChain=${tokensBridgedEv.fromChain} eventHash=${tokensBridgedEv.eventHash}`)
             this.pendingTokenBridgingEvs.push(tokensBridgedEv)
             return true;
         }
@@ -414,13 +477,18 @@ export class EthereumChainTracker extends ChainTracker {
     
 
     async updateStateRoot(
-        proof: MerkleTreeProof, leaf: ChainStateLeaf
+        proof2: MerkleTreeProof, leaf2: ChainStateLeaf
     ): Promise<any> 
     {
+
         try {
+            // compute the state root first
+            let { proof, leaf } = await this.crosschainStateService.computeUpdatedStateRoot(this.conf.chainId);
+            this.logger.info(`computeUpdatedStateRoot: ${hexify(proof.root)}`)
+
             await EventListenerWrapper.updateStateRoot(this.eventListener, proof, leaf as EthereumStateLeaf)
         } catch(err) {
-            // console.log(ex)
+            // console.log(err.data.stack)
             // if(err.code == -32000) {
             //     this.logger.error(err.data.stack)
             // }
@@ -433,11 +501,16 @@ export class EthereumChainTracker extends ChainTracker {
 
     async stop() {
         this.pe.stop();
+        this.ethersProvider = null;
+        await this.eventEmitter_sub.removeAllListeners(EventEmitterEvents.EventEmitted)
+        await this.eventListener_sub.removeAllListeners(EventListenerEvents.StateRootUpdated)
+        await this.bridgeContract_sub.removeAllListeners(BridgeEvents.TokensBridged)
+        await this.escrowContract_sub.removeAllListeners(EscrowEvents.TokensBridged)
     }
 }
 
 
-class EventListenerWrapper {
+export class EventListenerWrapper {
     static updateStateRoot(eventListener: EventListenerContract, proof: MerkleTreeProof, leaf: EthereumStateLeaf) {
         return eventListener.updateStateRoot.sendTransactionAsync(
             proof.proofs.map(hexify),

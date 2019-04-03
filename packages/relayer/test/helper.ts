@@ -18,8 +18,10 @@ export class Testchain {
     }
 }
 
+
 export class TestchainFactory {
     static async fork(rpcUrl: string, port: string): Promise<Testchain> {
+        let nonce = new Date;
         const server = ganache.server({ 
             ws: true,
             // logger: {
@@ -27,12 +29,12 @@ export class TestchainFactory {
             // },
 
             total_accounts: 100,
-            s: "TestRPC is awesome!", // I didn't choose this
+            s: "TestRPC is awesome! " + nonce, // I didn't choose this
             gasPrice: 0,
             gas: 1,
             // networkId: 420,
             // debug: false,
-            defaultBalanceEther: '10000000000000000000',
+            defaultBalanceEther: '1000000000',
             unlock: [0, 1],
             fork: rpcUrl
         });
@@ -108,6 +110,14 @@ export function caseInsensitiveEquals(str: string) {
 
 import sinon from 'sinon'
 import { RevertTraceSubprovider } from "@0x/sol-trace";
+import { options } from "../src/db";
+import { getRepository, getConnection, Connection } from "typeorm";
+import { Chain } from "../src/db/entity/chain";
+import { ChainEvent } from "../src/db/entity/chain_event";
+import { InterchainStateUpdate } from "../src/db/entity/interchain_state_update";
+import { EthereumChainTracker } from "../src/chain/ethereum";
+import { CrosschainStateService } from "../src/interchain/xchain_state_service";
+import { DbConnProvider } from "../src/db/provider";
 
 export function sinonStrEqual(str: string) {
     return sinon.match(caseInsensitiveEquals(str), `${str}`)
@@ -121,15 +131,15 @@ export function sinonBignumEq(x: any) {
 
 export async function loadWeb3(config: { rpcUrl: string }) {
     let pe = new Web3ProviderEngine();
-    const artifactAdapter = new SolCompilerArtifactAdapter(
-        `${require("@ohdex/contracts")}/build/artifacts`,
-        `${require("@ohdex/contracts")}/contracts`
-    );
-    const revertTraceSubprovider = new RevertTraceSubprovider(
-        artifactAdapter, 
-        '0',
-        true
-    );
+    // const artifactAdapter = new SolCompilerArtifactAdapter(
+    //     `${require("@ohdex/contracts")}/build/artifacts`,
+    //     `${require("@ohdex/contracts")}/contracts`
+    // );
+    // const revertTraceSubprovider = new RevertTraceSubprovider(
+    //     artifactAdapter, 
+    //     '0',
+    //     true
+    // );
     // pe.addProvider(revertTraceSubprovider);
     pe.addProvider(new RPCSubprovider(config.rpcUrl))
     pe.start()
@@ -144,4 +154,32 @@ export async function loadWeb3(config: { rpcUrl: string }) {
         account,
         txDefaults
     }
+}
+
+export async function clearDb() {
+    // getConnection().query('drop * from')
+    await getConnection().synchronize(true);
+}
+
+export async function givenDbService(): Promise<Connection> {
+    const testConnOpts = options;
+    let db = new DbConnProvider(testConnOpts)
+    return await db.value()
+}
+
+export async function givenEmptyDatabase(conn: Connection) {
+    // let conn = getConnection();
+    await conn.synchronize(true)
+    await conn.getRepository<InterchainStateUpdate>(InterchainStateUpdate).clear()
+    await conn.getRepository<ChainEvent>(ChainEvent).clear()
+    await conn.getRepository<Chain>(Chain).clear()
+}
+
+export async function givenEthereumChainTracker(conn: Connection, conf: any) {
+    let tracker = new EthereumChainTracker(conf)
+    tracker.chain = conn.getRepository(Chain)
+    tracker.chainEvent = conn.getRepository(ChainEvent)
+    tracker.stateUpdate = conn.getRepository(InterchainStateUpdate)
+    tracker.crosschainStateService = {} as CrosschainStateService
+    return tracker
 }

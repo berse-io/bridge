@@ -18,6 +18,7 @@ interface EventEmittedEvent {
 type chainId = string
 interface MessageSentEvent {
     fromChain: chainId;
+    fromChainId: number;
     toBridge: string;
     data: ITokenBridgeEventArgs;
     eventHash: string;

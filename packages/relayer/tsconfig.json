@@ -11,7 +11,9 @@
         "esModuleInterop": true,
         "moduleResolution": "node",
         "module": "commonjs",
-        "sourceMap": true
+        "sourceMap": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
     },
     "include": [
         "src",

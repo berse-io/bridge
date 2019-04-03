@@ -114,7 +114,8 @@ describe('EventListener', function() {
                 get0xArtifact('EventEmitter'),
                 pe, txDefaults,
                 whitelist.address,
-                chainId
+                chainId,
+                "nonce"
             );
 
             await whitelist.addWhitelisted.sendTransactionAsync(eventEmitter.address, txDefaults);
@@ -185,7 +186,8 @@ describe('EventListener', function() {
                 get0xArtifact('EventEmitter'),
                 pe, txDefaults,
                 whitelist.address,
-                chainId
+                chainId,
+                "nonce"
             );
 
             await whitelist.addWhitelisted.sendTransactionAsync(user, txDefaults);

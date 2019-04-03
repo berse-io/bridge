@@ -23,13 +23,11 @@
 //     BridgeContract
 // }   from '../build/wrappers/bridge';
 
-// import {
-//     ERC20MintableContract
-// }   from '../build/wrappers/erc20_mintable'
 
 
 // import { Web3ProviderEngine, RPCSubprovider, BigNumber } from "0x.js";
 // import { Web3Wrapper, AbiDefinition, Provider, TxData } from '@0x/web3-wrapper';
+// import { BridgedTokenContract } from '../build/wrappers/bridged_token';
 
 
 
@@ -116,8 +114,8 @@
 //             eventEmitterBV = await new web3V.eth.Contract(eventEmitterB_.abi, eventEmitterA.address);
 
 
-//             token = await ERC20MintableContract.deployAsync(
-//                 ...getDeployArgs('ERC20Mintable', pe, user)
+//             token = await BridgedTokenContract.deployAsync(
+//                 ...getDeployArgs('BridgedToken', pe, user)
 //             );
 
 //             // @ts-ignore
@@ -172,46 +170,46 @@
 
 //             const proof = merkleTree.getHexProof(merkleTree.elements[0]);
 
-//             // console.log(proof);
+//             console.log(proof);
             
-//             // await bridge.getBridgedToken.sendTransactionAsync(token.address, chainAId);
+//             await bridge.getBridgedToken.sendTransactionAsync(token.address, chainAId);
             
 //             // claim the tokens on chain B
 
-//             //function bridge(address _token, address _receiver, uint256 _amount, uint256 _chainId, uint256 _salt) public {
+//             // function bridge(address _token, address _receiver, uint256 _amount, uint256 _chainId, uint256 _salt) public {
 
-//             // await bridge.claim.sendTransactionAsync(token.address, user, bridgeAmount, chainAId, salt, new BigNumber(0), proof);
+//             await bridge.claim.sendTransactionAsync(token.address, user, bridgeAmount, chainAId, salt, new BigNumber(0), proof);
             
-//             // const bridgedTokenAddress = await bridge.getBridgedToken.callAsync(token.address, chainAId);
+//             const bridgedTokenAddress = await bridge.getBridgedToken.callAsync(token.address, chainAId);
 
-//             // const bridgedToken = new web3V.eth.Contract(bridgedTokenAbi, bridgedTokenAddress);
+//             const bridgedToken = new web3V.eth.Contract(bridgedTokenAbi, bridgedTokenAddress);
 
-//             // let balance = await bridgedToken.methods.balanceOf(user).call();
+//             let balance = await bridgedToken.methods.balanceOf(user).call();
 
-//             // expect(balance).to.equal("1000");
+//             expect(balance).to.equal("1000");
 
-//             // // Woot that worked! Now bridging back to chain A
+//             // Woot that worked! Now bridging back to chain A
 
-//             // // Call bridge on bridge contract
+//             // Call bridge on bridge contract
 
-//             // // bridge(address _token, address _receiver, uint256 _amount, uint256 _chainId, uint256 _salt)
+//             // bridge(address _token, address _receiver, uint256 _amount, uint256 _chainId, uint256 _salt)
 
-//             // console.log("Bridging B to A");
+//             console.log("Bridging B to A");
 
-//             // let receipt = await bridge.bridge.sendTransactionAsync(token.address, user, bridgeAmount, chainAId, salt, {from: user});
+//             let receipt = await bridge.bridge.sendTransactionAsync(token.address, user, bridgeAmount, chainAId, salt, {from: user});
 
-//             // console.log("RECEIPT:", receipt);
+//             console.log("RECEIPT:", receipt);
 
-//             // let emittedEventsB = await eventEmitterBV.getPastEvents("EventEmitted", {fromBlock: 0});
+//             let emittedEventsB = await eventEmitterBV.getPastEvents("EventEmitted", {fromBlock: 0});
             
 
-//             // let merkleTreeB = await eventsToMerkleProof(emittedEventsB, eventUtil);
+//             let merkleTreeB = await eventsToMerkleProof(emittedEventsB, eventUtil);
             
-//             // await eventListenerB.updateProof.sendTransactionAsync(chainAId, merkleTreeB.getHexRoot());
+//             await eventListenerB.updateProof.sendTransactionAsync(chainAId, merkleTreeB.getHexRoot());
 
-//             // const proofB = merkleTreeB.getHexProof(merkleTreeB.elements[0]);
+//             const proofB = merkleTreeB.getHexProof(merkleTreeB.elements[0]);
         
-//             // receipt = await escrow.claim.sendTransactionAsync(token.address, user, bridgeAmount, chainBId, salt, 0, proofB, {from : user, gas: 4000000});
+//             receipt = await escrow.claim.sendTransactionAsync(token.address, user, bridgeAmount, chainBId, salt, 0, proofB, {from : user, gas: 4000000});
 
 //         })
 //     })

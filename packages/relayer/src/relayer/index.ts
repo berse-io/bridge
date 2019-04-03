@@ -4,6 +4,13 @@ import { EventEmittedEvent, MessageSentEvent } from "../chain/tracker";
 import { CrosschainState } from "../interchain/crosschain_state";
 import { defaultLogger } from "../logger";
 
+import { createContext } from './context';
+import { ChainTrackerFactory } from "../chain/factory";
+
+import { Context } from "@loopback/context";
+import { wait } from "@ohdex/shared";
+
+
 const winston = require('winston');
 const { format } = winston;
 const { combine, label, json, simple } = format;
@@ -22,7 +29,7 @@ interface CrosschainEventEvent {
     to: chainId;
     data: ITokenBridgeEventArgs;
 }
-
+require('asynctrace')
 export class Relayer {
     chains: { [k: string]: EthereumChainTracker };
 
@@ -30,25 +37,34 @@ export class Relayer {
 
     logger;
     config: any;
+    ctx: Context
 
     constructor(config: any) {
         this.chains = {};
         this.config = config;
         
-        this.logger = defaultLogger;
-
+        this.logger = defaultLogger();
+        this.ctx = createContext()
         this.crosschainState = new CrosschainState();
+
     }
 
     async start() {
+        
+
+        // Load the chains.
         let networks: ChainConfig[] = Object.values(this.config);
 
         this.logger.info('Loading chains...')
 
+        let factory = await this.ctx.get<ChainTrackerFactory>('trackers.Factory');
+
         for(let conf of networks) {
-            this.chains[conf.chainId] = (
-                new EthereumChainTracker(conf)
-            );
+            // this.chains[conf.chainId] = (
+            //     ctx.get<EthereumChainTracker>('trackers.EthereumChainTracker')
+            //     // new EthereumChainTracker(conf)
+            // );
+            this.chains[conf.chainId] = await factory.create(conf)
         }
 
         // Start all chains.
@@ -65,9 +81,10 @@ export class Relayer {
         });
 
         // Start state update loop
+        let self = this;
         Object.values(this.chains).map(chain => {
             chain.events.on('EventEmitter.EventEmitted', async (ev: EventEmittedEvent) => {
-                await this.updateChains()
+                await self.updateChains(chain.id)
             })
 
             chain.events.on('ITokenBridge.TokensBridgedEvent', async (msg: MessageSentEvent) => {
@@ -86,31 +103,54 @@ export class Relayer {
         });
     }
 
-    async updateChains() {
-        this.crosschainState.compute()
+    async updateChains(exceptChain: string) {
+        this.logger.info(`Computing new state root`)
 
-        this.logger.info(`Computed new interchain state root: ${this.crosschainState.root}`)
+        // Compute new state roots
         
-        await Promise.all(
-            Object.values(this.chains).map(async chain => {
-                try {
-                    let { proof, leaf } = this.crosschainState.proveUpdate(chain.stateGadget.getId())
-                    await chain.updateStateRoot(
-                        proof,
-                        leaf
-                    );
 
-                    chain.events.once('StateRootUpdated', async () => {
-                        await chain.processBridgeEvents(
-                            this.crosschainState
-                        )
-                    })
-                    
-                } catch(ex) {
-                    this.logger.error(ex)
-                }
-            })
-        )
+        // And then we can process the new bridge events after they have been ack'd.
+
+        for(let chain of Object.values(this.chains)) {
+            try {
+                // chain.events.once('StateRootUpdated', async () => {
+                //     await chain.processBridgeEvents(null)
+                // })
+                await chain.updateStateRoot(null, null);
+            } catch(ex) {
+                throw ex;
+            }
+        }
+        await wait(1500)
+        
+        for(let chain of Object.values(this.chains)) {
+            try {
+                await chain.processBridgeEvents(null)
+            } catch(ex) {
+                throw ex;
+            }
+        }
+        // await Promise.all(
+        //     Object.values(this.chains).map(async chain => {
+        //         try {
+        //             // chain.events.once('StateRootUpdated', async () => {
+        //             //     await chain.processBridgeEvents(null)
+        //             // })
+        //             await chain.updateStateRoot(null, null);
+        //         } catch(ex) {
+        //             throw ex;
+        //         }
+        //     })
+        // )
+
+
+        // It cannot process the bridge event
+        // until it has the state root of the other chain
+        // 
+
+        // chain.events.once('StateRootUpdated', async () => {
+        //     await chain.processBridgeEvents(null)
+        // })
     }
 
     async stop() {

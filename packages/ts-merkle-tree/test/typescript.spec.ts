@@ -93,13 +93,13 @@ describe('Typescript Merkle tree', function() {
         expect(tree.verifyProof(proof, tree.findLeaf(items[0]))).to.be.true;
     })
 
-    it('fails on n=0 items', async () => {
+    it('returns 0x00 on n=0 items', async () => {
         let items = [
         ];
         
-        expect(() => {
-            let tree = new MerkleTree(items, keccak256);
-        }).to.throws('Invalid array length')
+        let tree = new MerkleTree(items, keccak256);
+
+        expect(tree.root().equals(Buffer.alloc(32))).to.be.true;
     })
 
 

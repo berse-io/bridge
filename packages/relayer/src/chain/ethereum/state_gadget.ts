@@ -30,6 +30,7 @@ class EthereumStateGadget extends StateGadget {
 
     get root() {
         if(this.events.length == 0) {
+            throw new Error("changed");
             return Buffer.from('0000000000000000000000000000000000000000000000000000000000000000', 'hex');
         }
         return this.eventsTree.root();
@@ -50,6 +51,7 @@ class EthereumStateGadget extends StateGadget {
     getLeaf(): EthereumStateLeaf {
         let leaf = new EthereumStateLeaf()
         if(this.events.length == 0) {
+            throw new Error("changed");
             leaf.eventsRoot = Buffer.from('0000000000000000000000000000000000000000000000000000000000000000', 'hex');
         } else {
             leaf.eventsRoot = this.eventsTree.root()

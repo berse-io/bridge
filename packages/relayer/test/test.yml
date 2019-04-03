@@ -1,4 +1,4 @@
-rpcUrl: http://localhost:11001
+rpcUrl: http://localhost:10000
 contracts:
   artifacts: ./../../packages/contracts/build/artifacts/*.json
   addresses:
