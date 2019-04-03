@@ -23,7 +23,7 @@ contract EventEmitter is MerkleTreeVerifier, WhitelistUser {
         chainId = _chainId;
     }
 
-    function emitEvent(bytes32 _eventHash) public onlyWhitelisted returns(bytes32) {
+    function emitEvent(bytes32 _eventHash) public returns(bytes32) {
         require(_eventHash != 0x00, "INVALID_EVENT");
         // TODO implement some way of checking from which chain a event came
         bytes32 markedEventHash = _eventHash.getMarkedEvent(msg.sender, chainId);
