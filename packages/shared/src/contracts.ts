@@ -1,5 +1,5 @@
 
-import { BridgedTokenContract } from "@ohdex/contracts/lib/build/wrappers/bridged_token";
+import { BridgeContract } from "@ohdex/contracts/lib/build/wrappers/bridge";
 import { EventEmitterContract } from "@ohdex/contracts/lib/build/wrappers/event_emitter";
 import { Web3ProviderEngine, RPCSubprovider, BigNumber } from '0x.js';
 
@@ -23,6 +23,7 @@ export const _chainId = new BigNumber(0);
 
 export class ContractWrappers { 
     EventEmitter: EventEmitterContract;
+    Bridge: BridgeContract;
 
     static from(networkConf: any, pe: Web3ProviderEngine) {
         const EventEmitter = new EventEmitterContract(
@@ -30,9 +31,16 @@ export class ContractWrappers {
             networkConf.eventEmitterAddress,
             pe
         )
-             
+
+        const Bridge = new BridgeContract(
+            getContractAbi('Bridge'),
+            networkConf.bridgeAddress,
+            pe
+        )
+        
         return {
             EventEmitter,
+            Bridge
         } as ContractWrappers
     }
 }

@@ -1,4 +1,4 @@
-import { RPCSubprovider, Web3ProviderEngine } from "0x.js";
+import { RPCSubprovider, Web3ProviderEngine, BigNumber } from "0x.js";
 import { PrivateKeyWalletSubprovider } from "@0x/subproviders";
 import { Web3Wrapper } from '@0x/web3-wrapper';
 import { EventListenerContract, EventListenerEvents } from '@ohdex/contracts/lib//build/wrappers/event_listener';
@@ -337,7 +337,7 @@ export class EthereumChainTracker extends ChainTracker {
                 let _eventsPaths = eventProof.paths
                 let _eventsRoot = hexify(eventProof.root)
 
-              
+                let originChainId = ev.fromChainId;
                 if(ev.toBridge == shortToLongBridgeId(this.bridgeContract.address)) {
                     await this.web3Wrapper.awaitTransactionSuccessAsync(
                         await this.bridgeContract.claim.sendTransactionAsync(
@@ -346,7 +346,7 @@ export class EthereumChainTracker extends ChainTracker {
                             ev.data.amount, 
                             ev.data._salt, 
                             ev.data.triggerAddress,
-                            ev.data.chainId,
+                            new BigNumber(originChainId),
                             false, //need to fix this for bridging back
                             _proof, 
                             _proofPaths, 
@@ -408,9 +408,9 @@ export class EthereumChainTracker extends ChainTracker {
             eventHash, targetBridge, chainId, receiver, token, amount, _salt
         }
         data.triggerAddress = ev.address;
-        data.from = {
-            chainId: this.conf.chainId,
-        }
+        // data.from = {
+        //     chainId: this.conf.chainId,
+        // }
         // data.to = {
         //     chainId: 
         // }

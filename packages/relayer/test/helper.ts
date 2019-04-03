@@ -131,16 +131,18 @@ export function sinonBignumEq(x: any) {
 
 export async function loadWeb3(config: { rpcUrl: string }) {
     let pe = new Web3ProviderEngine();
-    // const artifactAdapter = new SolCompilerArtifactAdapter(
-    //     `${require("@ohdex/contracts")}/build/artifacts`,
-    //     `${require("@ohdex/contracts")}/contracts`
-    // );
-    // const revertTraceSubprovider = new RevertTraceSubprovider(
-    //     artifactAdapter, 
-    //     '0',
-    //     true
-    // );
-    // pe.addProvider(revertTraceSubprovider);
+    
+    const artifactAdapter = new SolCompilerArtifactAdapter(
+        `${require("@ohdex/contracts")}/build/artifacts`,
+        `${require("@ohdex/contracts")}/contracts`
+    );
+    const revertTraceSubprovider = new RevertTraceSubprovider(
+        artifactAdapter, 
+        '0',
+        true
+    );
+    pe.addProvider(revertTraceSubprovider);
+
     pe.addProvider(new RPCSubprovider(config.rpcUrl))
     pe.start()
     let web3 = new Web3Wrapper(pe);
