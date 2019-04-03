@@ -3,13 +3,13 @@ require('make-promises-safe')
 import '@ohdex/config';
 
 // import program from 'commander';
-import { EthereumChain } from './ethereum/chain';
+import { EthereumChain, EthereumChainGeth } from './ethereum';
 import { IChainConfig, IChain } from './types';
 import { AccountsConfig } from './accounts';
 
 
 const chains: { [k: string]: any } = {
-    'ethereum': EthereumChain
+    'ethereum': EthereumChainGeth
 };
 
 require('yargs')
