@@ -22,6 +22,7 @@
     "abi-gen": "abi-gen --abis 'build/artifacts/*.json' --template contract_templates/contract.handlebars --partials './contract_templates/partials/**/*.handlebars' --output ./build/wrappers --backend web3",
     "test": "mocha lib/test/index.spec.js",
     "test:Bridge": "mocha lib/test/Bridge.spec.js",
+    "test:Slave": "mocha lib/test/Slave.spec.js",
     "test:EventListener:old": "mocha lib/test/EventListener.spec.js",
     "test:EventListener": "mocha lib/test/EventListener.spec.js",
     "test:Escrow": "mocha lib/test/Escrow.spec.ts",
