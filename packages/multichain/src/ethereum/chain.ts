@@ -15,7 +15,7 @@ export class EthereumChain implements IChain {
     server: any;
 
     async start(conf: IChainConfig, accountsConf: IAccountsConfig): Promise<any> {
-        let dbpath = resolve(dirname(require.resolve(`@ohdex/multichain`)), `../../db/${conf.chainId}`)
+        let dbpath = resolve(dirname(require.resolve(`@ohdex/multichain`)), `../../db/ganache_${conf.chainId}`)
         let firstStart = !existsSync(dbpath)
         if(firstStart) {
             mkdirSync(dbpath)
@@ -32,7 +32,7 @@ export class EthereumChain implements IChain {
             total_accounts: 100,
             s: "TestRPC is awesome!", // I didn't choose this
             gasPrice: 0,
-            // gasLimit: 10000000000000000000,
+            gasLimit: '1000000000',
             debug: false,         
             defaultBalanceEther: '1000000000000000',
             unlock: [0, 1],
