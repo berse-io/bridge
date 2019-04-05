@@ -43,7 +43,7 @@ const winston = require('winston');
 const { format } = winston;
 const { combine, label, json, simple } = format;
 
-function getDeployArgs(name: string, pe: Web3ProviderEngine, from: string): [ string, AbiDefinition[], Provider, Partial<TxData>] {
+function getDeployArgs(name: string, pe: Web3ProviderEngine, from: string): [ string, AbiDefinition[], Provider, Partial<TxData> ] {
     // let json = require(`@ohdex/contracts/lib/build/contracts/${name}.json`);
     let json = require(`@ohdex/contracts/lib/build/artifacts/${name}.json`);
     let bytecode = json.compilerOutput.evm.bytecode.object;
@@ -58,7 +58,8 @@ function getDeployArgs(name: string, pe: Web3ProviderEngine, from: string): [ st
         bytecode,
         abi,
         provider,
-        { from, gas: 10000000 }
+        { from }
+        // gas: 100000
     ]
 }
 
@@ -148,6 +149,7 @@ async function _deploy(configMgr: ConfigManager, network: string) {
     // @ts-ignore
     let eventEmitter = await EventEmitterContract.deployAsync(
         ...getDeployArgs('EventEmitter', pe, account),
+        // @ts-ignore
         whitelist.address,
         config.chainId,
         network
@@ -158,6 +160,7 @@ async function _deploy(configMgr: ConfigManager, network: string) {
     // @ts-ignore
     let eventListener = await EventListenerContract.deployAsync(
         ...getDeployArgs('EventListener', pe, account),
+        // @ts-ignore
         eventEmitter.address
     )
 
@@ -185,6 +188,7 @@ async function _deploy(configMgr: ConfigManager, network: string) {
     // @ts-ignore
     let bridge = await BridgeContract.deployAsync(
         ...getDeployArgs('Bridge', pe, account),
+        // @ts-ignore
         eventListener.address,
         eventEmitter.address,
     )
@@ -195,29 +199,30 @@ async function _deploy(configMgr: ConfigManager, network: string) {
     config.bridgeAddress = bridge.address.toLowerCase();
 
     // @ts-ignore
-    let aliceToken = await DemoERC20Contract.deployAsync(
-        ...getDeployArgs('DemoERC20', pe, account),
-        "AliceToken",
-        "ALI",
-        "7",
-        "1000000000"
-    );
-    // @ts-ignore
-    let bobToken = await DemoERC20Contract.deployAsync(
-        ...getDeployArgs('DemoERC20', pe, account),
-        "BobToken",
-        "BOB",
-        "7",
-        "1000000000"
-    );
+    // let aliceToken = await DemoERC20Contract.deployAsync(
+    //     ...getDeployArgs('DemoERC20', pe, account),
+    //     "AliceToken",
+    //     "ALI",
+    //     "7",
+    //     "1000000000"
+    // );
+    // // @ts-ignore
+    // let bobToken = await DemoERC20Contract.deployAsync(
+    //     ...getDeployArgs('DemoERC20', pe, account),
+    //     // @ts-ignore
+    //     "BobToken",
+    //     "BOB",
+    //     "7",
+    //     "1000000000"
+    // );
 
     // @ts-ignore
     let weth = await WETH9Contract.deployAsync(
         ...getDeployArgs('WETH9', pe, account)
     );
     config.wethToken = weth.address.toLowerCase();
-    config.aliceToken = aliceToken.address.toLowerCase();
-    config.bobToken = bobToken.address.toLowerCase();
+    // config.aliceToken = aliceToken.address.toLowerCase();
+    // config.bobToken = bobToken.address.toLowerCase();
     
 
     pe.stop();

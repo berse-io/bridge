@@ -60,6 +60,11 @@ export class Relayer {
         let factory = await this.ctx.get<ChainTrackerFactory>('trackers.Factory');
 
         for(let conf of networks) {
+            // TODO(liamz): just for testing on public kovan/rinkeby
+            // if(process.env.NODE_ENV == 'production') {
+            //     if(![4,42].includes(parseInt(conf.chainId))) continue;
+            // }
+
             // this.chains[conf.chainId] = (
             //     ctx.get<EthereumChainTracker>('trackers.EthereumChainTracker')
             //     // new EthereumChainTracker(conf)
