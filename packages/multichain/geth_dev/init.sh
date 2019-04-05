@@ -6,7 +6,7 @@ rm -rf devChain
 
 echo initialising new blockchain with genesis file
 
-geth --datadir=devChain init genesis_dev.json
+geth --datadir=devChain init genesis.json
 
 echo copying utc file to keystore
 

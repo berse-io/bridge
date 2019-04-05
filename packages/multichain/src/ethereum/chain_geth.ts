@@ -25,7 +25,7 @@ export class EthereumChainGeth implements IChain {
             spawnSync(`rm`, [ join(dbpath, 'geth/LOCK') ])
             spawnSync(`rm`, [ join(dbpath, 'geth/chaindata/LOCK') ])
 
-            let genesis = JSON.parse(readFileSync(join(projectRoot, 'geth_dev/genesis_dev.json'), 'utf-8'))
+            let genesis = JSON.parse(readFileSync(join(projectRoot, 'geth_dev/genesis.template.json'), 'utf-8'))
 
             genesis.config.chainID = conf.chainId;
 
