@@ -22,6 +22,7 @@ const AbiCoder = require('web3-eth-abi').AbiCoder();
 import { inject } from '@loopback/context'
 import { CrosschainStateService } from "../../interchain/xchain_state_service";
 import { getCurrentBlocktime } from "../../interchain/helpers";
+import { getRevertTraceSubprovider, addRevertTraces } from "../../../test/helper";
 const locks = require('locks');
 
 
@@ -74,10 +75,10 @@ export class EthereumChainTracker extends ChainTracker {
         .onConflict(`("chainId") DO NOTHING`)
         .execute();
 
+        let relayerAccount = require("@ohdex/config").accounts.relayer;
+    
         this.pe = new Web3ProviderEngine();
-        // if(process.env.NODE_ENV !== 'test') {
-        // }
-        // this.pe.addProvider(new PrivateKeyWalletSubprovider("13d14e5f958796529e84827f6a62d8e19375019f8cf0110484bcef39c023edcc"));
+        this.pe.addProvider(new PrivateKeyWalletSubprovider(relayerAccount.privateKey))
         this.pe.addProvider(new RPCSubprovider(this.conf.rpcUrl));
         this.pe.start()
 
@@ -99,6 +100,13 @@ export class EthereumChainTracker extends ChainTracker {
         let account = accounts[0];
         this.account = account;
 
+
+        // do some hacky stuff
+        if(process.env.NODE_ENV === 'development') {
+            // addRevertTraces(this.pe, account);
+        }
+
+
         // check the available balance
         let balance = await this.web3Wrapper.getBalanceInWeiAsync(account)
         this.logger.info(`Using account ${account} (${fromWei(balance.toString(), 'ether')} ETH)`)
@@ -112,13 +120,16 @@ export class EthereumChainTracker extends ChainTracker {
                 // It will fail anyways below. This is to support Ganache, where tx's are free.
             }
         }
-
+        
         
         let ethersProvider = new ethers.providers.JsonRpcProvider(this.conf.rpcUrl);
+        
         ethersProvider.polling = true;
         ethersProvider.pollingInterval = 200;
         await new Promise((res, rej) => {
-            ethersProvider.on('block', res);
+            // ethersProvider.on('block', res);
+            ethersProvider.getBlockNumber().then(res)
+
             setTimeout(
                 _ => {
                     rej(new Error(`Ethers.js couldn't connect after ${CONNECT_TIMEOUT}ms`))
