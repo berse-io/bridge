@@ -30,8 +30,8 @@ export class TestchainFactory {
 
             total_accounts: 100,
             s: "TestRPC is awesome! " + nonce, // I didn't choose this
-            gasPrice: 0,
-            gas: 1,
+            // gasPrice: 0,
+            // gas: 1,
             // networkId: 420,
             // debug: false,
             defaultBalanceEther: '1000000000',
@@ -129,26 +129,41 @@ export function sinonBignumEq(x: any) {
     })
 }
 
-export async function loadWeb3(config: { rpcUrl: string }) {
-    let pe = new Web3ProviderEngine();
-    
+export function getRevertTraceSubprovider(account: string) {
     const artifactAdapter = new SolCompilerArtifactAdapter(
         `${require("@ohdex/contracts")}/build/artifacts`,
         `${require("@ohdex/contracts")}/contracts`
     );
     const revertTraceSubprovider = new RevertTraceSubprovider(
         artifactAdapter, 
-        '0',
-        true
+        account,
+        false
     );
-    pe.addProvider(revertTraceSubprovider);
+    return revertTraceSubprovider;
+}
 
+export function addRevertTraces(pe, account) {
+    function prependSubprovider(provider: Web3ProviderEngine, subprovider: any): void {
+        subprovider.setEngine(provider);
+        // HACK: We use implementation details of provider engine here
+        // https://github.com/MetaMask/provider-engine/blob/master/index.js#L68
+        (provider as any)._providers = [subprovider, ...(provider as any)._providers];
+    }
+
+    // prependSubprovider(pe, getRevertTraceSubprovider(account))
+}
+
+export async function loadWeb3(config: { rpcUrl: string }) {
+    let pe = new Web3ProviderEngine();
     pe.addProvider(new RPCSubprovider(config.rpcUrl))
     pe.start()
     let web3 = new Web3Wrapper(pe);
     let accounts = await web3.getAvailableAddressesAsync()
     let account = accounts[0]
+    
+
     let txDefaults = { from: account }
+    // , gas: 10000000
     return {
         pe,
         web3,
