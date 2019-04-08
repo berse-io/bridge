@@ -14,6 +14,7 @@
   "workspaces": {
     "packages": [
       "packages/bridge-ui",
+      "packages/bridge-ui-v2",
       "packages/contracts",
       "packages/deployer",
       "packages/multichain",

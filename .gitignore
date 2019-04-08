@@ -5,6 +5,8 @@ packages/contracts/devchain/keys
 **/yarn-error.log
 
 packages/*/.next
+packages/bridge-ui/.next
+packages/bridge-ui-v2/.next
 packages/deployer/yarn-error.log
 packages/contracts/.0x-artifacts
 packages/multichain/db
