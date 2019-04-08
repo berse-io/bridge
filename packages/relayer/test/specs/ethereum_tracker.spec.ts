@@ -179,7 +179,7 @@ describe('EthereumChainTracker', function () {
             await tracker1.start()
             tracker1.listen()
     
-            let fakeMessage: CrosschainEvent = {
+            let fakeMessage: CrosschainEvent<any> = {
                 from: {
                     chainId: 0
                 },
@@ -204,7 +204,7 @@ describe('EthereumChainTracker', function () {
             await tracker1.start()
             tracker1.listen()
     
-            let fakeMessage: CrosschainEvent = {
+            let fakeMessage: CrosschainEvent<any> = {
                 from: {
                     chainId: 0
                 },

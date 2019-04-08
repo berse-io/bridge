@@ -28,8 +28,10 @@ const locks = require('locks');
 
 const Queue = require('queue')
 
-export interface CrosschainEvent {
-    data: TokensBridgedEvent | any;
+type CrosschainEventTypes = TokensBridgedEvent;
+
+export interface CrosschainEvent<CrosschainEventTypes> {
+    data: CrosschainEventTypes;
     
     // Might be different in future.
     from: {
@@ -53,7 +55,7 @@ export class EthereumChainTracker extends ChainTracker {
     bridge: BridgeAdapter;
 
 
-    pendingCrosschainEvs: CrosschainEvent[] = [];
+    pendingCrosschainEvs: CrosschainEvent<any>[] = [];
 
     
     account: string;
@@ -93,9 +95,11 @@ export class EthereumChainTracker extends ChainTracker {
         this.pe.addProvider(new NonceTrackerSubprovider())
         let key = new PrivateKeyWalletSubprovider(relayerAccount.privateKey);
         let accounts = await key.getAccountsAsync()
+        let account = accounts[0];
+        this.account = account;
         this.pe.addProvider(key)
         this.pe.addProvider(new RPCSubprovider(this.conf.rpcUrl));
-        addRevertTraces(this.pe, accounts[0])
+        // addRevertTraces(this.pe, account)
         this.pe.start()
 
         this.pe.on('error', () => {
@@ -111,8 +115,6 @@ export class EthereumChainTracker extends ChainTracker {
             throw ex;
         }
 
-        let account = accounts[0];
-        this.account = account;
 
         this.web3Wrapper = new Web3Wrapper(this.pe, {
             from: this.account
@@ -255,10 +257,10 @@ export class EthereumChainTracker extends ChainTracker {
         })
 
         this.bridge.events.on('tokensBridged', async (tokensBridgedEv: TokensBridgedEvent) => {
-            let crosschainEvent: CrosschainEvent = {
+            let crosschainEvent: CrosschainEvent<any> = {
                 data: tokensBridgedEv,
                 from: {
-                    chainId: this.conf.chainId
+                    chainId: this.conf.chainId,
                 },
                 to: {
                     targetBridge: shortToLongBridgeId(tokensBridgedEv.targetBridge)
@@ -283,6 +285,7 @@ export class EthereumChainTracker extends ChainTracker {
 
         this.txQueue.on('error', err => {
             this.logger.error(err);
+            throw err;
         })
     }
 
@@ -347,7 +350,7 @@ export class EthereumChainTracker extends ChainTracker {
 
     // Listen for the original events from other chains
     // and add them to our pending queue here
-    async receiveCrosschainEvent(ev: CrosschainEvent): Promise<boolean> {
+    async receiveCrosschainEvent(ev: CrosschainEvent<any>): Promise<boolean> {
         this.logger.debug(JSON.stringify(ev))
 
         if(ev.from == this.conf.chainId) {

@@ -88,7 +88,7 @@ export class Relayer {
                 await self.updateChains(chain.id)
             })
 
-            chain.events.on('crosschainEvent', async (ev: CrosschainEvent) => {
+            chain.events.on('crosschainEvent', async (ev: CrosschainEvent<any>) => {
                 let found: boolean = false;
 
                 for(let chain2 of Object.values(this.chains)) {

@@ -15,6 +15,9 @@ export interface TokensBridgedEvent {
     token: string
     amount: any
     salt: any
+
+    // TODO: this could be improved
+    triggerAddress: string;
 }
 
 export class BridgeAdapter {
@@ -64,6 +67,7 @@ export class BridgeAdapter {
                 // fromChain: this.stateGadget.getId(),
                 // fromChainId: this.conf.chainId,
                 ...data,
+                triggerAddress: this.bridgeContract.address
                 // toBridge: data.targetBridge,
                 // eventHash: data.eventHash
             };
@@ -82,7 +86,8 @@ export class BridgeAdapter {
             BridgeEvents.TokensBridged, 
             async function(eventHash, targetBridge, chainId, receiver, token, amount, salt, ev: ethers.Event) {
                 let tokensBridgedEv: TokensBridgedEvent = {
-                    eventHash, targetBridge, chainId, receiver, token, amount, salt
+                    eventHash, targetBridge, chainId, receiver, token, amount, salt,
+                    triggerAddress: self.bridgeContract.address
                 }
                 self.events.emit('tokensBridged', tokensBridgedEv)
             }
@@ -94,10 +99,11 @@ export class BridgeAdapter {
     }
 
     async bridge(
-        ev: CrosschainEvent,
+        ev: CrosschainEvent<TokensBridgedEvent>,
         proof: CrosschainEventProof
     ) {
         let { rootProof, eventProof } = proof;
+
         
         let _proof = rootProof.proofs.map(hexify)
         let _proofPaths = rootProof.paths
@@ -106,15 +112,16 @@ export class BridgeAdapter {
         let _eventsPaths = eventProof.paths
         let _eventsRoot = hexify(eventProof.root)
 
-        let originChainId = ev.from.chainId;
+        let originChainId = new BigNumber(ev.from.chainId);
+
 
         let gas = await this.bridgeContract.claim.estimateGasAsync(
             ev.data.token, 
             ev.data.receiver, 
             ev.data.amount, 
-            ev.data._salt, 
+            ev.data.salt, 
             ev.data.triggerAddress,
-            new BigNumber(originChainId),
+            originChainId,
             false, //need to fix this for bridging back
             _proof, 
             _proofPaths, 
@@ -130,9 +137,9 @@ export class BridgeAdapter {
                 ev.data.token, 
                 ev.data.receiver, 
                 ev.data.amount, 
-                ev.data._salt, 
+                ev.data.salt, 
                 ev.data.triggerAddress,
-                new BigNumber(originChainId),
+                originChainId,
                 false, //need to fix this for bridging back
                 _proof, 
                 _proofPaths, 
@@ -143,6 +150,6 @@ export class BridgeAdapter {
                 { ...this.txDefaults, gas: 5000000 }
             )
         );
-        this.logger.info(`bridged ev: ${ev.data.eventHash} for bridge ${ev.to}`)
+        this.logger.info(`bridged ev: ${ev.data.eventHash} for bridge ${ev.to.targetBridge}`)
     }
 }

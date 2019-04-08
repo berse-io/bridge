@@ -83,21 +83,27 @@ describe('Relayer', function() {
                 web3: web32
             } = await loadWeb3(chain2));
             
-            // bchain1 = new BlockchainLifecycle(web31)
-            // bchain2 = new BlockchainLifecycle(web32)
+            bchain1 = new BlockchainLifecycle(web31)
+            bchain2 = new BlockchainLifecycle(web32)
         })
 
         before(async () => {
-            // await Promise.all([
-            //     bchain1.startAsync(),
-            //     bchain2.startAsync()
-            // ])
+            await Promise.all([
+                bchain1.startAsync(),
+                bchain2.startAsync()
+            ])
+
             // console.log(2)
             // await web31.revertSnapshotAsync(chain1.deploymentInfo.blockNumber)
             // await web32.revertSnapshotAsync(chain2.deploymentInfo.blockNumber)
-            
-            await web31.setHeadAsync(chain1.deploymentInfo.blockNumber)
-            await web32.setHeadAsync(chain2.deploymentInfo.blockNumber)
+            // await web31.sendRawPayloadAsync({"method": "miner_stop", "params": []})            
+            // await web32.sendRawPayloadAsync({"method": "miner_stop", "params": []})            
+
+            // await web31.setHeadAsync(chain1.deploymentInfo.blockNumber)
+            // await web32.setHeadAsync(chain2.deploymentInfo.blockNumber)
+
+            // await web31.sendRawPayloadAsync({"method": "miner_start", "params": [1]})
+            // await web32.sendRawPayloadAsync({"method": "miner_start", "params": [1]})
         })
 
         beforeEach(async () => {
@@ -132,10 +138,10 @@ describe('Relayer', function() {
         })
 
         afterEach(async () => {
-            // await Promise.all([
-            //     bchain1.revertAsync(),
-            //     bchain2.revertAsync()
-            // ])
+            await Promise.all([
+                bchain1.revertAsync(),
+                bchain2.revertAsync()
+            ])
         })
 
         after(async () => {
@@ -185,7 +191,6 @@ describe('Relayer', function() {
             await bridgedToken2.mint.sendTransactionAsync(account2, bridgeAmt, txDefaults2);
             await bridgedToken2.approve.sendTransactionAsync(wrappers2.Bridge.address, bridgeAmt, txDefaults2);
 
-            console.log(generateSalt())
 
             await Promise.all([
                 wrappers1.Bridge.bridge.sendTransactionAsync( 
@@ -196,14 +201,14 @@ describe('Relayer', function() {
                     chain2.bridgeAddress,
                     txDefaults1
                 ),
-                // wrappers1.Bridge.bridge.sendTransactionAsync(
-                //     bridgedToken1.address, 
-                //     account1, new BigNumber('300'), 
-                //     generateSalt(),
-                //     chain2.chainId,
-                //     chain2.bridgeAddress,
-                //     txDefaults1
-                // ),
+                wrappers1.Bridge.bridge.sendTransactionAsync(
+                    bridgedToken1.address, 
+                    account1, new BigNumber('301'), 
+                    generateSalt(),
+                    chain2.chainId,
+                    chain2.bridgeAddress,
+                    txDefaults1
+                ),
                 // wrappers2.Bridge.bridge.sendTransactionAsync(
                 //     bridgedToken2.address, 
                 //     account2, new BigNumber('300'), 
@@ -216,7 +221,7 @@ describe('Relayer', function() {
 
             
             
-
+            await wait(20000)
             
         })
 
