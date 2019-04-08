@@ -1,6 +1,5 @@
 import { ITokenBridgeEventArgs } from "@ohdex/contracts/lib/build/wrappers/i_token_bridge";
-import { EthereumChainTracker } from "../chain/ethereum";
-import { EventEmittedEvent, MessageSentEvent } from "../chain/tracker";
+import { EthereumChainTracker, CrosschainEvent } from "../chain/ethereum";
 import { CrosschainState } from "../interchain/crosschain_state";
 import { defaultLogger } from "../logger";
 
@@ -24,12 +23,8 @@ interface ChainConfig {
 const eventEmitter = require("events");
 
 type chainId = string;
-interface CrosschainEventEvent {
-    from: chainId;
-    to: chainId;
-    data: ITokenBridgeEventArgs;
-}
-require('asynctrace')
+
+// require('asynctrace')
 export class Relayer {
     chains: { [k: string]: EthereumChainTracker };
 
@@ -87,20 +82,21 @@ export class Relayer {
 
         // Start state update loop
         let self = this;
+        
         Object.values(this.chains).map(chain => {
-            chain.events.on('EventEmitter.EventEmitted', async (ev: EventEmittedEvent) => {
+            chain.events.on('eventEmitted', async (ev) => {
                 await self.updateChains(chain.id)
             })
 
-            chain.events.on('ITokenBridge.TokensBridgedEvent', async (msg: MessageSentEvent) => {
+            chain.events.on('crosschainEvent', async (ev: CrosschainEvent) => {
                 let found: boolean = false;
 
                 for(let chain2 of Object.values(this.chains)) {
-                    if(await chain2.receiveCrosschainMessage(msg)) found = true;
+                    if(await chain2.receiveCrosschainEvent(ev)) found = true;
                 }
 
                 if(!found) {
-                    this.logger.error(`Couldn't find a bridge ${msg.toBridge} for cross-chain message`)
+                    this.logger.error(`Couldn't find a bridge ${ev.to.targetBridge} for cross-chain message`)
                 }
             })
 
@@ -112,8 +108,6 @@ export class Relayer {
         this.logger.info(`Computing new state root`)
 
         // Compute new state roots
-        
-
         // And then we can process the new bridge events after they have been ack'd.
 
         for(let chain of Object.values(this.chains)) {
@@ -135,27 +129,6 @@ export class Relayer {
                 throw ex;
             }
         }
-        // await Promise.all(
-        //     Object.values(this.chains).map(async chain => {
-        //         try {
-        //             // chain.events.once('StateRootUpdated', async () => {
-        //             //     await chain.processBridgeEvents(null)
-        //             // })
-        //             await chain.updateStateRoot(null, null);
-        //         } catch(ex) {
-        //             throw ex;
-        //         }
-        //     })
-        // )
-
-
-        // It cannot process the bridge event
-        // until it has the state root of the other chain
-        // 
-
-        // chain.events.once('StateRootUpdated', async () => {
-        //     await chain.processBridgeEvents(null)
-        // })
     }
 
     async stop() {

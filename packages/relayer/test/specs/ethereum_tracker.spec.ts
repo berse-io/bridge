@@ -8,11 +8,12 @@ import { BridgeContract } from "@ohdex/contracts/lib/build/wrappers/bridge";
 import { expect } from 'chai';
 import { suiteTeardown } from 'mocha';
 import sinon from 'sinon';
-import { EthereumChainTracker } from "../../src/chain/ethereum";
-import { MessageSentEvent } from '../../src/chain/tracker';
+import { EthereumChainTracker, CrosschainEvent } from "../../src/chain/ethereum";
 import { hexify, keccak256 } from '../../src/utils';
-import { get0xArtifact, getContractAbi, sinonBignumEq, sinonStrEqual, givenEthereumChainTracker, givenDbService, givenEmptyDatabase } from '../helper';
+import { get0xArtifact, getContractAbi, sinonBignumEq, sinonStrEqual, givenEthereumChainTracker, givenDbService, givenEmptyDatabase, TestchainFactory, loadWeb3 } from '../helper';
 import { Connection } from 'typeorm';
+import { BlockchainLifecycle } from '@0x/dev-utils';
+import { dehexify } from '@ohdex/shared';
 
 
 const chai = require("chai");
@@ -29,42 +30,47 @@ describe('EthereumChainTracker', function () {
     let accounts: string[];
 
     let snapshotId;
-    let config = require('@ohdex/config').networks['kovan'];
+    let chain1 = require('@ohdex/config').networks['kovan'];
     let conn: Connection;
 
+    let testchain1;
+    
     before(async () => {
-        // let chain1 = await TestchainFactory.fork(config.rpcUrl, '9000')
+        // testchain1 = await TestchainFactory.fork(chain1.rpcUrl, '11000')
+        // chain1.rpcUrl = testchain1.rpcUrl;
 
         conn = await givenDbService();
         
-        pe = new Web3ProviderEngine();
-        const artifactAdapter = new SolCompilerArtifactAdapter(
-            `${require("@ohdex/contracts")}/build/artifacts`,
-            `${require("@ohdex/contracts")}/contracts`
-        );
-        const revertTraceSubprovider = new RevertTraceSubprovider(
-            artifactAdapter, 
-            '0',
-            true
-        );
-        pe.addProvider(revertTraceSubprovider);
-        pe.addProvider(new RPCSubprovider(config.rpcUrl))
-        pe.start()
-        web3 = new Web3Wrapper(pe);
-        accounts = await web3.getAvailableAddressesAsync()
-        account = accounts[0]
-        txDefaults = { from: account }
+        ({ 
+            pe,
+            account,
+            txDefaults,
+            web3
+        } = await loadWeb3(chain1));
     })
 
+    let bchain1: BlockchainLifecycle;
+
     beforeEach(async () => {
-        if(snapshotId) await web3.revertSnapshotAsync(snapshotId);
-        snapshotId = await web3.takeSnapshotAsync()
+        // bchain1 = new BlockchainLifecycle(web3)
+        // await bchain1.startAsync()
+        // await web3.setHeadAsync(chain1.deploymentInfo.blockNumber)
+        // if(snapshotId) await web3.revertSnapshotAsync(snapshotId);
+        // snapshotId = await web3.takeSnapshotAsync()
         await givenEmptyDatabase(conn)
     })
 
+    after(async () => {
+        // await web3.setHeadAsync(chain1.deploymentInfo.blockNumber)
+    })
+
+    // afterEach(async () => {
+    //     // await bchain1.revertAsync()
+    // })
+
     describe('account', () => {
         it('uses the RELAYER_PRIVKEY env variable', async () => {
-            let tracker = new EthereumChainTracker(config)
+            let tracker = new EthereumChainTracker(chain1)
             await tracker.start()
             await tracker.listen()
             expect(tracker.account).to.eq('0x0')
@@ -113,9 +119,11 @@ describe('EthereumChainTracker', function () {
             await tracker1.start()
             tracker1.listen()
             
-            let spy_onEventEmitted = sinon.spy(tracker1, 'onEventEmitted')
-            let spy_onTokensBridgedEvent = sinon.spy(tracker1, 'onTokensBridgedEvent');
-            let spy_eventsEmit = sinon.spy(tracker1.events, 'emit')
+            let spy_onEventEmitted = sinon.spy();
+            tracker1.eventEmitter.events.on('eventEmitted', spy_onEventEmitted)
+
+            let spy_onTokensBridgedEvent = sinon.spy();
+            tracker1.bridge.events.on('tokensBridged', spy_onTokensBridgedEvent)
 
 
             // Expect 2 events
@@ -171,16 +179,20 @@ describe('EthereumChainTracker', function () {
             await tracker1.start()
             tracker1.listen()
     
-            let fakeMessage: MessageSentEvent = {
-                fromChain: "",
-                fromChainId: 0,
-                toBridge: chain1.bridgeAddress,
-                data: null,
-                eventHash: ""
+            let fakeMessage: CrosschainEvent = {
+                from: {
+                    chainId: 0
+                },
+                to: {
+                    targetBridge: chain1.bridgeAddress,
+                },
+                data: {
+                    eventHash: ""
+                },
             }
-            expect(await tracker1.receiveCrosschainMessage(fakeMessage)).to.be.true;
+            expect(await tracker1.receiveCrosschainEvent(fakeMessage)).to.be.true;
 
-            expect(tracker1.pendingTokenBridgingEvs).to.have.members([
+            expect(tracker1.pendingCrosschainEvs).to.have.members([
                 fakeMessage
             ])
         })
@@ -192,14 +204,18 @@ describe('EthereumChainTracker', function () {
             await tracker1.start()
             tracker1.listen()
     
-            let fakeMessage: MessageSentEvent = {
-                fromChain: "",
-                fromChainId: 0,
-                toBridge: "I'm a stupid fake bridge, I don't exist",
-                data: null,
-                eventHash: ""
+            let fakeMessage: CrosschainEvent = {
+                from: {
+                    chainId: 0
+                },
+                to: {
+                    targetBridge: "I'm a stupid fake bridge, I don't exist",
+                },
+                data: {
+                    eventHash: ""
+                },
             }
-            expect(await tracker1.receiveCrosschainMessage(fakeMessage)).to.be.false;
+            expect(await tracker1.receiveCrosschainEvent(fakeMessage)).to.be.false;
         })
         
     })
@@ -208,24 +224,32 @@ describe('EthereumChainTracker', function () {
 
     describe.only('#stateGadget', async () => {
         it("loads the most recent state root update time", async () => {
-            let tracker1 = await givenEthereumChainTracker(conn, config)
+            let tracker1 = await givenEthereumChainTracker(conn, chain1)
             await tracker1.start()
             tracker1.listen()
 
-            expect(tracker1.lastUpdated).to.deep.eq(
-                new Buffer(32)
-            );
+            // expect(tracker1.lastUpdated).to.deep.eq(
+            //     new Buffer(32)
+            // );
         })
 
-        it('loads all previous events', async () => {
+        it.only('loads all previous events', async () => {
             const WHITELIST_ADDR = hexify(Buffer.alloc(20))
             let eventEmitter = await EventEmitterContract.deployFrom0xArtifactAsync(
                 get0xArtifact('EventEmitter'), pe, txDefaults,
                 WHITELIST_ADDR,
-                config.chainId,
+                chain1.chainId,
                 "nonce"
             )
-    
+
+                
+            // let makeMockEvent = (x) => {
+            //     // _eventHash, _triggerAddress, _triggerChain
+            //     let _triggerAddress = dehexify(txDefaults.from);
+                
+
+            //     keccak256(x, )
+            // }
             let ev_1 = hexify(keccak256('1'))
             let ev_2 = hexify(keccak256('2'))
             let ev_3 = hexify(keccak256('3'))
@@ -243,16 +267,18 @@ describe('EthereumChainTracker', function () {
             )
     
             let tracker = await givenEthereumChainTracker(conn, {
-                ...config,
+                ...chain1,
                 eventEmitterAddress: eventEmitter.address
             })
             await tracker.start()
+
+            let prev = await tracker.eventEmitter.loadPreviousEvents()
     
-            // expect(tracker.stateGadget.events.map(hexify)).to.have.ordered.members([
-            //     ev_1,
-            //     ev_2,
-            //     ev_3
-            // ])
+            expect(prev.map(ev => ev.eventHash)).to.have.ordered.members([
+                ev_1,
+                ev_2,
+                ev_3
+            ])
             
             await tracker.stop()
         })
