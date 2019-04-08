@@ -16,7 +16,8 @@ contract ITokenBridge {
         address targetBridge, 
         uint256 indexed chainId, address indexed receiver, address indexed token, uint256 amount, uint256 _salt
     );
-
+    event TokensClaimed(address indexed token, address indexed receiver, uint256 amount, uint256 indexed chainId, uint256 salt);
+    
     constructor(EventListener _eventListener, EventEmitter _eventEmitter) public {
         // tokenBridgeId = keccak256(abi.encodePacked(this, blockhash(1)));
         // tokenBridgeId = abi.encodePacked(bytes12(0x000000000000000000000000), address(this));

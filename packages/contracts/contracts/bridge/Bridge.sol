@@ -17,8 +17,6 @@ contract Bridge is ITokenBridge {
        
     }
 
-    event TokensClaimed(address indexed token, address indexed receiver, uint256 amount, uint256 indexed chainId, uint256 salt);
-
     // Each network can have infitite amount of bridge contracts so we don't need to initialize anything on any side
     struct Network {
         mapping(address => BridgeContract) bridgeContracts;

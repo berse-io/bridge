@@ -44,7 +44,7 @@ export class EthereumChainGeth implements IChain {
         // --ws --wsapi 'eth,net,web3,admin,debug,personal,miner,txpool'
         spawnSync(
             'geth',
-            `--nodiscover --ipcdisable --networkid ${conf.chainId} --datadir=devChain --unlock 7ef5a6135f1fd6a02593eedc869c6d41d934aef8 --password _pw.txt --port 0 --rpc --rpcapi eth,net,web3,admin,debug,personal,miner,txpool --rpcaddr localhost --rpcport ${conf.port} --rpccorsdomain '0.0.0.0' --mine`.split(' '),
+            `--nodiscover --ipcdisable --networkid ${conf.chainId} --datadir=devChain --unlock 7ef5a6135f1fd6a02593eedc869c6d41d934aef8 --password _pw.txt --port 0 --rpc --rpcapi eth,net,web3,admin,debug,personal,miner,txpool --rpcaddr localhost --rpcport ${conf.port} --rpccorsdomain '*' --mine`.split(' '),
             { cwd: dbpath, stdio: 'inherit' }
         )
 

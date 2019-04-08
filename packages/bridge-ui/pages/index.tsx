@@ -23,13 +23,13 @@ class Index extends React.Component<any> {
         return(
           <div>
                 <Head>
-                    <title key="title">0dex bridge</title>
+                    <title key="title">Berse bridge</title>
                 </Head>
 
                 <Grid container className={classes.root} spacing={16} justify="center" alignItems="center">
 
                     <Grid item>
-                        <Typography align="center" variant="h1">0Dex Bridge POC</Typography>
+                        <Typography align="center" variant="h1">Berse Bridge POC</Typography>
 
                         <Grid container className={classes.buttonWrapper} justify="center">
                             <Link href="/create-token">

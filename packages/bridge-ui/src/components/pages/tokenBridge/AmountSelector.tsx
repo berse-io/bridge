@@ -101,27 +101,27 @@ class AmountSelector extends React.Component<any> {
     }
 
     setBridgeBack = async () => {
-        const {drizzle, drizzleState} = this.props;
-        const {tokenAddress} = this.props.bridge;
-        const {chainB} = this.props.bridge;
+        // const {drizzle, drizzleState} = this.props;
+        // const {tokenAddress} = this.props.bridge;
+        // const {chainB} = this.props.bridge;
 
-        const bridgeContract = drizzle.contracts.Bridge;
-        const originToken = await bridgeContract.methods.getOriginToken(tokenAddress).call();
+        // const bridgeContract = drizzle.contracts.Bridge;
+        // const originToken = await bridgeContract.methods.getOriginToken(tokenAddress).call();
         
-        let bridgingBack = false;
-        let originTokenAddress = "";
+        // let bridgingBack = false;
+        // let originTokenAddress = "";
 
-        //If token is being bridged back
-        if(originToken.network == chainB){
-            bridgingBack = true;
-            originTokenAddress = originToken.address;
-        }
+        // //If token is being bridged back
+        // if(originToken.network == chainB){
+        //     bridgingBack = true;
+        //     originTokenAddress = originToken.address;
+        // }
 
-        this.props.dispatch({
-            type: bridgeActionTypes.SET_BRIDGING_BACK,
-            bridgingBack,
-            originTokenAddress
-        }) 
+        // this.props.dispatch({
+        //     type: bridgeActionTypes.SET_BRIDGING_BACK,
+        //     bridgingBack,
+        //     originTokenAddress
+        // }) 
 
     }
 }
