@@ -17,11 +17,17 @@
     "@zeit/next-source-maps": "^0.0.3",
     "@zeit/next-typescript": "^1.1.1",
     "axios": "^0.18.0",
+    "bip39": "^3.0.0",
     "chains": "https://github.com/ethereum-lists/chains",
+    "eth-utils": "^0.1.0-alpha.9",
     "ethereum-lists": "https://github.com/MyEtherWallet/ethereum-lists",
+    "hdkey": "^1.1.1",
     "mui-datatables": "^2.0.0-beta.58",
     "next": "^8.0.3",
     "react": "^16.8.4",
+    "react-redux": "^6.0.1",
+    "redux": "^4.0.1",
+    "redux-persist": "^5.10.0",
     "web3": "^1.0.0-beta.50",
     "web3-utils": "^1.0.0-beta.48"
   }

@@ -112,7 +112,7 @@ async function addNetworkToTokens(network:string, tokens:any[]) {
     const web3 = new Web3(rpcs[network]);
     // @ts-ignore
     nativeToken.balance = fromWei(await web3.eth.getBalance(window.web3.eth.accounts[0]));
-    tokenList.push(nativeToken);
+    tokenList.unshift(nativeToken);
 
     return tokenList;
 }

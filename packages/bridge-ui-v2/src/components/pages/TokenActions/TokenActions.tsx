@@ -4,6 +4,7 @@ import Container from '../../utils/Container';
 import {getToken} from '../../../utils/getTokens';
 import { getSignatureParameters } from 'web3-utils/types';
 import { networkInterfaces } from 'os';
+import WalletGate from '../../wallet/WalletGate';
 
 // import SendIcon from '@material-ui/icons/Send';
 // import FavoriteIcon from '@material-ui/icons/Favorite';
@@ -40,7 +41,7 @@ class TokenActions  extends React.Component<any> {
         }
 
         return (
-            <> 
+            <WalletGate>
                 <Container>
                     <Typography component="h1" variant="h2" gutterBottom>
                         {token.symbol} ({token.name}) - {token.network}
@@ -151,7 +152,7 @@ class TokenActions  extends React.Component<any> {
                     </form>
                     
                 </Container>
-            </>
+            </WalletGate>
         )
     }
 

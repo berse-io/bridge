@@ -5,6 +5,7 @@ import GridView from './GridView';
 import getTokens from '../../../utils/getTokens';
 import MUIDataTable from "mui-datatables";
 import Router from 'next/router'
+import WalletGate from '../../wallet/WalletGate';
 
 const columns = [
     {
@@ -69,7 +70,7 @@ class TokenOverview  extends React.Component<any> {
         }
         
         return (
-            <> 
+            <WalletGate> 
                 <Container>
                     <Grid container spacing={16} justify="flex-start">
                         <Grid item xs={12}>
@@ -94,7 +95,7 @@ class TokenOverview  extends React.Component<any> {
                         
                     </Grid>
                 </Container>
-            </>
+            </WalletGate>
         )
     }
 
