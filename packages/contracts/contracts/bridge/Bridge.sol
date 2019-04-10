@@ -73,12 +73,10 @@ contract Bridge is ITokenBridge {
     /// @param _salt Random salt to allow exact matches of bridging actions
     /// @param _triggerAddress Address of smart contract that triggered the event
     /// @param _originChainId Chain ID of the chain the event came from
-    /// @param _proof ?????
-    /// @param _proofPaths ??
-    /// @param _interChainStateRoot ???
-    /// @param _eventsProof ??
-    /// @param _eventsPaths ???
-    /// @param _eventsRoot ???
+    /// @param _eventProofBitmap ?????
+    /// @param _eventProof ??
+    /// @param _stateProofBitmap ???
+    /// @param _stateProof ??
     function claim(
         address _token,
         address _receiver,
@@ -87,12 +85,12 @@ contract Bridge is ITokenBridge {
         address _triggerAddress,
         uint256 _originChainId,
         bool _bridgingBack,
-        bytes32[] memory _proof,
-        bool[] memory _proofPaths,
-        bytes32 _interChainStateRoot,
-        bytes32[] memory _eventsProof,
-        bool[] memory _eventsPaths,
-        bytes32 _eventsRoot
+        
+        bytes32 _eventProofBitmap,
+        bytes memory _eventProof,
+        bytes32 _stateProofBitmap,
+        bytes memory _stateProof
+        
     ) public {
 
         // Generate event hash
@@ -103,12 +101,11 @@ contract Bridge is ITokenBridge {
         _checkEventProcessed(eventHash);
         
         require(eventListener.checkEvent(
-            _proof,
-            _proofPaths,
-            _eventsProof,
-            _eventsPaths,
-            _eventsRoot,
-            eventHash
+            eventHash,
+            _eventProofBitmap,
+            _eventProof,
+            _stateProofBitmap,
+            _stateProof
         ), "EVENT_NOT_FOUND");
 
         handleClaim(_token, _receiver, _amount, _salt, eventEmitter.chainId(), _triggerAddress, _originChainId, _bridgingBack);
