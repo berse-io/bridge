@@ -132,24 +132,28 @@ export class BridgeAdapter {
         )
         this.logger.info(`Bridge.claim: estimateGas=${gas}`)
 
-        await this.web3Wrapper.awaitTransactionSuccessAsync(
-            await this.bridgeContract.claim.sendTransactionAsync(
-                ev.data.token, 
-                ev.data.receiver, 
-                ev.data.amount, 
-                ev.data.salt, 
-                ev.data.triggerAddress,
-                originChainId,
-                false, //need to fix this for bridging back
-                _proof, 
-                _proofPaths, 
-                _interchainStateRoot, 
-                _eventsProof, 
-                _eventsPaths, 
-                _eventsRoot,
-                { ...this.txDefaults, gas: 5000000 }
-            )
-        );
-        this.logger.info(`bridged ev: ${ev.data.eventHash} for bridge ${ev.to.targetBridge}`)
+        try {
+            await this.web3Wrapper.awaitTransactionSuccessAsync(
+                await this.bridgeContract.claim.sendTransactionAsync(
+                    ev.data.token, 
+                    ev.data.receiver, 
+                    ev.data.amount, 
+                    ev.data.salt, 
+                    ev.data.triggerAddress,
+                    originChainId,
+                    false, //need to fix this for bridging back
+                    _proof, 
+                    _proofPaths, 
+                    _interchainStateRoot, 
+                    _eventsProof, 
+                    _eventsPaths, 
+                    _eventsRoot,
+                    { ...this.txDefaults, gas: 5000000 }
+                )
+            );
+            this.logger.info(`bridged ev: ${ev.data.eventHash} for bridge ${ev.to.targetBridge}`)
+        } catch(ex) {
+            throw ex;
+        }
     }
 }
