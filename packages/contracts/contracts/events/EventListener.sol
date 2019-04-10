@@ -2,6 +2,8 @@ pragma solidity ^0.5.0;
 
 import "./EventEmitter.sol";
 import "../MerkleTreeVerifier.sol";
+import "../libs/MerklePatriciaProof.sol";
+import "../libs/SparseMerkleTree.sol";
 
 contract EventListener is MerkleTreeVerifier {
     // The interchain state root.
@@ -39,79 +41,64 @@ contract EventListener is MerkleTreeVerifier {
     }
 
     function checkEvent(
-        bytes32[] memory proof, 
-        bool[] memory paths,         
-        bytes32[] memory _eventsProof,
-        bool[] memory _eventsPaths,
-        bytes32 _eventsRoot,
-        bytes32 _eventHash
+        // bytes32 _eventsRoot,
+        bytes32 _eventHash,
+        bytes32 _eventProofBitmap,
+        bytes memory _eventProof,
+        bytes32 _stateProofBitmap,
+        bytes memory _stateProof
     ) public returns (bool) {
-        bytes32 _eventLeaf = _hashLeaf(_eventHash);
-        // Verify the event hash
-        require(_verify(_eventsProof, _eventsPaths, _eventsRoot, _eventLeaf), "INVALID_EVENT_PROOF");
 
-        // Verify the events root for that chain's bridge.
-        // bytes32 bridgeLeaf = _hashLeaf2(_bridgeInterchainStateRoot, _eventsRoot);
-        bytes32 bridgeLeaf = _hashLeaf(_eventsRoot);
+        bytes32 eventsRoot = emitter.getEventsRoot();
+        require(
+            SparseMerkleTree.verify(
+                eventsRoot,
+                uint256(_eventHash),
+                _eventHash,
+                _eventProofBitmap,
+                _eventProof
+            ) == true,
+            "_eventHash INVALID_PROOF"
+        );
 
-        require(_verify(proof, paths, interchainStateRoot, bridgeLeaf), "INVALID_STATE_PROOF");
+        require(
+            SparseMerkleTree.verify(
+                interchainStateRoot,
+                emitter.chainId(),
+                eventsRoot,
+                _stateProofBitmap,
+                _stateProof
+            ) == true,
+            "_eventsRoot INVALID_PROOF"
+        );
 
         return true;
     }
     
-    // function checkEvent(uint256 _chainId, uint256 _period, bytes32[] memory _proof, bool[] memory paths, bytes32 _leaf) public returns(bool) {
-    //     return _verify(_proof, paths, chainIdToProofs[_chainId][_period], _leaf);
-    // }
-
-    // function getProof(uint256 _chainId, uint256 _index) public view returns(bytes32) {
-    //     return chainIdToProofs[_chainId][_index]; 
-    // }
-
-    // function getLatestProof(uint256 _chainId) public view returns(bytes32) {
-    //     return getProof(_chainId, chainIdToProofs[_chainId].length - 1);
-    // }
-
-    // function updateProof(uint256 _chainId, bytes32 _proof) public {
-    //     chainIdToProofs[_chainId].push(_proof);
-    //     emit ProofSubmitted(_chainId, _proof);
-    // }
-
     // TODO only the relayer(s) should be able to update the proof
     function updateStateRoot(
-        bytes32[] memory _proof, 
-        bool[] memory _proofPaths,
         bytes32 _newInterchainStateRoot, 
-        bytes32 _eventsRoot
+        bytes32 _eventsRoot,
+        bytes32 _proofBitmap,
+        bytes memory _proof
     ) public {
-        // todo
-        // ACL for only validators
-        // and groupsig
+        require(emitter.getEventsRoot() == _eventsRoot, "EVENT_ROOT_MISMATCH");
+        
+        uint256 key = emitter.chainId();
 
-        // if the validators attempt to exploit arbitrage of time between chains
-        // this proof can be used on all other bridges to shut them down (slashing)
-
-
-        // require(block.timestamp > stateRootUpdated, "BACK_IN_TIME_ERR");
-
-        // It must reference the previous interchain state root and prove we build upon it.
-        // require(_interchainStateRoot == interchainStateRoot, "INVALID_STATE_CHRONOLOGY");
-        // require(_newInterchainStateRoot != interchainStateRoot, "HUH");
-
-        // TODO - Verify this chain's events are acknowledged        
-        // bytes32 eventsRoot = MerkleProof.computeRoot(EventEmitter.getPendingEvents());
-        // TODO Skip generation of merkle proof onchain as it gets crazy expensive with large number of events and will run out of gas
-        require(emitter.getEventsRoot() == _eventsRoot, "INVALID_STATE_CHRONOLOGY");
-
-        bytes32 chainLeaf = _hashLeaf2(_eventsRoot);
-        require(_verify(_proof, _proofPaths, _newInterchainStateRoot, chainLeaf) == true, "INTERCHAIN_STATE_ROOT_PROOF_INCORRECT");
+        require(
+            SparseMerkleTree.verify(
+                _newInterchainStateRoot,
+                key,
+                _eventsRoot,
+                _proofBitmap,
+                _proof
+            ) == true,
+            "_newInterchainStateRoot INVALID_PROOF"
+        );
         
         _updateStateRoot(_newInterchainStateRoot);
         
         emitter.acknowledgeEvents();
-    }
-
-    function _hashLeaf2(bytes32 c) public pure returns (bytes32) {
-        bytes1 LEAF_PREFIX = 0x00;
-        return keccak256(abi.encodePacked(LEAF_PREFIX, c));
     }
 }

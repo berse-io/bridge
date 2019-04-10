@@ -1,1 +1,1 @@
---bail --full-trace -r source-map-support -r make-promises-safe
+--no-timeouts --full-trace -r source-map-support -r make-promises-safe -r asynctrace
