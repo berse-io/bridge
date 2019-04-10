@@ -60,6 +60,7 @@
     "mocha": "^5.2.0",
     "openzeppelin-solidity": "^2.1.2",
     "remixd": "^0.1.8-alpha.6",
+    "rlp": "^2.2.3",
     "snarkjs": "^0.1.9",
     "source-map-support": "^0.5.10",
     "toml-js": "^0.0.8",
