@@ -23,6 +23,10 @@ class InterfaceBoilerPlate {
         )
     }
 
+    async getBalance(address:string, network: string): Promise<string> {
+        return ""
+    }
+
 }
 
 export default InterfaceBoilerPlate;

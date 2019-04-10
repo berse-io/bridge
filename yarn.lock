@@ -6553,7 +6553,7 @@ ethereum-common@^0.0.18:
 
 "ethereum-lists@https://github.com/MyEtherWallet/ethereum-lists":
   version "1.0.0"
-  resolved "https://github.com/MyEtherWallet/ethereum-lists#77f3a8faed73c39b6ffec4a4cd21307aac95714f"
+  resolved "https://github.com/MyEtherWallet/ethereum-lists#170753a0fe418c7f69de0b7dd7776dc1c9f598d4"
   dependencies:
     prettier "^1.14.2"
     validate.js "^0.12.0"

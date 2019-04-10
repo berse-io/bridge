@@ -3,6 +3,9 @@ import { KeyPair } from './types';
 import {mnemonicToSeedSync} from "bip39";
 import hdkey from "hdkey";
 import ethUtils from "ethereumjs-util";
+import Web3 from 'web3';
+import nameToNetwork from '../nameToNetwork';
+import networks from  "@ohdex/config/networks.json";
 
 class Web3Interface extends InterfaceBoilerPlate {
 
@@ -22,6 +25,14 @@ class Web3Interface extends InterfaceBoilerPlate {
             }
         )
 
+    }
+
+    async getBalance(address:string, network: string): Promise<string> {
+
+        const config = networks[nameToNetwork[network]];
+        const web3 = new Web3(config.rpcUrl);
+        return "";
+        
     }
 
 }

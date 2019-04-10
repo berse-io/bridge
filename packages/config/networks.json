@@ -1,4 +1,9 @@
 {
+    "ethereum": {
+        "chainId": 1,
+        "chainType": "ethereum",
+        "rpcUrl": "mainnet.infura.io/v3/076b582fd6164444af0b426614496e15"
+    },
     "ropsten": {
         "chainId": 3,
         "chainType": "ethereum",

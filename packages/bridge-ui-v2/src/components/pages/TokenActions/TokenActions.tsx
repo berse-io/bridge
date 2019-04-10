@@ -2,6 +2,7 @@ import React from 'react';
 import { Grid, Button, FormControl, InputLabel, Select, MenuItem, Typography, withStyles, Tabs, Tab, TextField } from '@material-ui/core';
 import Container from '../../utils/Container';
 import {getToken} from '../../../utils/getTokens';
+import { connect } from 'react-redux';
 import { getSignatureParameters } from 'web3-utils/types';
 import { networkInterfaces } from 'os';
 import WalletGate from '../../wallet/WalletGate';
@@ -23,7 +24,7 @@ class TokenActions  extends React.Component<any> {
         action: 0,
         amount: "",
         to: "",
-        token: "",
+        tokenIndex: 0,
     }
 
     componentDidMount() {
@@ -32,7 +33,7 @@ class TokenActions  extends React.Component<any> {
 
     render() {
         const{classes} = this.props;
-        const{token} = this.state;
+        const token = this.props.wallet.tokens[this.state.tokenIndex];
 
         console.log(token);
 
@@ -156,11 +157,23 @@ class TokenActions  extends React.Component<any> {
         )
     }
 
-    loadToken = async () => {
-
+    loadToken = async () => {        
+        const{wallet} = this.props;
         let networkAndToken = window.location.pathname.split("/");
+        const network = networkAndToken[2];
+        const address = networkAndToken[3]
+
+        let tokenIndex = 0;
+
+        for(tokenIndex = 0; tokenIndex < wallet.tokens.length; tokenIndex++) {
+            const item = wallet.tokens[tokenIndex];
+            if(item.address.toLowerCase() == address.toLowerCase() && item.network.toLowerCase() == network.toLowerCase()){
+                break;
+            }
+        }
+        
         this.setState({
-            token: await getToken(networkAndToken[3], networkAndToken[2]),
+            tokenIndex
         });
     } 
 
@@ -173,4 +186,8 @@ class TokenActions  extends React.Component<any> {
     };
 }
 
-export default  withStyles(styles)(TokenActions);
+const styledTokenActions = withStyles(styles)(TokenActions);
+
+export default connect((state:any) => ({
+    wallet: state.wallet,
+}))(styledTokenActions);

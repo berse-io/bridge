@@ -32,7 +32,14 @@ const mapping = {
             ...state.tokens,
             action.token,
         ]
-    }) 
+    }),
+    [actionTypes.REMOVE_TOKEN]: (state:WalletState, action:any) => ({
+        ...state,
+        tokens: [
+            ...state.tokens.slice(0, action.tokenIndex),
+            ...state.tokens.slice(action.tokenIndex + 1)
+        ]
+    })  
 };
 
 function setupWallet(state:WalletState, mnemonic:string) : WalletState {
