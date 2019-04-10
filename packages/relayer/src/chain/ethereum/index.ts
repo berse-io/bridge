@@ -250,10 +250,22 @@ export class EthereumChainTracker extends ChainTracker {
         })
 
         this.eventListener.events.on('stateRootUpdated', async (update) => {
-            await this.stateUpdate.insert({
+            await this.stateUpdate.insert({ 
                 ...update,
                 chain: this.conf.chainId
             })
+
+            // Also try process acknowledged events
+            await this.processBridgeEvents(null)
+            // await wait(1500)
+        
+            // for(let chain of Object.values(this.chains)) {
+            //     try {
+            //         await chain.processBridgeEvents(null)
+            //     } catch(ex) {
+            //         throw ex;
+            //     }
+            // }
         })
 
         this.bridge.events.on('tokensBridged', async (tokensBridgedEv: TokensBridgedEvent) => {
@@ -273,7 +285,6 @@ export class EthereumChainTracker extends ChainTracker {
         this.eventEmitter.listen()
         this.eventListener.listen()
         this.bridge.listen()
-        
 
         let self = this;
 
@@ -337,9 +348,10 @@ export class EthereumChainTracker extends ChainTracker {
             this.logger.error(`processBridgeEvents failed`)
             this.logger.error(ex)
             this.processBridgeEvents_mutex.unlock()
-            // throw ex;
+            throw ex;
+        } finally {
+            this.processBridgeEvents_mutex.unlock()
         }
-        this.processBridgeEvents_mutex.unlock()
     }
     
     get bridgeIds(): string[] {
@@ -360,7 +372,7 @@ export class EthereumChainTracker extends ChainTracker {
 
         if(this.bridgeIds.includes(ev.to.targetBridge))
         {
-            this.logger.info(`receiveCrosschainMessage fromChain=${ev.from} eventHash=${ev.data.eventHash}`)
+            this.logger.info(`receiveCrosschainMessage fromChain=${ev.from.chainId} eventHash=${ev.data.eventHash}`)
             this.pendingCrosschainEvs.push(ev)
             return true;
         }

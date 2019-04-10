@@ -109,22 +109,9 @@ export class Relayer {
 
         // Compute new state roots
         // And then we can process the new bridge events after they have been ack'd.
-
         for(let chain of Object.values(this.chains)) {
             try {
-                // chain.events.once('StateRootUpdated', async () => {
-                //     await chain.processBridgeEvents(null)
-                // })
                 await chain.updateStateRoot(null, null);
-            } catch(ex) {
-                throw ex;
-            }
-        }
-        await wait(1500)
-        
-        for(let chain of Object.values(this.chains)) {
-            try {
-                await chain.processBridgeEvents(null)
             } catch(ex) {
                 throw ex;
             }
