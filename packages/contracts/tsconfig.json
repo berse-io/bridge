@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        "baseUrl": ".",
         "rootDir": ".",
         "outDir": "lib/",
         "lib": [
@@ -15,7 +16,7 @@
         "esModuleInterop": true,
         "moduleResolution": "node",
         "module": "commonjs",
-        "inlineSourceMap": true,
+        "sourceMap": true,
         "declaration": true,
         "composite": true,
         "resolveJsonModule": true
