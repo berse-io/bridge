@@ -33,6 +33,7 @@
     "wsrun": "^3.6.4"
   },
   "dependencies": {
+    "@0x/web3-wrapper": "6.0.4",
     "dotenv": "^7.0.0"
   }
 }
