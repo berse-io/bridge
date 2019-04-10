@@ -28,7 +28,6 @@ export const bnify = (hex) => {
 export const generateSalt = () => {
     return bnify(randomHex(32))
 }
-export const _chainId = new BigNumber(0);
 
 export class ContractWrappers { 
     EventEmitter: EventEmitterContract;
