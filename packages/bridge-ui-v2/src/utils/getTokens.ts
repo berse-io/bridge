@@ -3,33 +3,19 @@ import ethereumTokens from 'ethereum-lists/dist/tokens/eth/tokens-eth.json';
 
 const getTokensObject = () => {
     let tokens:any[] = [];
-    return(tokens.concat( addNetworkToTokens("Ethereum", ethereumTokens)));
+    tokens = tokens.concat( addNetworkToTokens("Ethereum", "Ether", "ETH" , ethereumTokens));
+    tokens = tokens.concat( addNetworkToTokens("Ethereum Ropsten Testnet", "Ropsten Ether", "RETH" , []));
+    tokens = tokens.concat( addNetworkToTokens("Ethereum Kovan Testnet", "Kovan Ether", "KETH" , []));
+
+    return tokens;
 }
 
 export const tokens =  getTokensObject();
 
 
-function addNetworkToTokens(network:string, tokens:any[]) {
+function addNetworkToTokens(network:string, nativeCurrencyName:string, nativeCurrencySymbol: string, tokens:any[]) {
  
     const tokenList =  tokens.map((token:any) => {
-        
-        // let found = false;
-
-        // // @ts-ignore
-        // for(let i = 0; i < balances.length; i ++ ){
-        //     // @ts-ignore
-        //     if(token.address.toLowerCase() == balances[i].contractAddress) {
-        //         // @ts-ignore
-        //         token.balance = fromWei(balances[i].balance).toString();
-        //         found = true;
-        //         break;
-        //     }
-        // }
-
-        // if(!found){
-        //     token.balance = "0";
-        // }
-
         token.network = network;
         return token;
     })
@@ -37,8 +23,8 @@ function addNetworkToTokens(network:string, tokens:any[]) {
     // console.log(tokenList);
 
     let nativeToken = {
-        "symbol": "ETH",
-        "name": "Ether",
+        "symbol": nativeCurrencySymbol,
+        "name": nativeCurrencyName,
         "type": "native",
         "address": "native",
         "ens_address": "",
@@ -70,7 +56,7 @@ function addNetworkToTokens(network:string, tokens:any[]) {
           "youtube": ""
         },
         "balance": "0",
-        "network": "Ethereum"
+        "network": network
     }
     // @ts-ignore
     tokenList.unshift(nativeToken);

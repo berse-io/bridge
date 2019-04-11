@@ -1,11 +1,12 @@
 import React from 'react';
 import { Grid, Button, FormControl, InputLabel, Select, MenuItem, Typography, withStyles, Tabs, Tab, TextField } from '@material-ui/core';
 import Container from '../../utils/Container';
-import {getToken} from '../../../utils/getTokens';
 import { connect } from 'react-redux';
-import { getSignatureParameters } from 'web3-utils/types';
-import { networkInterfaces } from 'os';
 import WalletGate from '../../wallet/WalletGate';
+import walletActions from '../../../reducers/wallet/actionTypes'
+import Web3Interface from '../../../utils/coinInterfaces/Web3Interface';
+
+// console.log(Web3Interface.getBalance("0x1e17A75616cd74f5846B1b71622Aa8e10ea26Cc0", "Ethereum"));
 
 // import SendIcon from '@material-ui/icons/Send';
 // import FavoriteIcon from '@material-ui/icons/Favorite';
@@ -29,6 +30,7 @@ class TokenActions  extends React.Component<any> {
 
     componentDidMount() {
         this.loadToken();
+        
     }
 
     render() {
@@ -36,6 +38,11 @@ class TokenActions  extends React.Component<any> {
         const token = this.props.wallet.tokens[this.state.tokenIndex];
 
         console.log(token);
+
+
+        console.log(this.props.wallet);
+
+        
 
         if(!token) {
             return <></>
@@ -160,8 +167,10 @@ class TokenActions  extends React.Component<any> {
     loadToken = async () => {        
         const{wallet} = this.props;
         let networkAndToken = window.location.pathname.split("/");
-        const network = networkAndToken[2];
+        const network = networkAndToken[2].replace(new RegExp('-', 'g'), ' ').toLowerCase();
         const address = networkAndToken[3]
+        
+        console.log(network);
 
         let tokenIndex = 0;
 
@@ -175,6 +184,11 @@ class TokenActions  extends React.Component<any> {
         this.setState({
             tokenIndex
         });
+
+        this.props.dispatch({
+            type: walletActions.UPDATE_TOKEN_BALANCE,
+            tokenIndex: tokenIndex,
+        })
     } 
 
     handleChange = (name:string) => (event:any) => {

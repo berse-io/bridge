@@ -39,7 +39,16 @@ const mapping = {
             ...state.tokens.slice(0, action.tokenIndex),
             ...state.tokens.slice(action.tokenIndex + 1)
         ]
-    })  
+    }),
+    [actionTypes.SET_TOKEN_BALANCE]: (state:WalletState, action:any) => ({
+        ...state,
+        tokens: state.tokens.map((item, index) => {
+            if(index == action.tokenIndex) {
+                item.balance = action.balance;
+            }
+            return item
+        })
+    })    
 };
 
 function setupWallet(state:WalletState, mnemonic:string) : WalletState {

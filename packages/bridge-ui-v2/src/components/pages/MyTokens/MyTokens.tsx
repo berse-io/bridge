@@ -72,7 +72,7 @@ class MyTokens extends React.Component<any> {
                             </TableHead>
                             <TableBody>
                                 {wallet.tokens.map((token: Token, index: number) => (
-                                    <TableRow className={classes.tableRow} key={token.address}>
+                                    <TableRow className={classes.tableRow} key={`${token.address}${token.name}`}>
                                         <TableCell component="th" scope="row">
                                             {token.symbol}
                                         </TableCell>
@@ -114,7 +114,10 @@ class MyTokens extends React.Component<any> {
     }
 
     tokenClicked = (token: Token) => (event:any) => {  
-        Router.push(`/coin?network=${token.network.toLowerCase()}&address=${token.address}`, `/token/${token.network.toLowerCase()}/${token.address}`);
+
+        const urlSafeNetwork = token.network.replace(new RegExp(' ', 'g'), '-').toLowerCase();
+
+        Router.push(`/coin?network=${urlSafeNetwork}&address=${token.address}`, `/token/${urlSafeNetwork}/${token.address}`);
     }
 
     deleteClicked = (tokenIndex: number) => () => {

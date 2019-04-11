@@ -27,12 +27,14 @@ class Web3Interface extends InterfaceBoilerPlate {
 
     }
 
-    async getBalance(address:string, network: string): Promise<string> {
-
+    async getBalance(address:string, network: string, token: string = "native"): Promise<string> {
         const config = networks[nameToNetwork[network]];
         const web3 = new Web3(config.rpcUrl);
-        return "";
-        
+        if(token == "native") {
+            return  (web3.utils.fromWei(await web3.eth.getBalance(address)).toString());        
+        }
+        return "1337";
+        // TODO implement tokens        
     }
 
 }
