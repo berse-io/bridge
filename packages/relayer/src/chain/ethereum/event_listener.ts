@@ -5,6 +5,7 @@ import { EventEmitter } from "events";
 import { MerkleTreeProof } from "@ohdex/typescript-solidity-merkle-tree";
 import { EthereumStateLeaf } from "./state_gadget";
 import { hexify } from "@ohdex/shared";
+import { StateRootUpdate } from "../../interchain/xchain_state_service";
 
 interface StateRootUpdated { 
     blockHash: string;
@@ -92,13 +93,13 @@ export class EventListenerAdapter {
         await this.eventListener_sub.removeAllListeners(EventListenerEvents.StateRootUpdated)
     }
 
-    async updateStateRoot(proof: MerkleTreeProof, leaf: EthereumStateLeaf) {
+    async updateStateRoot(stateRootUpdate: StateRootUpdate) {
         return this.eventListener.updateStateRoot.sendTransactionAsync(
-            proof.proofs.map(hexify),
-            proof.paths,
-            hexify(proof.root),
-            hexify(leaf.eventsRoot)
-        )
+            stateRootUpdate.root, 
+            stateRootUpdate.eventRoot,
+            stateRootUpdate.proof.proofBitmap,
+            stateRootUpdate.proof.proofNodes
+        );
     }
 }
 

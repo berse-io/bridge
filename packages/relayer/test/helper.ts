@@ -137,7 +137,7 @@ export function getRevertTraceSubprovider(account: string) {
     const revertTraceSubprovider = new RevertTraceSubprovider(
         artifactAdapter, 
         account,
-        false
+        true
     );
     return revertTraceSubprovider;
 }
@@ -150,8 +150,8 @@ function prependSubprovider(provider: Web3ProviderEngine, subprovider: any): voi
 }
 
 export function addRevertTraces(pe, account) {
-    // prependSubprovider(pe, getRevertTraceSubprovider(account))
-    pe.addProvider(getRevertTraceSubprovider(account))
+    prependSubprovider(pe, getRevertTraceSubprovider(account))
+    // pe.addProvider(getRevertTraceSubprovider(account))
     return;
 }
 
@@ -163,6 +163,8 @@ export async function loadWeb3(config: { rpcUrl: string }) {
     let web3 = new Web3Wrapper(pe);
     let accounts = await web3.getAvailableAddressesAsync()
     let account = accounts[2]
+
+    // console.log(accounts)
 
     let txDefaults = { from: account }
     // , gas: 10000000

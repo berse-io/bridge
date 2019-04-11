@@ -159,7 +159,7 @@ describe.only("sparse merkle tree", async () => {
             let res = await contract.verify.callAsync(
                 leaf,
                 tree.root,
-                toBN(key),
+                key,
                 proofBitmap,
                 proofNodes
             )

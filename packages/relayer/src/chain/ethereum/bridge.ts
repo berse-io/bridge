@@ -6,6 +6,7 @@ import { Web3Wrapper } from "@0x/web3-wrapper";
 import { CrosschainEventProof } from "../../interchain/crosschain_state";
 import { hexify } from "@ohdex/shared";
 import { CrosschainEvent } from ".";
+import { EventProof } from "../../interchain/xchain_state_service";
 
 export interface TokensBridgedEvent {
     eventHash: string 
@@ -100,37 +101,11 @@ export class BridgeAdapter {
 
     async bridge(
         ev: CrosschainEvent<TokensBridgedEvent>,
-        proof: CrosschainEventProof
+        proof: EventProof
     ) {
-        let { rootProof, eventProof } = proof;
-
-        
-        let _proof = rootProof.proofs.map(hexify)
-        let _proofPaths = rootProof.paths
-        let _interchainStateRoot = hexify(rootProof.root)
-        let _eventsProof = eventProof.proofs.map(hexify)
-        let _eventsPaths = eventProof.paths
-        let _eventsRoot = hexify(eventProof.root)
-
         let originChainId = new BigNumber(ev.from.chainId);
 
-
-        let gas = await this.bridgeContract.claim.estimateGasAsync(
-            ev.data.token, 
-            ev.data.receiver, 
-            ev.data.amount, 
-            ev.data.salt, 
-            ev.data.triggerAddress,
-            originChainId,
-            false, //need to fix this for bridging back
-            _proof, 
-            _proofPaths, 
-            _interchainStateRoot, 
-            _eventsProof, 
-            _eventsPaths, 
-            _eventsRoot
-        )
-        this.logger.info(`Bridge.claim: estimateGas=${gas}`)
+        // this.logger.info(`Bridge.claim: estimateGas=${gas}`)
 
         try {
             await this.web3Wrapper.awaitTransactionSuccessAsync(
@@ -142,12 +117,10 @@ export class BridgeAdapter {
                     ev.data.triggerAddress,
                     originChainId,
                     false, //need to fix this for bridging back
-                    _proof, 
-                    _proofPaths, 
-                    _interchainStateRoot, 
-                    _eventsProof, 
-                    _eventsPaths, 
-                    _eventsRoot,
+                    proof.eventLeafProof.proofs.map(hexify),
+                    proof.eventLeafProof.paths,
+                    proof.stateProof.proofBitmap,
+                    proof.stateProof.proofNodes,
                     { ...this.txDefaults, gas: 5000000 }
                 )
             );

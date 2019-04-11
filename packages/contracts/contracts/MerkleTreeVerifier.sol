@@ -1,6 +1,6 @@
 pragma solidity ^0.5.0;
 
-contract MerkleTreeVerifier {
+library MerkleTreeVerifier {
     function math_log2(uint x) public pure returns (uint y){
         assembly {
             let arg := x
@@ -96,7 +96,12 @@ contract MerkleTreeVerifier {
      * @param root Merkle root
      * @param leaf Leaf of Merkle tree
      */
-    function _verify(bytes32[] memory proof, bool[] memory paths, bytes32 root, bytes32 leaf) public pure returns (bool) {
+    function _verify(
+        bytes32 leaf,
+        bytes32 root,
+        bytes32[] memory proof,
+        bool[] memory paths
+    ) public pure returns (bool) {
         // Check if the computed hash (root) is equal to the provided root
         return _computeRoot(proof, paths, leaf) == root;
     }

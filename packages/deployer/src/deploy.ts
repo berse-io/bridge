@@ -1,11 +1,12 @@
 import { Web3ProviderEngine, RPCSubprovider, BigNumber} from "0x.js";
 import { PrivateKeyWalletSubprovider } from "@0x/subproviders";
 import { Web3Wrapper, AbiDefinition, Provider, TxData } from '@0x/web3-wrapper';
-
+import { SparseMerkleTreeContract } from '@ohdex/contracts/lib/build/wrappers/sparse_merkle_tree';
+import { MerkleTreeVerifierContract } from '@ohdex/contracts/lib/build/wrappers/merkle_tree_verifier';
 
 import {
     WhitelistContract
-} from '../../contracts/build/wrappers/whitelist';
+} from '@ohdex/contracts/lib/build/wrappers/whitelist';
 
 import {
     EventListenerContract
@@ -15,10 +16,6 @@ import {
     EventEmitterContract,
 } from '@ohdex/contracts/lib/build/wrappers/event_emitter';
 
-// import {
-//     EscrowContract
-// }  from '@ohdex/contracts/lib/build/wrappers/escrow'
-
 import {
     BridgeContract
 }   from '@ohdex/contracts/lib/build/wrappers/bridge';
@@ -27,15 +24,13 @@ import {
     WETH9Contract
 }   from '@ohdex/contracts/lib/build/wrappers/weth9';
 
-import {
-    DemoERC20Contract
-}   from '@ohdex/contracts/lib/build/wrappers/demo_erc20';
 import { ConfigManager } from "./config";
 import { toWei, fromWei } from "web3-utils";
 
 import { logUtils } from '@0x/utils';
 
 import { AccountsConfig } from '@ohdex/multichain';
+import { getDeployArgs, addLibrary } from "./deploy_utils";
 
 const assert = require('assert');
 
@@ -43,25 +38,10 @@ const winston = require('winston');
 const { format } = winston;
 const { combine, label, json, simple } = format;
 
-function getDeployArgs(name: string, pe: Web3ProviderEngine, from: string): [ string, AbiDefinition[], Provider, Partial<TxData> ] {
-    // let json = require(`@ohdex/contracts/lib/build/contracts/${name}.json`);
-    let json = require(`@ohdex/contracts/lib/build/artifacts/${name}.json`);
-    let bytecode = json.compilerOutput.evm.bytecode.object;
-    let abi = json.compilerOutput.abi;
-    let provider = pe;
 
-    assert.ok(bytecode.length > 0)
-    assert.ok(abi.length > 0)
-    assert.ok(from != "")
 
-    return [
-        bytecode,
-        abi,
-        provider,
-        { from }
-        // gas: 100000
-    ]
-}
+
+
 
 
 async function deploy(configMgr: ConfigManager) {
@@ -124,6 +104,19 @@ async function _deploy(configMgr: ConfigManager, network: string) {
     web3 = new Web3Wrapper(pe);
     accounts = await web3.getAvailableAddressesAsync();
     account = accounts[0];
+    
+    // Deploy libraries
+    let sparseMerkleTree = await SparseMerkleTreeContract.deployAsync(
+        ...getDeployArgs('SparseMerkleTree', pe, account)
+    )
+
+    let merkleTreeVerifier = await MerkleTreeVerifierContract.deployAsync(
+        ...getDeployArgs('MerkleTreeVerifier', pe, account)
+    )
+
+    addLibrary('SparseMerkleTree', sparseMerkleTree.address)
+    addLibrary('MerkleTreeVerifier', merkleTreeVerifier.address)
+
 
     // 0 Deploy whitelist
 
@@ -148,7 +141,7 @@ async function _deploy(configMgr: ConfigManager, network: string) {
     // 2 Deploy eventEmitter
     // @ts-ignore
     let eventEmitter = await EventEmitterContract.deployAsync(
-        ...getDeployArgs('EventEmitter', pe, account),
+        ...getDeployArgs('EventEmitter', pe, account, true),
         // @ts-ignore
         whitelist.address,
         config.chainId,
@@ -159,29 +152,11 @@ async function _deploy(configMgr: ConfigManager, network: string) {
     
     // @ts-ignore
     let eventListener = await EventListenerContract.deployAsync(
-        ...getDeployArgs('EventListener', pe, account),
+        ...getDeployArgs('EventListener', pe, account, true),
         // @ts-ignore
         eventEmitter.address
     )
 
-
-    // // 4 Deploy Escrow
-
-    // // @ts-ignore
-    // let escrow = await EscrowContract.deployAsync(
-    //     ...getDeployArgs('Escrow', pe, account),
-    //     config.chainId,
-    //     eventListener.address,
-    //     eventEmitter.address
-    // );
-
-    // // 4.1 add Escrow to whitelist
-
-    // await whitelist.addWhitelisted.sendTransactionAsync(
-    //     escrow.address
-    // )
-
-    // console.log("whitelisted Escrow");
 
     // 5 Deploy Bridge
 
@@ -198,31 +173,12 @@ async function _deploy(configMgr: ConfigManager, network: string) {
     // config.escrowAddress = escrow.address.toLowerCase();
     config.bridgeAddress = bridge.address.toLowerCase();
 
-    // @ts-ignore
-    // let aliceToken = await DemoERC20Contract.deployAsync(
-    //     ...getDeployArgs('DemoERC20', pe, account),
-    //     "AliceToken",
-    //     "ALI",
-    //     "7",
-    //     "1000000000"
-    // );
-    // // @ts-ignore
-    // let bobToken = await DemoERC20Contract.deployAsync(
-    //     ...getDeployArgs('DemoERC20', pe, account),
-    //     // @ts-ignore
-    //     "BobToken",
-    //     "BOB",
-    //     "7",
-    //     "1000000000"
-    // );
 
     // @ts-ignore
     let weth = await WETH9Contract.deployAsync(
         ...getDeployArgs('WETH9', pe, account)
     );
     config.wethToken = weth.address.toLowerCase();
-    // config.aliceToken = aliceToken.address.toLowerCase();
-    // config.bobToken = bobToken.address.toLowerCase();
     
 
     pe.stop();

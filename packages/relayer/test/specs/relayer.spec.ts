@@ -1,6 +1,6 @@
 import { BigNumber } from "@0x/utils";
 import { BridgedTokenContract } from "@ohdex/contracts/lib/build/wrappers/bridged_token";
-import { ContractWrappers, _chainId, _salt, generateSalt, wait } from '@ohdex/shared';
+import { ContractWrappers, _salt, generateSalt, wait } from '@ohdex/shared';
 import { consoleOpts } from '../../src/logger';
 import { Relayer } from '../../src/relayer';
 import { get0xArtifact, loadWeb3, Testchain, TestchainFactory, givenEmptyDatabase } from '../helper';
@@ -88,10 +88,7 @@ describe('Relayer', function() {
         })
 
         before(async () => {
-            await Promise.all([
-                bchain1.startAsync(),
-                bchain2.startAsync()
-            ])
+            
 
             // console.log(2)
             // await web31.revertSnapshotAsync(chain1.deploymentInfo.blockNumber)
@@ -107,7 +104,10 @@ describe('Relayer', function() {
         })
 
         beforeEach(async () => {
-
+            await Promise.all([
+                bchain1.startAsync(),
+                bchain2.startAsync()
+            ])
             // await web31.awaitTransactionMinedAsync(
             //     await web31.sendTransactionAsync({
             //         from: account1,
@@ -201,22 +201,22 @@ describe('Relayer', function() {
                     chain2.bridgeAddress,
                     txDefaults1
                 ),
-                wrappers1.Bridge.bridge.sendTransactionAsync(
-                    bridgedToken1.address, 
-                    account1, new BigNumber('301'), 
-                    generateSalt(),
-                    chain2.chainId,
-                    chain2.bridgeAddress,
-                    txDefaults1
-                ),
-                // wrappers2.Bridge.bridge.sendTransactionAsync(
-                //     bridgedToken2.address, 
-                //     account2, new BigNumber('300'), 
-                //     generateSalt(), 
-                //     chain1.chainId, 
-                //     chain1.bridgeAddress, 
-                //     txDefaults2
-                // )
+                // wrappers1.Bridge.bridge.sendTransactionAsync(
+                //     bridgedToken1.address, 
+                //     account1, new BigNumber('301'), 
+                //     generateSalt(),
+                //     chain2.chainId,
+                //     chain2.bridgeAddress,
+                //     txDefaults1
+                // ),
+                wrappers2.Bridge.bridge.sendTransactionAsync(
+                    bridgedToken2.address, 
+                    account2, new BigNumber('300'), 
+                    generateSalt(), 
+                    chain1.chainId, 
+                    chain1.bridgeAddress, 
+                    txDefaults2
+                )
             ])
 
             

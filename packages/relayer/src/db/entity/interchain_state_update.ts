@@ -41,20 +41,4 @@ export class InterchainStateUpdate extends BaseEntity {
         .limit(1)
         .getOne();
     }
-
-    // static getLatestStateroots(blockTime: number) {
-    //     return this.createQueryBuilder('update')
-    //     .select('MAX(update.blockTime)')
-    //     .addSelect('update.blockHash')
-    //     .addSelect('update.stateRoot')
-    //     .addSelect('update.chain')
-    //     .addSelect('update.id')
-    //     .leftJoinAndSelect("update.chain", "chain")
-    //     // .where('chain.chainId = :chainId', { chainId })
-    //     .andWhere('update.blockTime <= :blockTime', { blockTime })
-    //     .orderBy('blockTime', 'DESC')
-    //     .groupBy('chain.chainId')
-    //     // .limit(1)
-    //     .getMany()
-    // }
 }

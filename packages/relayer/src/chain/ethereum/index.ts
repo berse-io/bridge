@@ -149,8 +149,8 @@ export class EthereumChainTracker extends ChainTracker {
         ethersProvider.polling = true;
         ethersProvider.pollingInterval = 200;
         await new Promise((res, rej) => {
-            // ethersProvider.on('block', res);
-            ethersProvider.getBlockNumber().then(res)
+            ethersProvider.on('block', res);
+            // ethersProvider.getBlockNumber().then(res)
 
             setTimeout(
                 _ => {
@@ -225,6 +225,7 @@ export class EthereumChainTracker extends ChainTracker {
 
         let previousUpdates = await this.eventListener.loadPreviousStateRootUpdates()
         for(let update of previousUpdates) {
+            console.log(update)
             await this.stateUpdate.insert({
                 ...update,
                 chain: this.conf.chainId
@@ -306,12 +307,12 @@ export class EthereumChainTracker extends ChainTracker {
     {
         try {
             // compute the state root first
-            let { proof, leaf } = await this.crosschainStateService.computeUpdatedStateRoot(this.conf.chainId);
-            this.logger.info(`computeUpdatedStateRoot: ${hexify(proof.root)}`)
+            let stateRootUpdate = await this.crosschainStateService.computeUpdatedStateRoot(this.conf.chainId);
+            this.logger.info(`computeUpdatedStateRoot: ${stateRootUpdate.root}`)
 
             this.txQueue.push(async _ => {
                 await this.web3Wrapper.awaitTransactionSuccessAsync(
-                    await this.eventListener.updateStateRoot(proof, leaf as EthereumStateLeaf)
+                    await this.eventListener.updateStateRoot(stateRootUpdate)
                 );
             })
         } catch(err) {
@@ -390,14 +391,14 @@ export class EthereumChainTracker extends ChainTracker {
 }
 
 
-export class EventListenerWrapper {
-    static updateStateRoot(eventListener: EventListenerContract, proof: MerkleTreeProof, leaf: EthereumStateLeaf) {
-        return eventListener.updateStateRoot.sendTransactionAsync(
-            proof.proofs.map(hexify),
-            proof.paths,
-            hexify(proof.root),
-            hexify(leaf.eventsRoot)
-        )
-    }
-}
+// export class EventListenerWrapper {
+//     static updateStateRoot(eventListener: EventListenerContract, proof: MerkleTreeProof, leaf: EthereumStateLeaf) {
+//         return eventListener.updateStateRoot.sendTransactionAsync(
+//             proof.proofs.map(hexify),
+//             proof.paths,
+//             hexify(proof.root),
+//             hexify(leaf.eventsRoot)
+//         )
+//     }
+// }
 

@@ -2,10 +2,9 @@ pragma solidity ^0.5.0;
 
 import "./EventEmitter.sol";
 import "../MerkleTreeVerifier.sol";
-import "../libs/MerklePatriciaProof.sol";
 import "../libs/SparseMerkleTree.sol";
 
-contract EventListener is MerkleTreeVerifier {
+contract EventListener {
     // The interchain state root.
     bytes32 public interchainStateRoot;
     bytes32 public lastUpdated;
@@ -41,22 +40,22 @@ contract EventListener is MerkleTreeVerifier {
     }
 
     function checkEvent(
-        // bytes32 _eventsRoot,
         bytes32 _eventHash,
-        bytes32 _eventProofBitmap,
-        bytes memory _eventProof,
+        bytes32[] memory _eventsProof,
+        bool[] memory _eventsPaths,
         bytes32 _stateProofBitmap,
         bytes memory _stateProof
     ) public returns (bool) {
-
         bytes32 eventsRoot = emitter.getEventsRoot();
+
+        bytes32 eventLeaf = MerkleTreeVerifier._hashLeaf(_eventHash);
+
         require(
-            SparseMerkleTree.verify(
+            MerkleTreeVerifier._verify(
+                eventLeaf,
                 eventsRoot,
-                uint256(_eventHash),
-                _eventHash,
-                _eventProofBitmap,
-                _eventProof
+                _eventsProof,
+                _eventsPaths
             ) == true,
             "_eventHash INVALID_PROOF"
         );

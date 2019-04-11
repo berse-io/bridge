@@ -306,12 +306,12 @@ describe('Bridge', function(){
 
 class EventListenerWrapper {
     static updateStateRoot(eventListener: EventListenerContract, proof: MerkleTreeProof, leaf: EthereumStateLeaf) {
-        return eventListener.updateStateRoot.sendTransactionAsync(
-            proof.proofs.map(hexify), 
-            proof.paths, 
-            hexify(proof.root),
-            hexify(leaf.eventsRoot)
-        )
+        // return eventListener.updateStateRoot.sendTransactionAsync(
+        //     proof.proofs.map(hexify), 
+        //     proof.paths, 
+        //     hexify(proof.root),
+        //     hexify(leaf.eventsRoot)
+        // )
     }
 }
 

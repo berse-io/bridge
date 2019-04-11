@@ -5,7 +5,7 @@ import "../MerkleTreeVerifier.sol";
 import "../whitelist/WhiteListUser.sol";
 
 
-contract EventEmitter is MerkleTreeVerifier, WhitelistUser {
+contract EventEmitter is WhitelistUser {
 
     using LibEvent for bytes32;
 
@@ -42,8 +42,7 @@ contract EventEmitter is MerkleTreeVerifier, WhitelistUser {
     }
 
     function getEventsRoot() public view returns(bytes32) {
-        if(events.length == 0) return nonce;
-        return _computeMerkleRoot(events);
+        return MerkleTreeVerifier._computeMerkleRoot(events);
     }
 
 }

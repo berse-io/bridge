@@ -31,7 +31,7 @@
     "remix": "remixd -s . --remix-ide https://remix.ethereum.org",
     "newTestAccounts": "cd devchain && rm -rf keys && for run in {1..300}; do parity account new --config testnode.toml; done && cd ../ && yarn addTestAccountsToChainSpec",
     "addTestAccountsToChainSpec": "cd devchain && node scripts/addToSpec.js",
-    "clean": "rm build/contracts/** && rm build/artifacts/** && rm build/wrappers/** && rm .0x-artifacts/**"
+    "clean": "rm build/artifacts/* && rm build/wrappers/* && rm .0x-artifacts/**"
   },
   "author": "",
   "license": "ISC",
