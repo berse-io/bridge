@@ -48,5 +48,10 @@
         "chainId": 5,
         "chainType": "ethereum",
         "rpcUrl": "https://goerli.infura.io/v3/3049535d150e49729f54f6f8bef40a1b"
+    },
+    "pepchainChurchill": {
+        "chainId": 13371337,
+        "chainType": "ethereum",
+        "rpcUrl": "https://churchill-rpc.pepchain.io/"
     }
 }

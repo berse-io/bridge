@@ -30,9 +30,29 @@ function* tryGetBalance(action: any) {
     // console.log(action);
 }
 
+function* tryGetAllBalances(action: any) {
+    const wallet:WalletState = yield select(getWallet);
+
+
+    for(let tokenIndex in wallet.tokens) {
+
+        const token = wallet.tokens[tokenIndex];
+
+        let balance = yield call(Web3Interface.getBalance, wallet.ethereum.address, token.network, token.address);
+
+        yield put({
+            type: actions.SET_TOKEN_BALANCE,
+            tokenIndex,
+            balance: balance
+        })
+
+    }
+}
+
 
 export default function* saga() {
     yield all([
-        takeEvery(actions.UPDATE_TOKEN_BALANCE, tryGetBalance)
+        takeEvery(actions.UPDATE_TOKEN_BALANCE, tryGetBalance),
+        takeEvery(actions.UPDATE_ALL_BALANCES, tryGetAllBalances)
     ]);
 }

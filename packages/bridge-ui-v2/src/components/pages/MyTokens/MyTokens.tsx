@@ -37,8 +37,14 @@ const styles:any = (theme:any) => ({
 })
 
 class MyTokens extends React.Component<any> {
-    render() {
 
+    componentDidMount(){
+        this.props.dispatch({
+            type: walletActions.UPDATE_ALL_BALANCES      
+        })
+    }
+
+    render() {
         const {classes, wallet, addToken} = this.props;
 
         console.log(addToken);

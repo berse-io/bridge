@@ -6,6 +6,9 @@ const getTokensObject = () => {
     tokens = tokens.concat( addNetworkToTokens("Ethereum", "Ether", "ETH" , ethereumTokens));
     tokens = tokens.concat( addNetworkToTokens("Ethereum Ropsten Testnet", "Ropsten Ether", "RETH" , []));
     tokens = tokens.concat( addNetworkToTokens("Ethereum Kovan Testnet", "Kovan Ether", "KETH" , []));
+    tokens = tokens.concat( addNetworkToTokens("Ethereum Rinkeby Testnet", "Rinkeby Ether", "RiETH" , []));
+    tokens = tokens.concat( addNetworkToTokens("Ethereum Goerli Testnet", "Goerli Ether", "GETH" , []));
+    tokens = tokens.concat( addNetworkToTokens("PepChain Testnet", "Test PEP", "TPEP" , []));
 
     return tokens;
 }
@@ -19,8 +22,6 @@ function addNetworkToTokens(network:string, nativeCurrencyName:string, nativeCur
         token.network = network;
         return token;
     })
-
-    // console.log(tokenList);
 
     let nativeToken = {
         "symbol": nativeCurrencySymbol,
