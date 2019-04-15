@@ -3,11 +3,13 @@ pragma solidity ^0.5.0;
 import "./EventEmitter.sol";
 import "../MerkleTreeVerifier.sol";
 import "../libs/SparseMerkleTree.sol";
+import "../interfaces/IEventListener.sol";
 
-contract EventListener {
+contract EventListener is IEventListener {
     // The interchain state root.
     bytes32 public interchainStateRoot;
     bytes32 public lastUpdated;
+    bytes32 public acknowledgedEventsRoot;
     // bytes32 public acknowledgedEventsRoot;
     
     // The last recorded root of this chain on other chains.
@@ -46,14 +48,14 @@ contract EventListener {
         bytes32 _stateProofBitmap,
         bytes memory _stateProof
     ) public returns (bool) {
-        bytes32 eventsRoot = emitter.getEventsRoot();
+        // bytes32 eventsRoot = emitter.getEventsRoot();
 
         bytes32 eventLeaf = MerkleTreeVerifier._hashLeaf(_eventHash);
 
         require(
             MerkleTreeVerifier._verify(
                 eventLeaf,
-                eventsRoot,
+                acknowledgedEventsRoot,
                 _eventsProof,
                 _eventsPaths
             ) == true,
@@ -64,7 +66,7 @@ contract EventListener {
             SparseMerkleTree.verify(
                 interchainStateRoot,
                 emitter.chainId(),
-                eventsRoot,
+                acknowledgedEventsRoot,
                 _stateProofBitmap,
                 _stateProof
             ) == true,
@@ -96,6 +98,7 @@ contract EventListener {
             "_newInterchainStateRoot INVALID_PROOF"
         );
         
+        acknowledgedEventsRoot = _eventsRoot;
         _updateStateRoot(_newInterchainStateRoot);
         
         emitter.acknowledgeEvents();

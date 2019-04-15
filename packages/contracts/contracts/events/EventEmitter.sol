@@ -3,10 +3,9 @@ pragma solidity ^0.5.0;
 import "../libs/LibEvent.sol";
 import "../MerkleTreeVerifier.sol";
 import "../whitelist/WhiteListUser.sol";
+import "../interfaces/IEventEmitter.sol";
 
-
-contract EventEmitter is WhitelistUser {
-
+contract EventEmitter is WhitelistUser, IEventEmitter {
     using LibEvent for bytes32;
 
     // Events pending acknowledgement on other chains.
