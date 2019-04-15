@@ -2,22 +2,38 @@ pragma solidity ^0.5.0;
 
 import "../events/EventListener.sol";
 import "../events/EventEmitter.sol";
-import "./ITokenBridge.sol";
 import "../BridgedToken.sol";
 import "../libs/LibEvent.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 
-// This contract combines the former Escrow and Bridge contracts into one. Making the implementation simpler and easier to understand
-contract Bridge is ITokenBridge {
+contract Bridge {
     using LibEvent for bytes32;
     using SafeMath for uint256;
 
-    constructor(EventListener _eventListener, EventEmitter _eventEmitter) ITokenBridge(_eventListener, _eventEmitter) public {
-       
-    }
+    mapping(bytes32 => bool) public processedEvents;
+    uint256 public chainId;
 
-    event TokensClaimed(address indexed token, address indexed receiver, uint256 amount, uint256 indexed chainId, uint256 salt);
+    EventListener public eventListener;
+    EventEmitter public eventEmitter;
+
+    event TokensBridged(
+        bytes32 eventHash, 
+        address targetBridge, 
+        uint256 indexed chainId, 
+        address indexed receiver, 
+        address indexed token, 
+        uint256 amount, 
+        uint256 _salt
+    );
+
+    event TokensClaimed(
+        address indexed token, 
+        address indexed receiver, 
+        uint256 amount, 
+        uint256 indexed chainId, 
+        uint256 salt
+    );
 
     // Each network can have infitite amount of bridge contracts so we don't need to initialize anything on any side
     struct Network {
@@ -35,6 +51,81 @@ contract Bridge is ITokenBridge {
 
     mapping(address => bool) isBridgedToken; //is bridged token
 
+
+
+    constructor(
+        EventListener _eventListener, 
+        EventEmitter _eventEmitter
+    ) 
+        public 
+    {
+        eventListener = _eventListener;
+        eventEmitter = _eventEmitter;
+    }
+    
+    
+    function _createBridgeTokenEvent(
+        address _targetBridge, 
+        address _receiver, 
+        address _token, 
+        uint256 _amount, 
+        uint256 _chainId, 
+        uint256 _salt, 
+        bool _bridgingBack
+    ) 
+        internal 
+    {
+        bytes32 eventHash = _getTokensBridgedEventHash(
+            _token, 
+            _receiver, 
+            _amount, 
+            _salt, 
+            _chainId, 
+            _bridgingBack
+        );
+        eventHash = eventEmitter.emitEvent(eventHash); //Emit and return marked event reusing the variable
+
+        emit TokensBridged(
+            eventHash, 
+            _targetBridge, 
+            _chainId, 
+            _receiver, 
+            _token, 
+            _amount, 
+            _salt
+        );
+    }
+
+    function _getTokensBridgedEventHash(
+       address _token, 
+       address _receiver,
+       uint256 _amount,
+       uint256 _salt,
+       uint256 _targetChainId,
+       bool _bridgingBack
+    ) 
+        public pure 
+        returns (bytes32) 
+    {
+        return keccak256(abi.encodePacked(
+            _receiver, 
+            _token, 
+            _amount, 
+            _salt, 
+            _targetChainId, 
+            _bridgingBack
+        ));
+    }
+
+    function _checkEventProcessed(
+        bytes32 eventHash
+    ) 
+        internal 
+    {
+        require(!processedEvents[eventHash], "EVENT_ALREADY_PROCESSED");
+        processedEvents[eventHash] = true;
+    }
+
     /// @notice Called when bridging tokens
     /// @param _token Address of the token to bridge
     /// @param _receiver Address receiving the token on the other chain
@@ -42,7 +133,16 @@ contract Bridge is ITokenBridge {
     /// @param _targetChainId Chain Id of the receiving bridge contract
     /// @param _targetBridge Address of the target bridge contract
     /// @param _salt Random salt to allow exact matches of bridging actions
-    function bridge(address _token, address _receiver, uint256 _amount, uint256 _salt, uint256 _targetChainId, address _targetBridge)  public {
+    function bridge(
+        address _token, 
+        address _receiver, 
+        uint256 _amount, 
+        uint256 _salt, 
+        uint256 _targetChainId, 
+        address _targetBridge
+    ) 
+        public
+    {
         BridgedToken tokenContract = BridgedToken(_token);
         BridgeContract storage bridgeContract = networks[_targetChainId].bridgeContracts[_targetBridge];
         address originTokenAddress = networks[_targetChainId].bridgeContracts[_targetBridge].bridgedTokenToOrigin[_token];
@@ -91,15 +191,12 @@ contract Bridge is ITokenBridge {
         bytes32 _stateProofBitmap,
         bytes memory _stateProof
         
-    ) public {
-
+    ) 
+        public
+    {
         // Generate event hash
-        
         bytes32 eventHash = _getTokensBridgedEventHash(_token, _receiver, _amount, _salt, eventEmitter.chainId(), _bridgingBack);
         eventHash = eventHash.getMarkedEvent(_triggerAddress, _originChainId);
-
-        bytes32 markedEventHash = _eventHash.getMarkedEvent(msg.sender, chainId);
-        events.push(markedEventHash);
 
         // make sure event was not processed
         _checkEventProcessed(eventHash);
@@ -124,8 +221,9 @@ contract Bridge is ITokenBridge {
         address _triggerAddress,
         uint256 _originChainId,
         bool _bridgingBack
-        ) internal {
-
+    ) 
+        internal
+    {
         BridgeContract storage bridgeContract = networks[_originChainId].bridgeContracts[_triggerAddress];
 
         // if token was bridged back
@@ -145,7 +243,14 @@ contract Bridge is ITokenBridge {
     }
 
 
-    function getBridgedToken(address _token, uint256 _chainId, address _triggerAddress) public returns(address tokenAddress) { 
+    function getBridgedToken(
+        address _token, 
+        uint256 _chainId, 
+        address _triggerAddress
+    ) 
+        public
+        returns (address tokenAddress) 
+    { 
         // Check if the bridged token already exists
         tokenAddress = getBridgedTokenStatic(_token, _chainId, _triggerAddress);  
         if(tokenAddress != address(0)){
@@ -162,11 +267,27 @@ contract Bridge is ITokenBridge {
         bridgeContract.originTokenToBridged[_token] = _token;
     }
 
-    function getBridgedTokenStatic(address _token, uint256 _chainId, address _triggerAddress) public view returns(address) {
+    function getBridgedTokenStatic(
+        address _token, 
+        uint256 _chainId, 
+        address _triggerAddress
+    ) 
+        public 
+        view 
+        returns (address) 
+    {
         return networks[_chainId].bridgeContracts[_triggerAddress].originTokenToBridged[_token];
     }
 
-    function markEvent(bytes32 _eventHash, address _triggerAddress, uint256 _triggerChain) public view returns(bytes32) {
+    function markEvent(
+        bytes32 _eventHash, 
+        address _triggerAddress, 
+        uint256 _triggerChain
+    ) 
+        public 
+        view 
+        returns (bytes32) 
+    {
         return _eventHash.getMarkedEvent(_triggerAddress, _triggerChain);
     }
 
