@@ -3,7 +3,7 @@ import { NonceTrackerSubprovider, PrivateKeyWalletSubprovider } from "@0x/subpro
 import { Web3Wrapper } from '@0x/web3-wrapper';
 import { inject } from '@loopback/context';
 import { EventListenerContract } from '@ohdex/contracts/lib//build/wrappers/event_listener';
-import { zxWeb3Connected } from '@ohdex/shared';
+import { zxWeb3Connected, wait } from '@ohdex/shared';
 import { MerkleTreeProof } from "@ohdex/typescript-solidity-merkle-tree";
 import { ethers } from 'ethers';
 import { Repository } from "typeorm";
@@ -15,7 +15,7 @@ import { InterchainStateUpdate } from "../../db/entity/interchain_state_update";
 import { ChainStateLeaf, CrosschainState } from "../../interchain/crosschain_state";
 import { getCurrentBlocktime } from "../../interchain/helpers";
 import { CrosschainStateService } from "../../interchain/xchain_state_service";
-import { hexify, shortToLongBridgeId } from "../../utils";
+import { hexify, normaliseAddress } from "../../utils";
 import { ChainTracker } from "../tracker";
 import { BridgeAdapter, TokensBridgedEvent } from "./bridge";
 import { EventEmitterAdapter } from "./event_emitter";
@@ -216,6 +216,7 @@ export class EthereumChainTracker extends ChainTracker {
     
     private async loadStateAndEvents() {
         let previousEvents = await this.eventEmitter.loadPreviousEvents()
+        console.log(previousEvents)
         for(let ev of previousEvents) {
             await this.chainEvent.insert({
                 ...ev,
@@ -225,12 +226,12 @@ export class EthereumChainTracker extends ChainTracker {
 
         let previousUpdates = await this.eventListener.loadPreviousStateRootUpdates()
         for(let update of previousUpdates) {
-            console.log(update)
             await this.stateUpdate.insert({
                 ...update,
                 chain: this.conf.chainId
             })
         }
+        console.log(previousUpdates)
 
         this.logger.info(`pastEvents=${previousEvents.length} pastStateUpdates=${previousUpdates.length}`)
 
@@ -257,8 +258,8 @@ export class EthereumChainTracker extends ChainTracker {
             })
 
             // Also try process acknowledged events
-            await this.processBridgeEvents(null)
             // await wait(1500)
+            await this.processBridgeEvents(null)
         
             // for(let chain of Object.values(this.chains)) {
             //     try {
@@ -276,7 +277,7 @@ export class EthereumChainTracker extends ChainTracker {
                     chainId: this.conf.chainId,
                 },
                 to: {
-                    targetBridge: shortToLongBridgeId(tokensBridgedEv.targetBridge)
+                    targetBridge: normaliseAddress(tokensBridgedEv.targetBridge)
                 }
             }
 
@@ -333,6 +334,7 @@ export class EthereumChainTracker extends ChainTracker {
         try {
             // Now process any events on this bridge for the user
             for(let ev of this.pendingCrosschainEvs) {
+                this.logger.info(`Proving event ${ev.data.eventHash} for bridging`)
                 let proof = await this.crosschainStateService.proveEvent(
                     this.conf.chainId, 
                     ev.from.chainId, 
@@ -357,16 +359,16 @@ export class EthereumChainTracker extends ChainTracker {
     
     get bridgeIds(): string[] {
         return [
-            shortToLongBridgeId(this.bridge.bridgeContract.address)
+            normaliseAddress(this.bridge.bridgeContract.address)
         ]
     }
 
     // Listen for the original events from other chains
     // and add them to our pending queue here
     async receiveCrosschainEvent(ev: CrosschainEvent<any>): Promise<boolean> {
-        this.logger.debug(JSON.stringify(ev))
+        // this.logger.debug(JSON.stringify(ev))
 
-        if(ev.from == this.conf.chainId) {
+        if(ev.from.chainId == this.conf.chainId) {
             this.logger.warn('receiveCrosschainMessage: ignoring event from own chain')
             return;
         }

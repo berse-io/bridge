@@ -10,7 +10,7 @@ function dehexify(str: string): Buffer {
     return Buffer.from(str, 'hex')
 }
 
-function shortToLongBridgeId(addr: string): string {
+function normaliseAddress(addr: string): string {
     // return `0x000000000000000000000000`+addr.split('0x')[1]
     return addr.toLowerCase()
 }
@@ -22,7 +22,7 @@ const keccak256 = (x: any) => dehexify(require('web3-utils').keccak256(x));
 export {
     hexify,
     dehexify,
-    shortToLongBridgeId,
+    normaliseAddress,
     toBN,
     keccak256
 }

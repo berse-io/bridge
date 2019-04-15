@@ -193,7 +193,7 @@ describe('Relayer', function() {
 
 
             await Promise.all([
-                wrappers1.Bridge.bridge.sendTransactionAsync( 
+                wrappers1.Bridge.deposit.sendTransactionAsync( 
                     bridgedToken1.address, 
                     account1, new BigNumber('300'), 
                     generateSalt(),
@@ -209,7 +209,7 @@ describe('Relayer', function() {
                 //     chain2.bridgeAddress,
                 //     txDefaults1
                 // ),
-                wrappers2.Bridge.bridge.sendTransactionAsync(
+                wrappers2.Bridge.deposit.sendTransactionAsync(
                     bridgedToken2.address, 
                     account2, new BigNumber('300'), 
                     generateSalt(), 
