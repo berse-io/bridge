@@ -61,6 +61,17 @@ library SparseMerkleTree {
         }
         return computedHash;
     }
-
-    
 }
+
+
+
+/**
+ * we can probably use an interval tree
+ * also known as a merkle sum tree
+ * whereby every node also has a sum attached to it 
+ * 
+ * but instead of a sum
+ * every event is given a monotonic id 
+ * so to prove an event
+ * you are O(1) 
+ */

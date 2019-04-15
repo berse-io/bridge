@@ -1,7 +1,7 @@
 pragma solidity ^0.5.0;
 
 import "../libs/LibEvent.sol";
-import "../MerkleTreeVerifier.sol";
+import "../libs/MerkleTreeVerifier.sol";
 import "../whitelist/WhiteListUser.sol";
 import "../interfaces/IEventEmitter.sol";
 
@@ -25,7 +25,7 @@ contract EventEmitter is WhitelistUser, IEventEmitter {
     function emitEvent(bytes32 _eventHash) public returns(bytes32) {
         require(_eventHash != 0x00, "INVALID_EVENT");
         // TODO implement some way of checking from which chain a event came
-        bytes32 markedEventHash = _eventHash.getMarkedEvent(msg.sender, chainId);
+        bytes32 markedEventHash = LibEvent.getEventHash(_eventHash, msg.sender, chainId);
         events.push(markedEventHash);
         emit EventEmitted(markedEventHash);
         // TODO: Implement fee system

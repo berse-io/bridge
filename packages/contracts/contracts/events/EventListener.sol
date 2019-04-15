@@ -1,7 +1,7 @@
 pragma solidity ^0.5.0;
 
 import "./EventEmitter.sol";
-import "../MerkleTreeVerifier.sol";
+import "../libs/MerkleTreeVerifier.sol";
 import "../libs/SparseMerkleTree.sol";
 import "../interfaces/IEventListener.sol";
 
