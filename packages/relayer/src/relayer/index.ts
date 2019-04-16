@@ -1,4 +1,4 @@
-import { ITokenBridgeEventArgs } from "@ohdex/contracts/lib/build/wrappers/i_token_bridge";
+// import { ITokenBridgeEventArgs } from "@ohdex/contracts/lib/build/wrappers/i_token_bridge";
 import { EthereumChainTracker, CrosschainEvent } from "../chain/ethereum";
 import { CrosschainState } from "../interchain/crosschain_state";
 import { defaultLogger } from "../logger";
@@ -74,11 +74,7 @@ export class Relayer {
         }
         
         await Promise.all(started)
-
-        // Add their state gadgets
-        Object.values(this.chains).map(chain => {
-            this.crosschainState.put(chain.stateGadget)
-        });
+        
 
         // Start state update loop
         let self = this;
@@ -105,13 +101,13 @@ export class Relayer {
     }
 
     async updateChains(exceptChain: string) {
-        this.logger.info(`Computing new state root`)
+        // this.logger.info(`Computing new state root`)
 
         // Compute new state roots
         // And then we can process the new bridge events after they have been ack'd.
         for(let chain of Object.values(this.chains)) {
             try {
-                await chain.updateStateRoot(null, null);
+                await chain.updateStateRoot();
             } catch(ex) {
                 throw ex;
             }

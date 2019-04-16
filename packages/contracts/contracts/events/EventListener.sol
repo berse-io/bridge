@@ -31,13 +31,14 @@ contract EventListener is IEventListener {
     constructor(address _emitter) public {
         // bytes32 nonce = keccak256(abi.encodePacked(this, blockhash(1), _emitter));
         emitter = EventEmitter(_emitter);
-        emitter.emitEvent(emitter.nonce());
+        // emitter.emitEvent(emitter.nonce());
         _updateStateRoot(emitter.nonce());
     }
 
     function _updateStateRoot(bytes32 root) internal {
         lastUpdated = blockhash(block.number);
         interchainStateRoot = root;
+        emitter.acknowledge();
         emit StateRootUpdated(root, emitter.getEventsRoot());
     }
 
@@ -83,7 +84,7 @@ contract EventListener is IEventListener {
         bytes32 _proofBitmap,
         bytes memory _proof
     ) public {
-        require(emitter.getEventsRoot() == _eventsRoot, "EVENT_ROOT_MISMATCH");
+        // require(emitter.getEventsRoot() == _eventsRoot, "EVENT_ROOT_MISMATCH");
         
         uint256 key = emitter.chainId();
 
@@ -100,7 +101,6 @@ contract EventListener is IEventListener {
         
         acknowledgedEventsRoot = _eventsRoot;
         _updateStateRoot(_newInterchainStateRoot);
-        
-        emitter.acknowledgeEvents();
+    
     }
 }

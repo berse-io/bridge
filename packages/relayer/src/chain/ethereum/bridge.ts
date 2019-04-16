@@ -32,6 +32,7 @@ export class BridgeAdapter {
     bridgeContract: BridgeContract;
     bridgeContract_sub: ethers.Contract;
     events = new EventEmitter()
+    chainId: number;
 
     constructor(
         private ethersProvider: ethers.providers.Provider,
@@ -114,6 +115,7 @@ export class BridgeAdapter {
                     targetBridge,
                     eventHash
                 }
+                console.log(tokensBridgedEv)
                 self.events.emit('tokensBridged', tokensBridgedEv)
             }
         )
@@ -166,8 +168,8 @@ export class BridgeAdapter {
                         ev.data.receiver,
                         ev.data.amount,
                         ev.data.salt,
-                        ev.data.originChainId,
-                        ev.data.originBridge,
+                        new BigNumber(ev.from.chainId),
+                        ev.from.bridge,
 
                         proof.eventLeafProof.proofs.map(hexify),
                         proof.eventLeafProof.paths,
@@ -183,8 +185,9 @@ export class BridgeAdapter {
                         ev.data.receiver,
                         ev.data.amount,
                         ev.data.salt,
-                        ev.data.originChainId,
-                        ev.data.originBridge,
+                        new BigNumber(ev.from.chainId),
+                        ev.from.bridge,
+
                         proof.eventLeafProof.proofs.map(hexify),
                         proof.eventLeafProof.paths,
                         proof.stateProof.proofBitmap,

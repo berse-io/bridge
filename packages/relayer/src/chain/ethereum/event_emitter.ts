@@ -8,7 +8,6 @@ interface EmittedEvent {
 }
 
 export class EventEmitterAdapter {
-    eventEmitter_web3: any;
     eventEmitter_sub: ethers.Contract;
     public events = new EventEmitter()
     

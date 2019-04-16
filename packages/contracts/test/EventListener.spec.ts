@@ -104,21 +104,21 @@
 //         let whitelist: WhitelistContract;
 //         let eventEmitter: EventEmitterContract;
 //         beforeEach(async () => {
-//             whitelist = await WhitelistContract.deployFrom0xArtifactAsync(
-//                 get0xArtifact('whitelist'),
-//                 pe, txDefaults,
-//             );
+            // whitelist = await WhitelistContract.deployFrom0xArtifactAsync(
+            //     get0xArtifact('whitelist'),
+            //     pe, txDefaults,
+            // );
             
 
-//             eventEmitter = await EventEmitterContract.deployFrom0xArtifactAsync(
-//                 get0xArtifact('EventEmitter'),
-//                 pe, txDefaults,
-//                 whitelist.address,
-//                 chainId,
-//                 "nonce"
-//             );
+            // eventEmitter = await EventEmitterContract.deployFrom0xArtifactAsync(
+            //     get0xArtifact('EventEmitter'),
+            //     pe, txDefaults,
+            //     whitelist.address,
+            //     chainId,
+            //     "nonce"
+            // );
 
-//             await whitelist.addWhitelisted.sendTransactionAsync(eventEmitter.address, txDefaults);
+            // await whitelist.addWhitelisted.sendTransactionAsync(eventEmitter.address, txDefaults);
 //         })
 
 //         it('initially has 0 events', async() => {

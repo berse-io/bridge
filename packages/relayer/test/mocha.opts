@@ -1,1 +1,1 @@
---exit --full-trace -r source-map-support -r make-promises-safe
+--exit --full-trace -r source-map-support -r make-promises-safe -r ./lib/test/global_hooks

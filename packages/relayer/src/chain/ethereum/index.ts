@@ -36,8 +36,10 @@ export interface CrosschainEvent<CrosschainEventTypes> {
     // Might be different in future.
     from: {
         chainId: number;
+        bridge: string;
     }
     to: {
+        chainId: number;
         targetBridge: string;
     }
 }
@@ -70,6 +72,7 @@ export class EthereumChainTracker extends ChainTracker {
     @inject('repositories.ChainEvent') chainEvent: Repository<ChainEvent>
     @inject('repositories.InterchainStateUpdate') stateUpdate: Repository<InterchainStateUpdate>
     @inject('interchain.CrosschainStateService') crosschainStateService: CrosschainStateService;
+    @inject('logging.default') logger2: any;
     
     constructor(
         conf: any
@@ -182,7 +185,8 @@ export class EthereumChainTracker extends ChainTracker {
             this.logger,
             this.conf.eventListenerAddress,
             this.pe,
-            txDefaults
+            txDefaults,
+            this.web3Wrapper
         )
 
         this.bridge = new BridgeAdapter(
@@ -216,7 +220,7 @@ export class EthereumChainTracker extends ChainTracker {
     
     private async loadStateAndEvents() {
         let previousEvents = await this.eventEmitter.loadPreviousEvents()
-        console.log(previousEvents)
+
         for(let ev of previousEvents) {
             await this.chainEvent.insert({
                 ...ev,
@@ -231,7 +235,6 @@ export class EthereumChainTracker extends ChainTracker {
                 chain: this.conf.chainId
             })
         }
-        console.log(previousUpdates)
 
         this.logger.info(`pastEvents=${previousEvents.length} pastStateUpdates=${previousUpdates.length}`)
 
@@ -248,6 +251,8 @@ export class EthereumChainTracker extends ChainTracker {
                 chain: this.conf.chainId,
             })
 
+            this.logger2.info('debug', event)
+
             this.events.emit('eventEmitted', event)
         })
 
@@ -256,6 +261,8 @@ export class EthereumChainTracker extends ChainTracker {
                 ...update,
                 chain: this.conf.chainId
             })
+
+            this.logger2.info('debug', update)
 
             // Also try process acknowledged events
             // await wait(1500)
@@ -275,11 +282,16 @@ export class EthereumChainTracker extends ChainTracker {
                 data: tokensBridgedEv,
                 from: {
                     chainId: this.conf.chainId,
+                    bridge: normaliseAddress(this.bridge.bridgeContract.address)
                 },
                 to: {
+                    // TODO(liamz): hazardous converting from bignum to number...
+                    chainId: tokensBridgedEv.targetChainId.toNumber(),
                     targetBridge: normaliseAddress(tokensBridgedEv.targetBridge)
                 }
             }
+
+            this.logger2.info('debug', crosschainEvent)
 
             this.events.emit('crosschainEvent', crosschainEvent)
         })
@@ -302,19 +314,34 @@ export class EthereumChainTracker extends ChainTracker {
         })
     }
 
-    async updateStateRoot(
-        proof2: MerkleTreeProof, leaf2: ChainStateLeaf
-    ): Promise<any> 
+    async updateStateRoot(): Promise<any> 
     {
         try {
+            let eventsCount = await this.chainEvent.count({ chain: this.conf.chainId })
+
             // compute the state root first
-            let stateRootUpdate = await this.crosschainStateService.computeUpdatedStateRoot(this.conf.chainId);
-            this.logger.info(`computeUpdatedStateRoot: ${stateRootUpdate.root}`)
+            let stateRootUpdate = await this.crosschainStateService.proveStateRootUpdate(this.conf.chainId);
+            
+            this.logger.info(`computeUpdatedStateRoot: root=${stateRootUpdate.root} eventRoot=${stateRootUpdate.eventRoot} ackdEvent=${eventsCount - 1}`)
 
             this.txQueue.push(async _ => {
-                await this.web3Wrapper.awaitTransactionSuccessAsync(
+                try {
                     await this.eventListener.updateStateRoot(stateRootUpdate)
-                );
+                } catch(ex) {
+                    // we can't get revert messages back
+                    // but we can try ascertain if the error was due to something we can understand
+                    
+                    // we can just count the number of events
+                    let eventsCountNow = await this.chainEvent.count({ chain: this.conf.chainId })
+                    this.logger.info(eventsCount, eventsCountNow)
+                    if(eventsCountNow > eventsCount) {
+                        this.logger.info(`State root update failed, newer events emitted`)
+                        this.logger.info(`ChainEvent.count BEFORE=${eventsCount} NOW=${eventsCountNow}`)
+                    } else {
+                        throw ex;
+                    }
+                    
+                }
             })
         } catch(err) {
             this.logger.error(err)
@@ -369,7 +396,7 @@ export class EthereumChainTracker extends ChainTracker {
         // this.logger.debug(JSON.stringify(ev))
 
         if(ev.from.chainId == this.conf.chainId) {
-            this.logger.warn('receiveCrosschainMessage: ignoring event from own chain')
+            // this.logger.warn('receiveCrosschainMessage: ignoring event from own chain')
             return;
         }
 
@@ -391,16 +418,3 @@ export class EthereumChainTracker extends ChainTracker {
         await this.bridge.stop()
     }
 }
-
-
-// export class EventListenerWrapper {
-//     static updateStateRoot(eventListener: EventListenerContract, proof: MerkleTreeProof, leaf: EthereumStateLeaf) {
-//         return eventListener.updateStateRoot.sendTransactionAsync(
-//             proof.proofs.map(hexify),
-//             proof.paths,
-//             hexify(proof.root),
-//             hexify(leaf.eventsRoot)
-//         )
-//     }
-// }
-

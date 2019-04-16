@@ -2,6 +2,5 @@ rpcUrl: http://localhost:10000
 contracts:
   artifacts: ./../../packages/contracts/build/artifacts/*.json
   addresses:
-    - Bridge: '0xcb59ba9417ec5e42b1fdaa952e62457bccb65790'
-    - EventListener: '0x99349f177fa95d5db73cf873b82ba6c79d2254df'
-  watch_new: true
+    - Bridge: '0x82ac0ab2db794ae1376ac18318ae3560f8dc40b6'
+  watch_new: false

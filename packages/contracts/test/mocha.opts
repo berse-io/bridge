@@ -1,1 +1,1 @@
---no-timeouts --full-trace -r source-map-support -r make-promises-safe -r asynctrace
+--no-timeouts --full-trace -r source-map-support -r make-promises-safe -r asynctrace -r ./lib/test/global_hooks

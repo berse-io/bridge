@@ -14,6 +14,8 @@ let debug = false;
 // See https://flawed.net.nz/2018/02/21/attacking-merkle-trees-with-a-second-preimage-attack/
 const LEAF_PREFIX = Buffer.from('00', 'hex');
 const BRANCH_PREFIX = Buffer.from('01', 'hex');
+export const EMPTY_BYTE32 = Buffer.from('0000000000000000000000000000000000000000000000000000000000000000', 'hex');
+// export const EMPTY_BYTES32 = Buffer.alloc(32);
 
 type HashFunction = (buf: Buffer) => Buffer;
 type MerkleTreeProof = {
@@ -23,50 +25,35 @@ type MerkleTreeProof = {
 	paths: boolean[];
 }
 
+
+import { keccak256 } from 'ethereumjs-util';
+
 class MerkleTree {
 	items: Buffer[];
-	leaves: Buffer[];
 	layers: Buffer[][];
 	nLayers: number;
 	hashFn: (buf: Buffer) => Buffer;
 	hashSizeBytes: number;
 
-	constructor(items: Buffer[], hashFn: HashFunction) {
-		let leaves = items;
-		this.items = items;
-		items.map((x,i) => {
-			if(i !== firstIndexOf(x, items)) throw new Error(`duplicate at ${i}`)
-		})
+	constructor(items: Buffer[], hashFn: HashFunction = keccak256) {
 		this.hashFn = hashFn;
 		this.hashSizeBytes = hashFn(BRANCH_PREFIX).byteLength;
 
-		// compute the balanced layer
-		if(leaves.length === 1) leaves = leaves.concat(leaves)
-		let balancedLeaves = new Array<Buffer>(
-			Math.pow(2, Math.ceil(Math.log2(
-				leaves.length
-			)))
-		);
-
-		for(let j = 0; j < balancedLeaves.length; j++) {
-			if(j > (leaves.length-1)) {
-				balancedLeaves[j] = leaves[leaves.length - 1];
-			} else {
-				balancedLeaves[j] = leaves[j];
-			}
-		}
-
-		leaves = balancedLeaves;
-
-		// Now hash all.
-		this.leaves = leaves.map(leaf => this.hashLeaf(leaf))
+		items.map((x,i) => {
+			if(i !== firstIndexOf(x, items)) throw new Error(`duplicate at ${i}`)
+		})
+		this.items = items;
 		
 		// And compute tree
-		this.layers = this.computeTree(this.leaves);
+		this.computeTree(items);
+	}
+
+	get leaves(): Buffer[] {
+		return this.layers[0];
 	}
 
 	root(): Buffer {
-		if (this.layers[0].length == 0) throw new Error("no leaves in tree");
+		if (this.leaves.length == 0) throw new Error("no leaves in tree");
 		return this.layers[this.nLayers - 1][0];
 	}
 
@@ -81,13 +68,15 @@ class MerkleTree {
 		return hashBranch(this.hashFn, left, right)
 	}
 
-	findLeafIndex(item: Buffer) {
+	// Finds the index of a leaf from an item
+	findLeafIndex(item: Buffer): number {
 		let idx = firstIndexOf(this.hashLeaf(item), this.layers[0]);
-		// if(idx == -1) throw new Error('item not found');
+		if(idx == -1) throw new Error('item not found');
 		return idx
 	}
 
-	findLeaf(item: Buffer) {
+	// Finds the leaf from an item
+	findLeaf(item: Buffer): Buffer {
 		return this.layers[0][this.findLeafIndex(item)]
 	}
 
@@ -97,80 +86,57 @@ class MerkleTree {
 		let leaf = this.layers[0][idx]
 
 		for (let i = 0; i < proofs.length; i++) {
-			let layer = this.layers[i];
-
-			// if (i == this.nLayers - 1) {
-			// 	proof[i] = layer[0];
-			// } else {
-			// 	const pairIdx = idx % 2 === 0 ? idx + 1 : idx - 1;
-			// 	proof[i] = layer[pairIdx];
-			// 	idx = Math.floor(idx / 2);
-			// }
 			let isLeftNode = idx % 2 === 0;
 			paths.push(!isLeftNode);
 
 			const pairIdx = isLeftNode ? idx + 1 : idx - 1;
-			proofs[i] = layer[pairIdx];
+			proofs[i] = this.layers[i][pairIdx];
 			idx = Math.floor(idx / 2);
 		}
 
 		return { proofs, paths, leaf, root: this.root() }
 	}
 
-	// TODO remove leaf param
-	verifyProof(proof: MerkleTreeProof, leaf?: Buffer) {
-		if(!leaf) {
-			leaf = proof.leaf;
+	verifyProof(proof: MerkleTreeProof) {
+		if (proof.proofs.length != this.nLayers - 1) {
+			throw new Error(`${proof.proofs.length} proof nodes, but only ${this.nLayers} layers in tree`)
 		}
-		if (proof.proofs.length != this.nLayers - 1) throw new Error(`${proof.proofs.length} proof nodes, but only ${this.nLayers} layers in tree`)
-		if(firstIndexOf(leaf, this.layers[0]) == -1) throw new Error(`Leaf doesn't exist in original tree`);
-		return verifyProof(this.hashFn, proof, this.root(), leaf);
+		if(firstIndexOf(proof.leaf, this.layers[0]) == -1) {
+			throw new Error(`Leaf doesn't exist in original tree`);
+		}
+		return verifyProof(this.hashFn, proof, this.root(), proof.leaf);
 	}
 
-	private computeTree(leaves: Buffer[]) {
-		if(leaves.length > 0) {
-			// 0th layer is the leaves
-			this.nLayers = Math.ceil(Math.log2(leaves.length)) + 1;
-		} else {
-			this.nLayers = 1;
-			let layers = [
-				[ Buffer.alloc(this.hashSizeBytes) ]
-			]
-			return layers;
-		}
+	private computeLayer(layer: Buffer[]): Buffer[] {
+		if(layer.length == 1) throw new Error("Layer too small, redundant call")
+
+		let nextLayer: Buffer[] = new Array<Buffer>(layer.length / 2);
+
+		for(let i = 0; i < nextLayer.length; i++) {
+            let left = i * 2;
+            let right = left + 1;
+            nextLayer[i] = this.hashBranch(layer[left], layer[right]);
+        }
+
+        return nextLayer;
+	}
+	
+	private computeTree(items: Buffer[]): Buffer[][] {
+		// let layers: Buffer[][] = new Array<Buffer[]>(this.nLayers);
+		let leaves = getBalancedLayer(items).map(item => this.hashLeaf(item))
+
+		let layer = leaves;
+		let layers = [ layer ];
+
+        while(layer.length > 1) {
+			layer = this.computeLayer(layer);
+			layers.push(layer)
+        }
+
+		this.layers = layers;
+		this.nLayers = this.layers.length;
 		
-		let layers: Buffer[][] = new Array<Buffer[]>(this.nLayers);
-
-		for (let i = 0; i < this.nLayers; i++) {
-			if (i == 0) {
-				layers[i] = leaves;
-				continue;
-			} else {
-				layers[i] = this.computeLayer(layers[i - 1]);
-			}
-
-		}
-
 		return layers;
-	}
-
-	computeLayer(leaves: Buffer[]): Buffer[] {
-		let nodes: Buffer[] = [];
-
-		// Make sure it's even
-		if (leaves.length % 2 == 1) {
-			// Some languages (ie Solidity) don't have prepend, so this makes compatible implementations easier.
-			leaves = [...leaves, leaves[leaves.length - 1]]
-		}
-
-		for (let i = 0; i < leaves.length;) {
-			nodes.push(
-				this.hashBranch(leaves[i], leaves[i + 1])
-			);
-			i += 2;
-		}
-
-		return nodes;
 	}
 
 	toString() {
@@ -199,8 +165,39 @@ function hashLeaf(hashFn: HashFunction, leaf: Buffer): Buffer {
 	return hashFn(Buffer.concat([LEAF_PREFIX, leaf]))
 }
 
-function hashBranch(hashFn: HashFunction, left, right: Buffer): Buffer {
+function hashBranch(hashFn: HashFunction, left: Buffer, right: Buffer): Buffer {
 	return hashFn(Buffer.concat([BRANCH_PREFIX, left, right]))
+}
+
+export function getBalancedLayer(items: Buffer[]) {
+	// Edge case:
+	// When there is only one item, we return a layer of 2 nodes
+	// This is a deliberate design decision:
+	// - we want second-preimage resistance (ie different prefixes for leaves and branches)
+	// - so we return two nodes here, so the logic later can do both hashes
+	// - otherwise we'd have to complexify the design in worse ways
+
+	
+	// compute the balanced layer
+	// powerOf2Size =  2^log2(items.length)          n > 1
+	//    			   2                             n = 1
+	let powerOf2Size = Math.pow(2, Math.ceil(Math.log2(
+		items.length
+	)));
+	if(items.length === 1) powerOf2Size = 2;
+
+	let layer = new Array<Buffer>(powerOf2Size);
+
+	for(let i = 0; i < layer.length; i++) {
+		if(i < items.length) {
+			layer[i] = items[i];
+		} else {
+			// The rest of the leaves are empty.
+			layer[i] = EMPTY_BYTE32;
+		}
+	}
+
+	return layer;
 }
 
 function verifyProof(hashFn: HashFunction, proof: MerkleTreeProof, root: Buffer, leaf: Buffer) {

@@ -4,10 +4,10 @@ import { dehexify } from "@ohdex/shared";
 
 @Entity()
 export class ChainEvent extends BaseEntity {
-    // @PrimaryGeneratedColumn()
-    // id: number;
+    @PrimaryGeneratedColumn()
+    id: number;
 
-    @PrimaryColumn({ name: "eventHash" })
+    @Column()
     eventHash: string;
 
     @ManyToOne(type => Chain, chain => chain.events)

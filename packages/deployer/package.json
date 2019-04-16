@@ -1,7 +1,7 @@
 {
-  "name": "0dex-deployer",
+  "name": "@ohdex/deployer",
   "version": "0.1.0",
-  "main": "index.js",
+  "main": "lib/src/api.js",
   "author": "0dex",
   "license": "MIT",
   "scripts": {

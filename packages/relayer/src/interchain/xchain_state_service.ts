@@ -10,6 +10,7 @@ import { dehexify, hexify } from "@ohdex/shared";
 import { EthereumStateLeaf } from "../chain/ethereum/state_gadget";
 import { getCurrentBlocktime } from "./helpers";
 import { StateTree, EventTree, ChainRoot, InterchainState } from "./trees";
+import { BlockWithTransactionData } from "ethereum-protocol";
 
 export interface StateRootUpdate {
     root: string;
@@ -27,12 +28,13 @@ export class CrosschainStateService {
     @inject('repositories.Chain') chain: Repository<Chain>
     @inject('repositories.ChainEvent') chainEvent: Repository<ChainEvent>
     @inject('repositories.InterchainStateUpdate') stateUpdate: Repository<InterchainStateUpdate>
+    @inject('logging.default') logger;
 
     constructor(    
     ) {
     }
 
-    private async getStateTree(time: number): Promise<StateTree> {
+    async getStateTree(time: number): Promise<StateTree> {
         // Get all exchain state roots
         let chains = (await this.chain.find()).map(({ chainId }) => chainId)
 
@@ -48,15 +50,17 @@ export class CrosschainStateService {
         }))
 
         let stateTree = new StateTree(state)
+
         return stateTree
     }
 
-    private async getEventsTree(chainId: number, time: number) {
+    async getEventsTree(chainId: number, time: number) {
         let events = await ChainEvent.getEventsBeforeTime(chainId, time);
-        return EventTree(events)
+        if(!events.length) throw new Error("No events");
+        return await EventTree(events)
     }
 
-    async computeUpdatedStateRoot(chainId: number): Promise<StateRootUpdate> {
+    async proveStateRootUpdate(chainId: number): Promise<StateRootUpdate> {
         const time = getCurrentBlocktime()
         
         let stateTree = await this.getStateTree(time)
@@ -68,6 +72,10 @@ export class CrosschainStateService {
             eventRoot: hexify(stateTree.state[chainId].eventsRoot),
             proof
         }
+
+        this.logger.log('debug', `computeUpdatedStateRoot(chainId=${chainId})`)
+        this.logger.log('debug', stateTree.state)
+        this.logger.log('debug', stateRootUpdate)
 
         return stateRootUpdate
     }
@@ -87,17 +95,17 @@ export class CrosschainStateService {
         if(!ev) throw new Error("Couldn't find event")
         if(ev.chain.chainId !== exchainId) throw new Error("Found event but it is from a different chain")
 
-        let latestStateUpdate = await InterchainStateUpdate.getLatestStaterootAtTime(chainId, time+10)
+        let latestStateUpdate = await InterchainStateUpdate.getLatestStaterootAtTime(chainId, time)
         if(ev.blockTime > latestStateUpdate.blockTime) {
             throw new Error('Exchain event not acknowledged on chain')
         }
         
         // 2) now reconstruct the trees
-        let stateTree = await this.getStateTree(ev.blockTime);
-        let eventsTree = await this.getEventsTree(exchainId, time)
+        let stateTree = await this.getStateTree(latestStateUpdate.blockTime);
+        let eventsTree = await this.getEventsTree(exchainId, latestStateUpdate.blockTime)
 
         // 3) prove
-        let stateProof = deconstructProof(stateTree.generateProof(chainId))
+        let stateProof = deconstructProof(stateTree.generateProof(exchainId))
         let eventIdx = eventsTree.findLeafIndex(dehexify(ev.eventHash))
         let eventLeafProof = eventsTree.generateProof(eventIdx)
 
@@ -105,6 +113,10 @@ export class CrosschainStateService {
             stateProof,
             eventLeafProof
         };
+
+        this.logger.log('debug', `proveEvent(${arguments})`)
+        this.logger.log('debug', stateTree.state)
+        this.logger.log('debug', eventsTree.leaves)
 
         return eventProof;
     }

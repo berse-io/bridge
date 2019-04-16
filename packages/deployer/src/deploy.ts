@@ -30,7 +30,7 @@ import { toWei, fromWei } from "web3-utils";
 import { logUtils } from '@0x/utils';
 
 import { AccountsConfig } from '@ohdex/multichain';
-import { getDeployArgs, addLibrary } from "./deploy_utils";
+import { getDeployArgs, addLibrary, deployLibraries } from "./deploy_utils";
 
 const assert = require('assert');
 
@@ -106,16 +106,18 @@ async function _deploy(configMgr: ConfigManager, network: string) {
     account = accounts[0];
     
     // Deploy libraries
-    let sparseMerkleTree = await SparseMerkleTreeContract.deployAsync(
-        ...getDeployArgs('SparseMerkleTree', pe, account)
-    )
+    // let sparseMerkleTree = await SparseMerkleTreeContract.deployAsync(
+    //     ...getDeployArgs('SparseMerkleTree', pe, account)
+    // )
 
-    let merkleTreeVerifier = await MerkleTreeVerifierContract.deployAsync(
-        ...getDeployArgs('MerkleTreeVerifier', pe, account)
-    )
+    // let merkleTreeVerifier = await MerkleTreeVerifierContract.deployAsync(
+    //     ...getDeployArgs('MerkleTreeVerifier', pe, account)
+    // )
 
-    addLibrary('SparseMerkleTree', sparseMerkleTree.address)
-    addLibrary('MerkleTreeVerifier', merkleTreeVerifier.address)
+    // addLibrary('SparseMerkleTree', sparseMerkleTree.address)
+    // addLibrary('MerkleTreeVerifier', merkleTreeVerifier.address)
+
+    await deployLibraries(pe, account)
 
 
     // 0 Deploy whitelist

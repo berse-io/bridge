@@ -1,6 +1,6 @@
 import { BigNumber } from "@0x/utils";
 import { BridgedTokenContract } from "@ohdex/contracts/lib/build/wrappers/bridged_token";
-import { ContractWrappers, _salt, generateSalt, wait } from '@ohdex/shared';
+import { ContractWrappers, _salt, generateSalt, wait, getContractArtifact, getContractAbi } from '@ohdex/shared';
 import { consoleOpts } from '../../src/logger';
 import { Relayer } from '../../src/relayer';
 import { get0xArtifact, loadWeb3, Testchain, TestchainFactory, givenEmptyDatabase } from '../helper';
@@ -10,6 +10,7 @@ import { Connection } from "typeorm";
 
 import { BlockchainLifecycle } from '@0x/dev-utils'
 import { Web3ProviderEngine } from "0x.js";
+import { EventEmitterContract } from "@ohdex/contracts/lib/build/wrappers/event_emitter";
 
 
 describe('Relayer', function() {
@@ -191,8 +192,17 @@ describe('Relayer', function() {
             await bridgedToken2.mint.sendTransactionAsync(account2, bridgeAmt, txDefaults2);
             await bridgedToken2.approve.sendTransactionAsync(wrappers2.Bridge.address, bridgeAmt, txDefaults2);
 
+            console.log(getContractAbi('EventEmitter'))
+            let eventEmitter = new EventEmitterContract(
+                getContractAbi('EventEmitter'),
+                chain1.eventEmitterAddress,
+                pe1, txDefaults1
+            );
+
+
 
             await Promise.all([
+                // eventEmitter.emitEvent.sendTransactionAsync('0x1234')
                 wrappers1.Bridge.deposit.sendTransactionAsync( 
                     bridgedToken1.address, 
                     account1, new BigNumber('300'), 
@@ -209,14 +219,14 @@ describe('Relayer', function() {
                 //     chain2.bridgeAddress,
                 //     txDefaults1
                 // ),
-                wrappers2.Bridge.deposit.sendTransactionAsync(
-                    bridgedToken2.address, 
-                    account2, new BigNumber('300'), 
-                    generateSalt(), 
-                    chain1.chainId, 
-                    chain1.bridgeAddress, 
-                    txDefaults2
-                )
+                // wrappers2.Bridge.deposit.sendTransactionAsync(
+                //     bridgedToken2.address, 
+                //     account2, new BigNumber('300'), 
+                //     generateSalt(), 
+                //     chain1.chainId, 
+                //     chain1.bridgeAddress, 
+                //     txDefaults2
+                // )
             ])
 
             

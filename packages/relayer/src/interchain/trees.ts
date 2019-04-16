@@ -6,12 +6,15 @@ import { keccak256 } from "../utils";
 import { InterchainStateUpdate } from "../db/entity/interchain_state_update";
 import { BigNumber } from "0x.js";
 
-export function EventTree(items: ChainEvent[]) {
+
+
+export async function EventTree(items: ChainEvent[]) {
     return new MerkleTree(
         items.map(ev => dehexify(ev.eventHash)),
         keccak256
     )
 }
+
 
 export interface ChainRoot {
     eventsRoot: Buffer;

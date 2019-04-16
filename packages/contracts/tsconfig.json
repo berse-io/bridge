@@ -1,8 +1,8 @@
 {
     "compilerOptions": {
+        "outDir": "lib/",
         "baseUrl": ".",
         "rootDir": ".",
-        "outDir": "lib/",
         "lib": [
             "es2016",
             "es2018",
@@ -24,7 +24,7 @@
     "include": [
         "./build/wrappers/*.ts",
         "./build/artifacts/*.json",
-        "test"
+        "./test/**/*.ts"
     ],
     "exclude": [
         "node_modules"

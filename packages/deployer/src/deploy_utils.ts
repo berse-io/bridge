@@ -8,6 +8,27 @@ let libraries = {}
 
 type DeployArgs = [ string, AbiDefinition[], Provider, Partial<TxData> ]
 
+import { SparseMerkleTreeContract } from '@ohdex/contracts/lib/build/wrappers/sparse_merkle_tree';
+import { MerkleTreeVerifierContract } from '@ohdex/contracts/lib/build/wrappers/merkle_tree_verifier';
+
+export async function deployLibraries(pe: any, account: string) {
+    // Deploy libraries
+    let sparseMerkleTree = await SparseMerkleTreeContract.deployAsync(
+        ...getDeployArgs('SparseMerkleTree', pe, account)
+    )
+
+    let merkleTreeVerifier = await MerkleTreeVerifierContract.deployAsync(
+        ...getDeployArgs('MerkleTreeVerifier', pe, account)
+    )
+
+    let bytesArrayUtil = await MerkleTreeVerifierContract.deployAsync(
+        ...getDeployArgs('BytesArrayUtil', pe, account)
+    )
+
+    addLibrary('SparseMerkleTree', sparseMerkleTree.address)
+    addLibrary('MerkleTreeVerifier', merkleTreeVerifier.address)
+    addLibrary('BytesArrayUtil', bytesArrayUtil.address)
+}
 
 // For some reason the 0x/solc-compiler uses a different linking format than we'd like
 // So we have to parse some stuff

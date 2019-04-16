@@ -6,6 +6,7 @@ import { MerkleTreeProof } from "@ohdex/typescript-solidity-merkle-tree";
 import { EthereumStateLeaf } from "./state_gadget";
 import { hexify } from "@ohdex/shared";
 import { StateRootUpdate } from "../../interchain/xchain_state_service";
+import { Web3Wrapper } from "@0x/web3-wrapper";
 
 interface StateRootUpdated { 
     blockHash: string;
@@ -24,7 +25,8 @@ export class EventListenerAdapter {
         private logger: any,
         eventListenerAddress: string,
         pe: Web3ProviderEngine,
-        txDefaults: any
+        txDefaults: any,
+        private web3Wrapper: Web3Wrapper
     ) {
         this.eventListener = new EventListenerContract(
             require('@ohdex/contracts/build/artifacts/EventListener.json').compilerOutput.abi,
@@ -94,11 +96,13 @@ export class EventListenerAdapter {
     }
 
     async updateStateRoot(stateRootUpdate: StateRootUpdate) {
-        return this.eventListener.updateStateRoot.sendTransactionAsync(
-            stateRootUpdate.root, 
-            stateRootUpdate.eventRoot,
-            stateRootUpdate.proof.proofBitmap,
-            stateRootUpdate.proof.proofNodes
+        await this.web3Wrapper.awaitTransactionSuccessAsync( 
+            await this.eventListener.updateStateRoot.sendTransactionAsync(
+                stateRootUpdate.root, 
+                stateRootUpdate.eventRoot,
+                stateRootUpdate.proof.proofBitmap,
+                stateRootUpdate.proof.proofNodes
+            )
         );
     }
 }
