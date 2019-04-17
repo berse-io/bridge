@@ -9,6 +9,7 @@ const getTokensObject = () => {
     tokens = tokens.concat( addNetworkToTokens("Ethereum Rinkeby Testnet", "Rinkeby Ether", "RiETH" , []));
     tokens = tokens.concat( addNetworkToTokens("Ethereum Goerli Testnet", "Goerli Ether", "GETH" , []));
     tokens = tokens.concat( addNetworkToTokens("PepChain Testnet", "Test PEP", "TPEP" , []));
+    tokens = tokens.concat( addNetworkToTokens("POA SOKOL Testnet", "SOKOL POA", "SPOA" , []));
 
     return tokens;
 }

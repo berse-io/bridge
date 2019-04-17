@@ -47,7 +47,7 @@ class MyTokens extends React.Component<any> {
     render() {
         const {classes, wallet, addToken} = this.props;
 
-        console.log(addToken);
+        console.log(wallet.tokens);
 
         return(
             <WalletGate>
@@ -120,6 +120,8 @@ class MyTokens extends React.Component<any> {
     }
 
     tokenClicked = (token: Token) => (event:any) => {  
+
+        console.log("token clicked");
 
         const urlSafeNetwork = token.network.replace(new RegExp(' ', 'g'), '-').toLowerCase();
 

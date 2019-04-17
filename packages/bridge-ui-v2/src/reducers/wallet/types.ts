@@ -1,4 +1,4 @@
-import {KeyPair} from '../../utils/coinInterfaces/types';
+import {KeyPair} from '../../utils/coinInterfaces/Web3/types';
 
 export interface WalletState {
     mnemonic: string,

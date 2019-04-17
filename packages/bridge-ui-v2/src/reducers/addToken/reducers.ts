@@ -1,7 +1,5 @@
 import actionTypes from './actionTypes';
 import {AddTokenState} from './types';
-import Web3Interface from '../../utils/coinInterfaces/Web3Interface';
-
 
 // export interface Token {
 //     symbol: string,

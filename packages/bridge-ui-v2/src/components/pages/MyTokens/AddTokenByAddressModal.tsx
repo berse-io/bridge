@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import addTokenActions from '../../../reducers/addToken/actionTypes';
 import walletActions from '../../../reducers/wallet/actionTypes';
 import {Token} from '../../../reducers/wallet/types';
+import nameToNetwork from '../../../utils/nameToNetwork';
 
 
 const styles:any = (theme:any) => ({
@@ -22,12 +23,9 @@ class AddTokenByAddress extends React.Component<any> {
         name: "",
     }
 
-    networks = [
-        {
-            label: "Ethereum",
-            value: "Ethereum"
-        }
-    ]
+    networks = Object.keys(nameToNetwork).map((key, index) => {
+        return {value: key, label: key}
+    });
 
     render() {
 

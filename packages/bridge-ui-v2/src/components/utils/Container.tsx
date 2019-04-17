@@ -14,7 +14,7 @@ class Container  extends React.Component<any> {
 
         return (
             <> 
-                <Grid className={classes.root} container spacing={16} justify="center">
+                <Grid className={classes.root} container spacing={0} justify="center">
                     <Grid item xs={10}>
                         {this.props.children}
                     </Grid>

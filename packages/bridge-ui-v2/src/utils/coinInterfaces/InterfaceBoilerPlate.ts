@@ -1,4 +1,4 @@
-import {KeyPair} from './types';
+import {KeyPair, ValidateResponse} from './Web3/types';
 
 class InterfaceBoilerPlate {
 
@@ -6,7 +6,7 @@ class InterfaceBoilerPlate {
         return "address";
     }
 
-    send(to : string, amount : string) {
+    send (from:string, to:string, amount:string, token:any, fee:number) { 
 
     }
 
@@ -26,6 +26,7 @@ class InterfaceBoilerPlate {
     async getBalance(address:string, network: string): Promise<string> {
         return ""
     }
+
 
 }
 

@@ -1,6 +1,6 @@
 import actionTypes from './actionTypes';
 import {WalletState} from './types';
-import Web3Interface from '../../utils/coinInterfaces/Web3Interface';
+import Web3Interface from '../../utils/coinInterfaces/Web3/Web3Interface';
 
 
 // export interface Token {
