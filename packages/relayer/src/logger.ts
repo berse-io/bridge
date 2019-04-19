@@ -21,7 +21,8 @@ export const logFormat = (formats) => format.combine(
 const { combine, label, json, simple } = format;
 
 export let consoleOpts = {
-    silent: process.env.NODE_ENV !== 'test',
+    // silent: process.env.NODE_ENV !== 'test',
+    silent: false,
     handleExceptions: true
 }
 
