@@ -3,9 +3,11 @@ import { Grid, withStyles } from '@material-ui/core';
 
 const styles:any = (theme:any) => ({
     root: {
-        paddingTop: theme.spacing.unit * 4,
-        margin: "0px -16px",
+    },
+    inner: {
+        overflow: "hidden",
     }
+
 })
 
 class Container  extends React.Component<any> {
@@ -15,7 +17,7 @@ class Container  extends React.Component<any> {
         return (
             <> 
                 <Grid className={classes.root} container spacing={0} justify="center">
-                    <Grid item xs={10}>
+                    <Grid item className={classes.inner} xs={10}>
                         {this.props.children}
                     </Grid>
                 </Grid>

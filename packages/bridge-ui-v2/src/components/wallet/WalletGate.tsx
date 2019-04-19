@@ -10,8 +10,6 @@ class WalletGate extends React.Component<any> {
         const {mnemonic} = this.props.wallet;
 
         if(mnemonic !== "") {
-
-            console.log(mnemonic);
             return(
                 <Web3Provider>{this.props.children}</Web3Provider>
             )

@@ -6,9 +6,8 @@ import { connect } from 'react-redux';
 import WalletGate from '../../wallet/WalletGate';
 import walletActions from '../../../reducers/wallet/actionTypes'
 import QrCode from 'qrcode.react';
-import Link from 'next/link';
 import nameToNetwork from '../../../utils/nameToNetwork';
-import BackIcon from '@material-ui/icons/ArrowBack';
+import TokenBar from './TokenBar';
 
 
 const styles:any = (theme:any) => ({
@@ -16,11 +15,33 @@ const styles:any = (theme:any) => ({
         width: "100%",
     },
     qrCode: {
-        width: "100%",
-        height: "auto",
+        width: "80%",
+        height: "80%",
+        marginTop: theme.spacing.unit * 3,
     },
     spacer: {
-        paddingTop: theme.spacing.unit * 10,
+        paddingTop: theme.spacing.unit * 2,
+    },
+    labelRoot: {
+        [theme.breakpoints.down('sm')]: {
+            fontSize: 12,
+        }, 
+    }, 
+    address: {
+        fontWeight: "bolder",
+        wordWrap: "break-word"
+    },
+    sendButton: {
+        position: "absolute",
+        bottom: theme.spacing.unit * 2,
+        left: theme.spacing.unit * 2,
+        width: `calc(100vw - ${theme.spacing.unit * 4}px)`,
+    },
+    slider: {
+        marginTop: theme.spacing.unit * 4,
+    },
+    gasPriceText:{
+        marginTop: theme.spacing.unit * 4,
     }
 })
 
@@ -31,7 +52,7 @@ class TokenActions  extends React.Component<any> {
         amount: "",
         to: "",
         tokenIndex: 0,
-        gasSlider: "50",
+        gasSlider: 50,
         gasPrice: 0,
     }
 
@@ -45,9 +66,6 @@ class TokenActions  extends React.Component<any> {
     render() {
         const{classes} = this.props;
         const token = this.props.wallet.tokens[this.state.tokenIndex];    
-
-        console.log(this.state.gasPrice);
-
         if(!token) {
             return <></>
         }
@@ -55,59 +73,48 @@ class TokenActions  extends React.Component<any> {
 
         return (
             <WalletGate>
+                <TokenBar token={token} onSelect={this.handleSelectAction} selectedAction={this.state.action}></TokenBar>
                 <Container>
-                    <Typography component="h1" variant="h4" gutterBottom>
-                    <Link href="/"><IconButton color="default" ><BackIcon /></IconButton></Link>{token.symbol} ({token.name}) - {token.network}
-                    </Typography>
+                    <div className={classes.spacer} ></div>
                     <form noValidate autoComplete="off">
                         <Grid container spacing={16} justify="flex-start">
-                            <Grid item xs={12}>
-                                <Tabs
-                                    value={this.state.action}
-                                    onChange={this.handleSelectAction}
-                                    variant="fullWidth"
-                                    indicatorColor="secondary"
-                                    textColor="secondary"
-                                    >
-                                    <Tab label="Send" />
-                                    <Tab label="Receive" />
-                                    <Tab label="Bridge" />
-                                    <Tab label="Buy/Sell" />
-                                    {/* <Tab icon={<SendIcon />} label="SEND" />
-                                    <Tab icon={<FavoriteIcon />} label="BRIDGE" /> */}
-                                    {/* <Tab icon={<PersonPinIcon />} label="SWAP" /> */}
-                                </Tabs>
-                            </Grid>
                             {this.state.action != 1 ? <>
-                                <Grid item xs={6}>
+                                <Grid item xs={12} lg={6}>
                                     <TextField
                                         id="amount"
                                         label={`Amount (Balance: ${token.balance})`}
+                                        InputLabelProps={{
+                                            FormLabelClasses: {
+                                              root: classes.labelRoot
+                                            }
+                                          }}
                                         value={this.state.amount}
                                         onChange={this.handleChange('amount')}
-                                        margin="normal"
+                                        margin="none"
                                         fullWidth
                                         type="number"
+                                        placeholder={token.balance}
                                     />
                                 </Grid>
 
-                                <Grid item xs={6}>
+                                <Grid item xs={12} lg={6}>
                                     <TextField
                                         id="to"
                                         label="Receiver"
                                         value={this.state.to}
                                         onChange={this.handleChange('to')}
-                                        margin="normal"
+                                        margin="none"
                                         fullWidth
                                         type="text"
                                     />
                                 </Grid>
 
-                                { this.state.action == 2 && <Grid item xs={6}>
-                                    <FormControl className={classes.formControl}>
+                                { this.state.action == 2 && <Grid item xs={12} lg={6}>
+                                    <FormControl fullWidth className={classes.formControl}>
                                         <InputLabel htmlFor="network">Network</InputLabel>
                                         <Select
                                             value={"Ethereum"}
+                                            fullWidth
                                             inputProps={{
                                             name: 'Token',
                                             id: 'Token',
@@ -120,8 +127,8 @@ class TokenActions  extends React.Component<any> {
                                     </FormControl>
                                 </Grid> }
                             
-                                <Grid item xs={6}>                    
-                                    <Typography id="label">Gas Price: {this.state.gasPrice} Gwei</Typography>
+                                <Grid item xs={12} lg={6}>                    
+                                    <Typography className={classes.gasPriceText} gutterBottom id="label">Gas Price: {this.state.gasPrice} Gwei</Typography>
                                     <Slider
                                     classes={{ container: classes.slider }}
                                     value={this.state.gasSlider}
@@ -131,20 +138,21 @@ class TokenActions  extends React.Component<any> {
                                 </Grid>
                                 <Grid item xs={12}>
                                     <Grid style={{height: "100%"}} container alignItems="flex-end" justify="flex-end" direction="row">
-                                        <Button variant="contained" onClick={this.handleSend} color="primary">SEND</Button>
+                                        <Button variant="contained" onClick={this.handleSend} color="primary" className={classes.sendButton}>SEND</Button>
                                     </Grid>
                                 </Grid>
                            </> : 
                            
                            
                            <>
-                                <div className={classes.spacer}> </div>
-                                <Grid item xs={4}>
-                                    <QrCode className={classes.qrCode} value={this.props.wallet.ethereum.address} renderAs="svg"/>
+                                <Grid item xs={12} lg={4} justify="center">
+                                    <Grid container justify = "center">
+                                        <QrCode className={classes.qrCode} value={this.props.wallet.ethereum.address} renderAs="svg"/>
+                                    </Grid>
                                 </Grid>
-                                <Grid item xs={8}>
-                                    <Typography variant="h6">Address: {this.props.wallet.ethereum.address}</Typography>
-                                    <Typography>Send funds to this address to use them in your Berse wallet.</Typography>
+                                <Grid item xs={12} lg={8}>
+                                    <Typography className={classes.address} align="center">{this.props.wallet.ethereum.address}</Typography>
+                                    <Typography align="center">Send funds to this address to use them in your Berse wallet.</Typography>
                                 </Grid>
                            </>}
                         </Grid>
@@ -170,9 +178,6 @@ class TokenActions  extends React.Component<any> {
         let networkAndToken = window.location.pathname.split("/");
         const network = networkAndToken[2].replace(new RegExp('-', 'g'), ' ').toLowerCase();
         const address = networkAndToken[3]
-        
-        console.log(network);
-
         let tokenIndex = 0;
 
         for(tokenIndex = 0; tokenIndex < wallet.tokens.length; tokenIndex++) {

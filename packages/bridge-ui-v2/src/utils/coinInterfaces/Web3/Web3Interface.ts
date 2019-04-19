@@ -45,13 +45,21 @@ class Web3Interface extends InterfaceBoilerPlate {
 
     async getBalanceWei(address:string, network:string, token:string):Promise<BN> {
         const web3 = this.getWeb3(network);
+
+        // @ts-ignore;
+        web3.provider.start();
+
+        let balance : BN; 
+
         if(token == "native") {
-            return (toBN(await web3.eth.getBalance(address)));        
+            balance = toBN(await web3.eth.getBalance(address));        
+        }else{
+            const tokenContract = new web3.eth.Contract(ERC20ABI, token);
+            balance = toBN(await tokenContract.methods.balanceOf(address).call());
         }
-
-        const tokenContract = new web3.eth.Contract(ERC20ABI, token);
-
-        return toBN(await tokenContract.methods.balanceOf(address).call());
+        // @ts-ignore;
+        web3.provider.stop();
+        return balance;
     }
 
     async getBalance(address:string, network:string, token:string = "native"): Promise<string>  {
@@ -91,7 +99,9 @@ class Web3Interface extends InterfaceBoilerPlate {
 
     addWeb3Instance(network: string, privateKey: string) {
         const config = networks[nameToNetwork[network]];
-        this.Web3Instances[network] = new Web3(new PrivateKeyProvider(privateKey, config.rpcUrl));
+        const Provider = new PrivateKeyProvider(privateKey, config.rpcUrl);
+        this.Web3Instances[network] = new Web3(Provider);
+        this.Web3Instances[network].provider = Provider;
     }
 
     getWeb3(network:string): Web3 {

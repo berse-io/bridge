@@ -8,8 +8,9 @@ class MyDocument extends Document {
     const { pageContext } = this.props;
 
     return (
-      <html lang="en" dir="ltr">
+      <html lang="en" dir="ltr" style={{height: "100%"}}>
         <Head>
+         
           <meta charSet="utf-8" />
           {/* Use minimum-scale=1 to enable GPU rasterization */}
           <meta
@@ -26,7 +27,7 @@ class MyDocument extends Document {
             href="https://fonts.googleapis.com/css?family=Roboto:300,400,500"
           />
         </Head>
-        <body>
+        <body style={{height: "100%"}}>
           <Main />
           <NextScript />
         </body>

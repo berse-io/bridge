@@ -2,10 +2,10 @@ import React from 'react'
 
 import {Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, Button, withStyles} from '@material-ui/core';
 import { connect } from 'react-redux';
-import addTokenActions from '../../../reducers/addToken/actionTypes';
-import walletActions from '../../../reducers/wallet/actionTypes';
-import {Token} from '../../../reducers/wallet/types';
-import nameToNetwork from '../../../utils/nameToNetwork';
+import addTokenActions from '../../../../reducers/addToken/actionTypes';
+import walletActions from '../../../../reducers/wallet/actionTypes';
+import {Token} from '../../../../reducers/wallet/types';
+import nameToNetwork from '../../../../utils/nameToNetwork';
 
 
 const styles:any = (theme:any) => ({

@@ -49,7 +49,7 @@ const columns = [
 
 const styles:any = (theme:any) => ({
     table: {
-        width: "80vw !important"
+        width: "100% !important"
     }
 })
 
@@ -66,6 +66,7 @@ class TokenOverview  extends React.Component<any> {
             elevation: 0,
             print: false,
             download: false,
+            responsive: 'scroll',
         }
         
         return (

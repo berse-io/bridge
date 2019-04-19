@@ -1,6 +1,6 @@
 import React from 'react';
 import {Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, Button, withStyles} from '@material-ui/core';
-import addTokenActions from '../../../reducers/addToken/actionTypes'
+import addTokenActions from '../../../../reducers/addToken/actionTypes'
 import { connect } from 'react-redux';
 
 
@@ -25,6 +25,8 @@ class AddTokenModal extends React.Component<any> {
                 onClose={this.handleClose}
                 aria-labelledby="form-dialog-title"
                 className={classes.root}
+                maxWidth={'xl'}
+                fullWidth
                 >
                 <DialogTitle id="form-dialog-title">Add token to your wallet</DialogTitle>
                 <DialogContent>

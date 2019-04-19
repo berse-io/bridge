@@ -69,8 +69,6 @@ function addNetworkToTokens(network:string, nativeCurrencyName:string, nativeCur
 export const getToken = async (address:string, network:string) =>  {
     const tokens = await getTokensObject();
 
-    console.log(address, network);
-
     for(let token in tokens) {
         const tokenObject = tokens[token];
         if(tokenObject.address.toLowerCase() == address.toLowerCase() && tokenObject.network.toLowerCase() == network.toLowerCase() ) {

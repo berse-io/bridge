@@ -16,7 +16,7 @@ class WalletProvider extends ProviderEngine {
 
     constructor(privateKey: string, rpcUrl: string) {
 
-        super();
+        super({});
 
         this.wallet = EthereumjsWallet.fromPrivateKey(new Buffer(privateKey, "hex"));
         this.address = "0x" + this.wallet.getAddress().toString("hex");
@@ -36,7 +36,7 @@ class WalletProvider extends ProviderEngine {
         });
         this.addProvider(subscriptionSubprovider);
 
-        this.start();
+        // this.start();
     }
 
 }

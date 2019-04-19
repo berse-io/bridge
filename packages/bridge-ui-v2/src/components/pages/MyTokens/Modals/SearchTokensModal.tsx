@@ -1,14 +1,15 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import {Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, Button, withStyles} from '@material-ui/core';
-import addTokenActions from '../../../reducers/addToken/actionTypes';
-import TokensOverview from './TokenOverview';
+import addTokenActions from '../../../../reducers/addToken/actionTypes';
+import TokensOverview from '../TokenOverview';
 
 const styles:any = (theme:any) => ({
     root: {
+        maxWidth: "100vw",
+        width: "100vw",
     }
 })
-
 class SearchTokensModal extends React.Component<any> {
     render() {
 
@@ -20,6 +21,7 @@ class SearchTokensModal extends React.Component<any> {
                 onClose={this.handleClose}
                 aria-labelledby="form-dialog-title"
                 className={classes.root}
+                
                 >
                 {/* <DialogTitle id="form-dialog-title">Add a token by address</DialogTitle> */}
                 <DialogContent>
