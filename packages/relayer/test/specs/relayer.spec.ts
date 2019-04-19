@@ -84,8 +84,8 @@ describe('Relayer', function() {
                 web3: web32
             } = await loadWeb3(chain2));
             
-            bchain1 = new BlockchainLifecycle(web31)
-            bchain2 = new BlockchainLifecycle(web32)
+            // bchain1 = new BlockchainLifecycle(web31)
+            // bchain2 = new BlockchainLifecycle(web32)
         })
 
         before(async () => {
@@ -165,8 +165,6 @@ describe('Relayer', function() {
 
             await relayer.start()
 
-            console.log(1)
-
             
             let wrappers1 = ContractWrappers.from(chain1, pe1)
             let wrappers2 = ContractWrappers.from(chain2, pe2)
@@ -176,8 +174,6 @@ describe('Relayer', function() {
                 pe1, txDefaults1
             )
             
-
-            console.log(2)
             const bridgedToken2 = await BridgedTokenContract.deployFrom0xArtifactAsync(
                 get0xArtifact('BridgedToken'),
                 pe2, txDefaults2
@@ -192,7 +188,7 @@ describe('Relayer', function() {
             await bridgedToken2.mint.sendTransactionAsync(account2, bridgeAmt, txDefaults2);
             await bridgedToken2.approve.sendTransactionAsync(wrappers2.Bridge.address, bridgeAmt, txDefaults2);
 
-            console.log(getContractAbi('EventEmitter'))
+
             let eventEmitter = new EventEmitterContract(
                 getContractAbi('EventEmitter'),
                 chain1.eventEmitterAddress,
@@ -202,15 +198,18 @@ describe('Relayer', function() {
 
 
             await Promise.all([
-                // eventEmitter.emitEvent.sendTransactionAsync('0x1234')
-                wrappers1.Bridge.deposit.sendTransactionAsync( 
-                    bridgedToken1.address, 
-                    account1, new BigNumber('300'), 
-                    generateSalt(),
-                    chain2.chainId,
-                    chain2.bridgeAddress,
-                    txDefaults1
-                ),
+                // eventEmitter.emitEvent.sendTransactionAsync('0x2234'),
+                // eventEmitter.emitEvent.sendTransactionAsync('0x2235'),
+                // eventEmitter.emitEvent.sendTransactionAsync('0x2236'),
+                
+                // wrappers1.Bridge.deposit.sendTransactionAsync( 
+                //     bridgedToken1.address, 
+                //     account1, new BigNumber('300'), 
+                //     generateSalt(),
+                //     chain2.chainId,
+                //     chain2.bridgeAddress,
+                //     txDefaults1
+                // ),
                 // wrappers1.Bridge.bridge.sendTransactionAsync(
                 //     bridgedToken1.address, 
                 //     account1, new BigNumber('301'), 
@@ -219,14 +218,14 @@ describe('Relayer', function() {
                 //     chain2.bridgeAddress,
                 //     txDefaults1
                 // ),
-                // wrappers2.Bridge.deposit.sendTransactionAsync(
-                //     bridgedToken2.address, 
-                //     account2, new BigNumber('300'), 
-                //     generateSalt(), 
-                //     chain1.chainId, 
-                //     chain1.bridgeAddress, 
-                //     txDefaults2
-                // )
+                wrappers2.Bridge.deposit.sendTransactionAsync(
+                    bridgedToken2.address, 
+                    account2, new BigNumber('300'), 
+                    generateSalt(), 
+                    chain1.chainId, 
+                    chain1.bridgeAddress, 
+                    txDefaults2
+                )
             ])
 
             

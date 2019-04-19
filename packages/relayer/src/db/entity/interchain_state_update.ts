@@ -1,6 +1,7 @@
-import {Entity, PrimaryColumn, Column, ManyToOne, OneToMany, JoinColumn, BaseEntity, PrimaryGeneratedColumn} from "typeorm";
+import {Entity, PrimaryColumn, Column, ManyToOne, OneToMany, JoinColumn, BaseEntity, PrimaryGeneratedColumn, OneToOne} from "typeorm";
 import { Chain } from "./chain";
 import { ChainEvent } from "./chain_event";
+import { Snapshot } from "./snapshot";
 
 @Entity()
 export class InterchainStateUpdate extends BaseEntity {
@@ -10,6 +11,12 @@ export class InterchainStateUpdate extends BaseEntity {
     @ManyToOne(type => Chain, u => u.stateUpdates)
     @JoinColumn()
     chain: Chain;
+
+    @OneToOne(
+        type => Snapshot, snapshot => snapshot.update, 
+        { nullable: true }
+    )
+    snapshot: Snapshot;
 
     @Column()
     blockTime: number;
@@ -31,9 +38,10 @@ export class InterchainStateUpdate extends BaseEntity {
         .select('update.blockTime')
         .addSelect('update.blockHash')
         .addSelect('update.stateRoot')
-        .addSelect('update.chain')
+        // .addSelect('update.chain')
         .addSelect('update.id')
         .addSelect('update.eventRoot')
+        .leftJoinAndSelect("update.snapshot", "snapshot")
         .leftJoinAndSelect("update.chain", "chain")
         .where('chain.chainId = :chainId', { chainId })
         .andWhere('update.blockTime <= :blockTime', { blockTime })

@@ -31,7 +31,9 @@ import { keccak256 } from 'ethereumjs-util';
 class MerkleTree {
 	items: Buffer[];
 	layers: Buffer[][];
-	nLayers: number;
+	get nLayers(): number {
+		return this.layers.length;
+	}
 	hashFn: (buf: Buffer) => Buffer;
 	hashSizeBytes: number;
 
@@ -134,7 +136,6 @@ class MerkleTree {
         }
 
 		this.layers = layers;
-		this.nLayers = this.layers.length;
 		
 		return layers;
 	}

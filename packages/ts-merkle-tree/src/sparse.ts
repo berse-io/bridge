@@ -51,15 +51,19 @@ function createTree(orderedLeaves, depth, defaultNodes) {
     return tree;
 }
 
+type Nodes = { [k: string]: NodeVal };
+type NodeKey = string;
+type NodeVal = string;
+
 export class SparseMerkleTree {
     depth: number;
-    leaves: { [k: string]: string };
-    tree;
+    leaves: Nodes;
+    tree: Nodes[];
     defaultNodes: string[];
-    root;
+    root: string;
 
 
-    constructor(depth: number = 256, leaves: { [k: string]: string } ) {
+    constructor(depth: number = 256, leaves: Nodes) {
         this.depth = depth;
 
         // Initialize defaults
