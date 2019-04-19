@@ -7,39 +7,29 @@ import "../interfaces/IEventListener.sol";
 
 contract EventListener is IEventListener {
     // The interchain state root.
-    bytes32 public interchainStateRoot;
+    bytes32 public stateRoot;
+    bytes32 public eventsRoot;
+
     bytes32 public lastUpdated;
-    bytes32 public acknowledgedEventsRoot;
-    // bytes32 public acknowledgedEventsRoot;
     
-    // The last recorded root of this chain on other chains.
-    bytes32 public lastAttestedStateRoot;
 
     // bytes32 public bridgeId;
     EventEmitter emitter;
 
-    // bytes32 public stateRoot;
-    uint public _stateRootUpdated;
-
-    mapping(bytes32 => uint) stateRootToChainRoot;
-
-    mapping(uint256 => bytes32[]) chainIdToProofs; 
-
     event StateRootUpdated(bytes32 indexed root, bytes32 eventRoot);
-    event ProofSubmitted(uint256 indexed chainId, bytes32 indexed proof);
 
     constructor(address _emitter) public {
-        // bytes32 nonce = keccak256(abi.encodePacked(this, blockhash(1), _emitter));
         emitter = EventEmitter(_emitter);
-        // emitter.emitEvent(emitter.nonce());
-        _updateStateRoot(emitter.nonce());
+        _updateStateRoot(emitter.nonce(), emitter.nonce());
     }
 
-    function _updateStateRoot(bytes32 root) internal {
+    function _updateStateRoot(bytes32 _root, bytes32 _eventsRoot) internal {
         lastUpdated = blockhash(block.number);
-        interchainStateRoot = root;
+        stateRoot = _root;
+        eventsRoot = _eventsRoot;
         emitter.acknowledge();
-        emit StateRootUpdated(root, emitter.getEventsRoot());
+
+        emit StateRootUpdated(stateRoot, eventsRoot);
     }
 
     function checkEvent(
@@ -49,14 +39,12 @@ contract EventListener is IEventListener {
         bytes32 _stateProofBitmap,
         bytes memory _stateProof
     ) public returns (bool) {
-        // bytes32 eventsRoot = emitter.getEventsRoot();
-
         bytes32 eventLeaf = MerkleTreeVerifier._hashLeaf(_eventHash);
 
         require(
             MerkleTreeVerifier._verify(
                 eventLeaf,
-                acknowledgedEventsRoot,
+                eventsRoot,
                 _eventsProof,
                 _eventsPaths
             ) == true,
@@ -65,9 +53,9 @@ contract EventListener is IEventListener {
 
         require(
             SparseMerkleTree.verify(
-                interchainStateRoot,
+                stateRoot,
                 emitter.chainId(),
-                acknowledgedEventsRoot,
+                eventsRoot,
                 _stateProofBitmap,
                 _stateProof
             ) == true,
@@ -84,7 +72,7 @@ contract EventListener is IEventListener {
         bytes32 _proofBitmap,
         bytes memory _proof
     ) public {
-        // require(emitter.getEventsRoot() == _eventsRoot, "EVENT_ROOT_MISMATCH");
+        require(emitter.getEventsRoot() == _eventsRoot, "EVENT_ROOT_MISMATCH");
         
         uint256 key = emitter.chainId();
 
@@ -99,8 +87,6 @@ contract EventListener is IEventListener {
             "_newInterchainStateRoot INVALID_PROOF"
         );
         
-        acknowledgedEventsRoot = _eventsRoot;
-        _updateStateRoot(_newInterchainStateRoot);
-    
+        _updateStateRoot(_newInterchainStateRoot, _eventsRoot);
     }
 }

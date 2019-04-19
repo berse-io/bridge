@@ -1,5 +1,7 @@
 pragma solidity ^0.5.0;
 
 interface IEventEmitter {
-    function emitEvent(bytes32 _eventHash) external returns(bytes32);
+    event EventEmitted(bytes32 eventHash);
+
+    function emitEvent(bytes32 _eventDataHash) external returns(bytes32);
 }

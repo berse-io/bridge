@@ -8,7 +8,6 @@ import { ethers } from "ethers";
 import { Web3ProviderEngine, BigNumber } from "0x.js";
 import { EventEmitter } from "events";
 import { Web3Wrapper } from "@0x/web3-wrapper";
-import { CrosschainEventProof } from "../../interchain/crosschain_state";
 import { hexify } from "@ohdex/shared";
 import { CrosschainEvent } from ".";
 import { EventProof } from "../../interchain/xchain_state_service";
@@ -115,7 +114,6 @@ export class BridgeAdapter {
                     targetBridge,
                     eventHash
                 }
-                console.log(tokensBridgedEv)
                 self.events.emit('tokensBridged', tokensBridgedEv)
             }
         )
@@ -171,6 +169,7 @@ export class BridgeAdapter {
                         new BigNumber(ev.from.chainId),
                         ev.from.bridge,
 
+
                         proof.eventLeafProof.proofs.map(hexify),
                         proof.eventLeafProof.paths,
                         proof.stateProof.proofBitmap,
@@ -188,6 +187,8 @@ export class BridgeAdapter {
                         new BigNumber(ev.from.chainId),
                         ev.from.bridge,
 
+                        ev.eventHash,
+                        
                         proof.eventLeafProof.proofs.map(hexify),
                         proof.eventLeafProof.paths,
                         proof.stateProof.proofBitmap,

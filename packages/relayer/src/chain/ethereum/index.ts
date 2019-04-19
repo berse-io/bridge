@@ -12,15 +12,14 @@ import { addRevertTraces } from "../../../test/helper";
 import { Chain } from "../../db/entity/chain";
 import { ChainEvent } from "../../db/entity/chain_event";
 import { InterchainStateUpdate } from "../../db/entity/interchain_state_update";
-import { ChainStateLeaf, CrosschainState } from "../../interchain/crosschain_state";
 import { getCurrentBlocktime } from "../../interchain/helpers";
 import { CrosschainStateService } from "../../interchain/xchain_state_service";
 import { hexify, normaliseAddress } from "../../utils";
 import { ChainTracker } from "../tracker";
 import { BridgeAdapter, TokensBridgedEvent } from "./bridge";
 import { EventEmitterAdapter } from "./event_emitter";
-import { EventListenerAdapter } from "./event_listener";
-import { EthereumStateGadget, EthereumStateLeaf } from "./state_gadget";
+import { EventListenerAdapter, StateRootUpdated } from "./event_listener";
+import { Snapshot } from "../../db/entity/snapshot";
 const AbiCoder = require('web3-eth-abi').AbiCoder();
 
 const locks = require('locks');
@@ -33,6 +32,8 @@ type CrosschainEventTypes = TokensBridgedEvent;
 export interface CrosschainEvent<CrosschainEventTypes> {
     data: CrosschainEventTypes;
     
+    eventHash: string;
+
     // Might be different in future.
     from: {
         chainId: number;
@@ -61,7 +62,6 @@ export class EthereumChainTracker extends ChainTracker {
 
     
     account: string;
-    stateGadget: EthereumStateGadget;
 
     txQueue = Queue({
         autostart: true,
@@ -71,6 +71,7 @@ export class EthereumChainTracker extends ChainTracker {
     @inject('repositories.Chain') chain: Repository<Chain>
     @inject('repositories.ChainEvent') chainEvent: Repository<ChainEvent>
     @inject('repositories.InterchainStateUpdate') stateUpdate: Repository<InterchainStateUpdate>
+    @inject('repositories.Snapshot') snapshots: Repository<Snapshot>
     @inject('interchain.CrosschainStateService') crosschainStateService: CrosschainStateService;
     @inject('logging.default') logger2: any;
     
@@ -198,12 +199,10 @@ export class EthereumChainTracker extends ChainTracker {
             this.web3Wrapper,
         )
 
-        this.stateGadget = new EthereumStateGadget(`${this.conf.chainId}-${this.conf.eventListenerAddress}`)
-
 
         await this.loadStateAndEvents()
 
-        this.logger.info(`Sync'd to block #${blockNum}, ${this.stateGadget.events.length} events`)
+        this.logger.info(`Sync'd to block #${blockNum}`)
         this.logger.info(``)
         
         let update = await InterchainStateUpdate.getLatestStaterootAtTime(this.conf.chainId, getCurrentBlocktime())
@@ -256,17 +255,47 @@ export class EthereumChainTracker extends ChainTracker {
             this.events.emit('eventEmitted', event)
         })
 
-        this.eventListener.events.on('stateRootUpdated', async (update) => {
-            await this.stateUpdate.insert({ 
+        this.eventListener.events.on('stateRootUpdated', async (update: StateRootUpdated) => {
+            let stateUpdate = { 
                 ...update,
                 chain: this.conf.chainId
+            }
+            await this.stateUpdate.insert(stateUpdate)
+
+
+            // Also link the state root update with the 
+            // snapshot we inserted
+            let snapshot = await this.snapshots.findOne({
+                chain: this.conf.chainId,
+                stateRoot: normaliseAddress(update.stateRoot)
             })
+            if(!snapshot) {
+                throw new Error("Couldn't find snapshot for corresponding state root update. UNEXPECTED!")
+            }
+            if(snapshot.update) {
+                throw new Error("Snapshot already linked to update, which indicates race conditions. UNEXPECTED!")
+            }
+            
+            let stateUpdate_inserted = await this.stateUpdate.findOne({
+                chain: this.conf.chainId,
+                stateRoot: update.stateRoot,
+                blockHash: update.blockHash,
+                eventRoot: update.eventRoot
+            })
+            if(!stateUpdate_inserted) {
+                throw new Error("State update should have been inserted, UNEXPECTED!")
+            }
+
+            snapshot.update = stateUpdate_inserted
+            await snapshot.save()
+
+
 
             this.logger2.info('debug', update)
 
             // Also try process acknowledged events
             // await wait(1500)
-            await this.processBridgeEvents(null)
+            await this.processBridgeEvents()
         
             // for(let chain of Object.values(this.chains)) {
             //     try {
@@ -280,6 +309,7 @@ export class EthereumChainTracker extends ChainTracker {
         this.bridge.events.on('tokensBridged', async (tokensBridgedEv: TokensBridgedEvent) => {
             let crosschainEvent: CrosschainEvent<any> = {
                 data: tokensBridgedEv,
+                eventHash: tokensBridgedEv.eventHash,
                 from: {
                     chainId: this.conf.chainId,
                     bridge: normaliseAddress(this.bridge.bridgeContract.address)
@@ -351,9 +381,7 @@ export class EthereumChainTracker extends ChainTracker {
 
     processBridgeEvents_mutex = locks.createMutex();
 
-    async processBridgeEvents(
-        _: CrosschainState
-    ) {
+    async processBridgeEvents() {
         await new Promise((res,rej) => this.processBridgeEvents_mutex.lock(res))
 
 
@@ -365,7 +393,7 @@ export class EthereumChainTracker extends ChainTracker {
                 let proof = await this.crosschainStateService.proveEvent(
                     this.conf.chainId, 
                     ev.from.chainId, 
-                    ev.data.eventHash
+                    ev.eventHash
                 )
                 
                 this.txQueue.push(async _ => {

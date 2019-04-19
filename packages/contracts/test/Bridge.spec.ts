@@ -1,485 +1,194 @@
-// import chai, { expect, should, assert } from 'chai';
-// import { describe, it, setup, teardown } from 'mocha';
-// import { bufferToHex, toBuffer  } from 'ethereumjs-util';
-// import Web3 from 'web3';
+import { BridgeContract, BridgeDepositEventArgs, BridgeEvents } from '../build/wrappers/bridge'
 
-// import chaiAsPromised from 'chai-as-promised';
-// chai.use(chaiAsPromised);
-// import 'mocha';
-
-// import {
-//     EventListenerContract, EventListenerEvents
-// } from '../build/wrappers/event_listener';
-
-// import {
-//     EventEmitterContract,
-//     EventEmitterEventArgs,
-//     EventEmitterEvents,
-//     EventEmitterEventEmittedEventArgs
-// } from '../build/wrappers/event_emitter';
-
-// import {
-//     WhitelistContract, WhitelistEvents
-// } from '../build/wrappers/whitelist';
+import { waitUntilConnected, get0xArtifact } from "./helpers";
+import { getDeployArgs, deployLibraries } from '@ohdex/deployer'
+// let getDeployArgs;
+import { Web3Wrapper, AbiDefinition, TxData, LogWithDecodedArgs } from '@0x/web3-wrapper';
+import { Web3ProviderEngine, GanacheSubprovider } from "@0x/subproviders";
 
 
-// import {
-//     BridgeContract
-// }   from '../build/wrappers/bridge';
+import chai, { expect, should, assert } from 'chai';
+import { describe, it, setup, teardown } from 'mocha';
+import chaiAsPromised from 'chai-as-promised';
+chai.use(chaiAsPromised);
+import 'mocha';
+import { BigNumber } from "@0x/utils";
+import { randomHex } from 'web3-utils';
 
-// import { Web3ProviderEngine, RPCSubprovider, BigNumber } from "0x.js";
-// import { Web3Wrapper, AbiDefinition, Provider, TxData } from '@0x/web3-wrapper';
-// import { BridgedTokenContract } from '../build/wrappers/bridged_token';
-// import { BaseContract } from '@0x/base-contract';
-// import { ethers } from 'ethers';
-
-// function getContractArtifact(name: string) {
-//     name = name.split('Contract')[0];
-
-//     // require('path').dirname(require.resolve('..')) + `/build/artifacts`,
-
-//     return require(`../../build/artifacts/${name}.json`)
-// }
-
-// const TRUFFLE_DEFAULT_ADDR = `0x3ffafd6738f1823ea25b42ebe02aff44d022513e`
-
-// import { SolCompilerArtifactAdapter } from '@0x/sol-trace';
-// import { RevertTraceSubprovider } from '@0x/sol-trace';
-// import { GanacheTestchain, dehexify, hexify } from './helpers';
-
-// import { MerkleTree, MerkleTreeProof } from '@ohdex/typescript-solidity-merkle-tree';
-
-// const toBN = (str) => new BigNumber(str);
-// // import { keccak256 } from 'web3-utils';
-// const keccak256 = (x: any) => dehexify(require('web3-utils').keccak256(x));
+import { MockEventEmitterContract } from '../build/wrappers/mock_event_emitter';
+import { MockEventListenerContract } from '../build/wrappers/mock_event_listener';
+import { BridgedTokenContract } from '../build/wrappers/bridged_token';
+import { EventEmitterEvents, EventEmitterEventEmittedEventArgs } from '../build/wrappers/event_emitter';
 
 
-// describe('Bridge', function(){
-//     this.timeout(10000);
-//     let ethersProvider: ethers.providers.Provider;
-//     let pe, web3: Web3Wrapper;
-//     let accounts;
-//     let user;
+const AbiCoder = require('web3-eth-abi').AbiCoder();
 
-//     function getEthersContract(contract: BaseContract) {
-//         return new ethers.Contract(
-//             contract.address,
-//             contract.abi,
-//             ethersProvider
-//         )
-//     }
+describe('Bridge', function(){
+    this.timeout(15000)
 
-//     let bridgeOrigin: BridgeContract;
-//     let bridgeForeign: BridgeContract;
-//     let bridgedToken: BridgedTokenContract;
+    let pe: Web3ProviderEngine, web3: Web3Wrapper;
+    let accounts: string[];
 
-//     let eventListener: EventListenerContract;
-//     let eventEmitter: EventEmitterContract;
-//     let whitelist: WhitelistContract;
+    let bridgeOrigin: BridgeContract;
+    let bridgeTarget: BridgeContract;
 
-//     let chainId = new BigNumber('1')
-//     let salt = new BigNumber('1')
+    let bridgedToken: BridgedTokenContract;
 
-//     beforeEach(async () => {
-//         const port = '9546';
-//         let chain = await GanacheTestchain.start(port);
+    let originChainId: BigNumber;
+    let targetChainId: BigNumber;
 
-//         pe = new Web3ProviderEngine();
-//         // const artifactAdapter = new SolCompilerArtifactAdapter(
-//             // require('path').dirname(require.resolve('..')) + `/build/artifacts`,
-//             // require('path').dirname(require.resolve('..')) + `/contracts`,
-//             // require('path').dirname(require.resolve('..')), 
-//             // '0.5.0'
-//         // );
-//         // const revertTraceSubprovider = new RevertTraceSubprovider(
-//         //     artifactAdapter, 
-//         //     TRUFFLE_DEFAULT_ADDR,
-//         //     true
-//         // );
-//         // pe.addProvider(revertTraceSubprovider);
-//         pe.addProvider(new RPCSubprovider('http://127.0.0.1:9546'))
-//         pe.start()
 
-//         web3 = new Web3Wrapper(pe);
-//         // web3V = new Web3(pe);
-//         accounts = await web3.getAvailableAddressesAsync();
-//         user = accounts[0]
+    let conf = require('@ohdex/config').networks;
 
-//         const CONNECT_TIMEOUT = 1500;
-//         ethersProvider = new ethers.providers.JsonRpcProvider('http://127.0.0.1:9546');
-//         // @ts-ignore
-//         ethersProvider.polling = true;
-//         // @ts-ignore
-//         ethersProvider.pollingInterval = 1000;
-//         await new Promise((res, rej) => {
-//             ethersProvider.on('block', res);
-//             setTimeout(
-//                 _ => {
-//                     rej(new Error(`Ethers.js couldn't connect after ${CONNECT_TIMEOUT}ms`))
-//                 }, 
-//                 CONNECT_TIMEOUT
-//             )
-//         })
+    before(async () => {
+        let provider = new GanacheSubprovider({})
         
-//         const txDefaults = { from: user };
+        let pe2 = new Web3ProviderEngine();
+        pe2.addProvider(provider)
+        pe2.start()
 
-//         whitelist = await WhitelistContract.deployFrom0xArtifactAsync(
-//             getContractArtifact('Whitelist'), pe, txDefaults
-//         )
+        web3 = new Web3Wrapper(pe2);
+        expect(waitUntilConnected(pe2), "didn't connect to chain").to.eventually.be.fulfilled;
         
-//         // @ts-ignore
-//         eventEmitter = await EventEmitterContract.deployFrom0xArtifactAsync(
-//             getContractArtifact('EventEmitterContract'), pe, txDefaults,
-//             whitelist.address,
-//             chainId,
-//         )
+        accounts = await web3.getAvailableAddressesAsync();
 
-//         // @ts-ignore
-//         eventListener = await EventListenerContract.deployFrom0xArtifactAsync(
-//             getContractArtifact('EventListenerContract'), pe, txDefaults,
-//             eventEmitter.address
-//         )
-//         // @ts-ignore
-//         bridgeOrigin = await BridgeContract.deployFrom0xArtifactAsync(
-//             getContractArtifact('BridgeContract'), pe, txDefaults,
-//             eventListener.address, eventEmitter.address
-//         )
-
-//         await whitelist.addWhitelisted.sendTransactionAsync(bridgeOrigin.address, txDefaults);
+        pe = new Web3ProviderEngine();
+        pe.addProvider(provider)
+        pe.start()
+        expect(waitUntilConnected(pe), "didn't connect to chain").to.eventually.be.fulfilled;
         
-//         // @ts-ignore
-//         bridgeForeign = await BridgeContract.deployFrom0xArtifactAsync(
-//             getContractArtifact('BridgeContract'), pe, txDefaults,
-//             eventListener.address, eventEmitter.address
-//         )
+        web3 = new Web3Wrapper(pe);
+        
+        await deployLibraries(pe, accounts[0])
 
-//         await whitelist.addWhitelisted.sendTransactionAsync(bridgeForeign.address, txDefaults);
- 
-//         // @ts-ignore
-//         bridgedToken = await BridgedTokenContract.deployFrom0xArtifactAsync(
-//             getContractArtifact('BridgedTokenContract'), pe, txDefaults,
-//         )
-//     });
+        originChainId = new BigNumber(conf.kovan.chainId);
+        targetChainId = new BigNumber(conf.rinkeby.chainId);
+    });
 
-
-//     describe('Bridge', async () => {
+    beforeEach(async () => { 
+        let txDefaults = { from: accounts[0] }
 
         
-
-//         it('passes on an event that has occurred', async () => {
-//             let _token = bridgedToken.address;
-//             let _receiver = user;
-//             let _amount = new BigNumber('10');
-//             let _chainId = chainId;
-//             let _salt = salt;
-//             let _targetBridge = await bridgeForeign.address
-
-//             await web3.awaitTransactionSuccessAsync(
-//                 await bridgedToken.mint.sendTransactionAsync(user, new BigNumber('10000000'))
-//             )
-//             await web3.awaitTransactionSuccessAsync(
-//                 await bridgedToken.approve.sendTransactionAsync(bridgeOrigin.address, _amount)
-//             )
-
-//             let bridgeOrigin_sub = getEthersContract(bridgeOrigin);
-//             let TokensBridged_ev = new Promise<string>((res,rej) => {
-//                 bridgeOrigin_sub.once('TokensBridged', (eventHash) => {
-//                     res(eventHash)
-//                 })
-//                 setTimeout(rej, 2000)
-//             })
-
-//             let eventEmitterAddr = await bridgeOrigin.eventEmitter.callAsync()
-//             expect(eventEmitterAddr).to.eq(eventEmitter.address)
-            
-//             await bridgeOrigin.bridge.sendTransactionAsync(
-//                 _token, _receiver, _amount, _salt, _chainId, bridgeForeign.address, {gas: 1000000}
-//             )
-            
-
-//             let TokensBridged_evHash = await TokensBridged_ev
-//             expect(
-//                 await eventEmitter.events.callAsync(toBN(0)),
-//             ).to.eq(TokensBridged_evHash)
-
-//             let tokenBridgedEvent = await bridgeOrigin._getTokensBridgedEventHash.callAsync(
-//                 _token, _receiver, _amount, _salt, _chainId, false
-//             )
-
-//             tokenBridgedEvent = await bridgeOrigin.markEvent.callAsync(tokenBridgedEvent, bridgeOrigin.address, chainId);
-
-//             expect(
-//                 tokenBridgedEvent
-//             ).to.eq(TokensBridged_evHash)
-
- 
-//             let state = new MockCrosschainState()
-            
-//             let origin = new MockEthereumChainStateGadget()
-//             origin.addEvent(TokensBridged_evHash)
-//             // origin.updateCurrentRoot(
-//             //     (await eventListener.interchainStateRoot.callAsync())
-//             // )
-            
-//             let misc = new MockChainStateGadget()
-//             misc.setState('123')
-            
-//             state.put(eventListener.address, origin)
-//             state.put('misc', misc)
-            
-//             state.compute()
-
-//             let update = state.proveUpdate(eventListener.address)
-            
-//             let eventListener_sub = getEthersContract(eventListener);
-//             let StateRootUpdated_ev = new Promise<string>((res,rej) => {
-//                 eventListener_sub.once(EventListenerEvents.StateRootUpdated, (root) => {
-//                     res(root)
-//                 })
-//                 setTimeout(rej, 2000)
-//             })
-
-//             await EventListenerWrapper.updateStateRoot(
-//                 eventListener, 
-//                 update.proof, 
-//                 update.leaf as EthereumStateLeaf
-//             )
-
-//             let StateRootUpdated_stateroot = await StateRootUpdated_ev;
-
-//             expect(StateRootUpdated_stateroot).to.eq(state.root)
-
-//             let { rootProof, eventProof} = state.proveEvent(eventListener.address, TokensBridged_evHash)
-//             let _proof = rootProof.proofs.map(hexify)
-//             let _proofPaths = rootProof.paths
-//             let _interchainStateRoot = hexify(rootProof.root)
-//             let _eventsProof = eventProof.proofs.map(hexify)
-//             let _eventsPaths = eventProof.paths
-//             let _eventsRoot = hexify(eventProof.root)
-
-
-//             expect(
-//                 await bridgeForeign.eventListener.callAsync()
-//             ).to.eq(eventListener.address)
-//             expect(
-//                 await bridgeOrigin.eventListener.callAsync()
-//             ).to.eq(eventListener.address)
-
-//             expect(
-//                 await bridgeForeign.eventEmitter.callAsync()
-//             ).to.eq(eventEmitter.address)
-//             expect(
-//                 await bridgeOrigin.eventEmitter.callAsync()
-//             ).to.eq(eventEmitter.address)
+        let eventEmitter = await MockEventEmitterContract.deployFrom0xArtifactAsync(
+            get0xArtifact('MockEventEmitter'), 
+            pe, txDefaults,
+            originChainId
+        )
+        let eventEmitter2 = await MockEventEmitterContract.deployFrom0xArtifactAsync(
+            get0xArtifact('MockEventEmitter'), 
+            pe, txDefaults,
+            targetChainId
+        )
+        web3.abiDecoder.addABI(eventEmitter.abi);
 
 
 
-//             expect(_eventsRoot).to.eq(
-//                 (await eventEmitter.getEventsRoot.callAsync())
-//             )
-//             expect(_interchainStateRoot).to.eq(
-//                 (await eventListener.interchainStateRoot.callAsync())
-//             )
-             
-            
-//             // check an event has been emitted
+        let eventListener = await MockEventListenerContract.deployFrom0xArtifactAsync(
+            get0xArtifact('MockEventListener'), 
+            pe, txDefaults
+        )
+        
+        bridgedToken = await BridgedTokenContract.deployFrom0xArtifactAsync(
+            get0xArtifact('BridgedToken'),
+            pe, txDefaults
+        )
 
-//             // await bridgeForeign.claim.sendTransactionAsync(
-//             //     _token, 
-//             //     _receiver, 
-//             //     _amount, 
-//             //     _chainId, 
-//             //     _salt, 
-//             //     _proof, _proofPaths, _interchainStateRoot, _eventsProof, _eventsPaths, _eventsRoot
-//             // )
+        const mintAmount = new BigNumber(100000)
+        await bridgedToken.mint.sendTransactionAsync(
+            accounts[0], 
+            mintAmount
+        )
 
-//         })
+        
+        bridgeOrigin = await BridgeContract.deployFrom0xArtifactAsync(
+            get0xArtifact('Bridge'),
+            pe, txDefaults,
+            eventListener.address,
+            eventEmitter.address
+        );
+        bridgeTarget = await BridgeContract.deployFrom0xArtifactAsync(
+            get0xArtifact('Bridge'),
+            pe, txDefaults,
+            eventListener.address,
+            eventEmitter2.address
+        );
 
-//     })
+        web3.abiDecoder.addABI(bridgeOrigin.abi);
+
+        await bridgedToken.approve.sendTransactionAsync(
+            bridgeOrigin.address, mintAmount
+        )
+    })
 
     
-//     teardown(() => {
-//         pe.stop();
-//     })
     
-// })
+    it('should generate correct hash', async () => {
+        let _token = bridgedToken.address;
+        let _receiver = randomHex(20)
+        let _amount = new BigNumber(100);
+        // let _salt = generateSalt()
+        let _salt = new BigNumber(1)
 
-// class EventListenerWrapper {
-//     static updateStateRoot(eventListener: EventListenerContract, proof: MerkleTreeProof, leaf: EthereumStateLeaf) {
-//         // return eventListener.updateStateRoot.sendTransactionAsync(
-//         //     proof.proofs.map(hexify), 
-//         //     proof.paths, 
-//         //     hexify(proof.root),
-//         //     hexify(leaf.eventsRoot)
-//         // )
-//     }
-// }
+        let originBridge = bridgeOrigin.address;
+        let targetBridge = bridgeTarget.address;
 
-
-// // Holds state (events) in a merkle tree and creates proofs of events
-// abstract class StateGadget {
-//     abstract getLeaf(): AbstractChainStateLeaf;
-//     abstract proveEvent(eventId: string): MerkleTreeProof;
-// }
-
-// // A buffer'ised representation of a state, for composition in larger state trees
-// abstract class AbstractChainStateLeaf {
-//     abstract toBuffer(): Buffer;
-// }
-
-// class EthereumStateLeaf extends AbstractChainStateLeaf {
-//     lastRoot: Buffer;
-//     eventsRoot: Buffer;
-    
-//     toBuffer(): Buffer {
-//         return Buffer.concat([
-//             // this.lastRoot,
-//             this.eventsRoot
-//         ])
-//     }
-// }
-
-// class MockStateLeaf extends AbstractChainStateLeaf {
-//     data: string;
-
-//     toBuffer(): Buffer {
-//         return Buffer.from(this.data);
-//     }
-// } 
-
-// class MockChainStateGadget extends StateGadget {
-//     state = ""
-
-//     setState(s) {
-//         this.state = s;
-//     }
-
-//     getLeaf(): MockStateLeaf {
-//         let leaf = new MockStateLeaf()
-//         leaf.data = this.state
-//         return leaf
-//     }
-
-//     proveEvent(eventId: string): MerkleTreeProof {
-//         throw new Error('unimplemented')
-//     }
-// }
-
-// class MockEthereumChainStateGadget extends StateGadget {
-//     events: Buffer[] = [];
-//     eventsTree: MerkleTree;
-//     root: Buffer;
-
-//     // putChainState(chainId: string, oldRoot: string, )
-//     addEvent(eventHash: string) {
-//         this.events.push(dehexify(eventHash))
-//         this.eventsTree = new MerkleTree(
-//             this.events,
-//             keccak256
-//         );
-//     }
-
-//     // updateCurrentRoot(root: string) {
-//     //     this.root = dehexify(root)
-//     // }
-    
-//     getLeaf(): EthereumStateLeaf {
-//         let leaf = new EthereumStateLeaf()
-//         leaf.eventsRoot = this.eventsTree.root()
-//         return leaf
-//     }
-
-//     proveEvent(eventHash: string): MerkleTreeProof {
-//         let idx = this.eventsTree.findLeafIndex(dehexify(eventHash))
-//         if(idx === -1) throw new Error(`no event ${eventHash}`)
-//         return this.eventsTree.generateProof(idx)
-//     }
-// }
-
-
-// class MockCrosschainState {
-//     chains: {
-//         [id: string]: StateGadget
-//     } = {};
-//     tree: MerkleTree;
-//     leaves: AbstractChainStateLeaf[] = [];
-//     leafIdx: {
-//         [id: string]: number
-//     } = {};
-
-//     get root(): string {
-//         return hexify(this.tree.root())
-//     }
-
-//     put(chainId: string, state: StateGadget) {
-//         this.chains[chainId] = state
-//     }
-
-//     compute() {
-//         let chains = Object.keys(this.chains)
-//         let leafIdx: {
-//             [id: string]: number
-//         } = {};
-//         let leaves: AbstractChainStateLeaf[] = []
-
-//         let i = 0;
-//         for(let id of chains) {
-//             let leaf = this.chains[id].getLeaf()
-//             leaves.push(leaf)
-//             leafIdx[id] = i;
-//             i++
-//         }
-
-//         let tree = new MerkleTree(
-//             leaves.map(leaf => leaf.toBuffer()),
-//             keccak256
-//         )
-
-//         this.tree = tree;
-//         this.leaves = leaves;
-//         this.leafIdx = leafIdx;
-//     }
-
-//     proveUpdate(chainId: string): CrosschainStateUpdateProof {
-//         if(!this.chains[chainId]) throw new Error(`no chain for id ${chainId}`)
-//         let leafIdx = this.leafIdx[chainId]
-//         let leaf = this.leaves[leafIdx]
-//         let proof = this.tree.generateProof(leafIdx)
         
-//         return {
-//             chainId,
-//             proof,
-//             leaf
-//         }
-//     }
 
-//     proveEvent(fromChain: string, eventId: string): CrosschainEventProof {
-//         if(!this.chains[fromChain]) throw new Error(`no chain for id ${fromChain}`)
+        let eventDataHash = await bridgeOrigin.hashEventData_Deposit.callAsync(
+            _token,
+            _receiver,
+            _amount,
+            _salt,
+            targetChainId,
+            targetBridge
+        );
 
-//         // Other chains can be on previous roots
-//         // So we need to keep track
 
-//         let gadget = this.chains[fromChain]
-//         let eventProof = gadget.proveEvent(eventId)
+        
+        
 
-//         let rootProof = this.tree.generateProof(
-//             this.leafIdx[fromChain]
-//         );
+        let transactionReceipt = await web3.awaitTransactionSuccessAsync(
+            await bridgeOrigin.deposit.sendTransactionAsync(
+                _token, 
+                _receiver, 
+                _amount, 
+                _salt, 
+                targetChainId, 
+                targetBridge
+            )
+        );
 
-//         return {
-//             eventProof,
-//             rootProof
-//         }
-//     }
-// }
+        
 
-// class CrosschainStateUpdateProof {
-//     chainId: string;
-//     proof: MerkleTreeProof;
-//     leaf: AbstractChainStateLeaf;
-// }
+        const depositEvent = transactionReceipt.logs.filter(
+            log => (log as LogWithDecodedArgs<BridgeDepositEventArgs>).event === BridgeEvents.Deposit,
+        )[0] as LogWithDecodedArgs<BridgeDepositEventArgs>;
 
-// class CrosschainEventProof {
-//     eventProof: MerkleTreeProof;
-//     rootProof: MerkleTreeProof;
-// }
+        const eventEmittedEvent = transactionReceipt.logs.filter(
+            log => (log as LogWithDecodedArgs<any>).event === EventEmitterEvents.EventEmitted,
+        )[0] as LogWithDecodedArgs<EventEmitterEventEmittedEventArgs>;
+
+
+        expect(depositEvent.args.eventHash).to.eq(eventEmittedEvent.args.eventHash)
+        expect(depositEvent.args.targetBridge).to.eq(targetBridge)
+        expect(depositEvent.args.targetChainId.eq(targetChainId)).to.be.true;
+
+
+        // now try again
+        let eventHash_check = depositEvent.args.eventHash
+
+        transactionReceipt = await web3.awaitTransactionSuccessAsync(
+            await bridgeTarget.issueBridged.sendTransactionAsync(
+                _token, _receiver, _amount, _salt, 
+                '42' as unknown as BigNumber, originBridge, 
+                eventHash_check, 
+                [], 
+                [], 
+                "0x00", 
+                "0x00"
+            )
+        )
+
+
+    })
+})

@@ -7,7 +7,7 @@ import "../libs/LibEvent.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 
-library BridgeCrosschainEvents {
+contract BridgeCrosschainEvents {
     function hashEventData_Deposit(
         address _token,
         address _receiver,
@@ -16,7 +16,7 @@ library BridgeCrosschainEvents {
         uint256 _targetChainId,
         address _targetBridge
     ) 
-        internal
+        public
         pure
         returns (bytes32)
     {
@@ -38,7 +38,7 @@ library BridgeCrosschainEvents {
         uint256 _targetChainId,
         address _targetBridge
     ) 
-        internal
+        public
         pure
         returns (bytes32)
     {
@@ -54,7 +54,8 @@ library BridgeCrosschainEvents {
     
 }
 
-contract Bridge {
+
+contract Bridge is BridgeCrosschainEvents {
     using LibEvent for bytes32;
     using SafeMath for uint256;
 
@@ -148,7 +149,7 @@ contract Bridge {
             "TOKEN_TRANSFER_FAILED"
         );
 
-        bytes32 eventDataHash = BridgeCrosschainEvents.hashEventData_Deposit(
+        bytes32 eventDataHash = hashEventData_Deposit(
             _token,
             _receiver,
             _amount,
@@ -178,6 +179,7 @@ contract Bridge {
         uint256 _originChainId,
         address _originBridge,
         
+        bytes32 eventHash_check,
         bytes32[] memory _eventsProof,
         bool[] memory _eventsPaths,
         bytes32 _stateProofBitmap,
@@ -185,7 +187,7 @@ contract Bridge {
     )
         public
     {
-        bytes32 eventDataHash = BridgeCrosschainEvents.hashEventData_Deposit(
+        bytes32 eventDataHash = hashEventData_Deposit(
             _token,
             _receiver,
             _amount,
@@ -195,6 +197,8 @@ contract Bridge {
         );
 
         bytes32 eventHash = LibEvent.getEventHash(eventDataHash, _originBridge, _originChainId);
+
+        require(eventHash == eventHash_check, "EVENT_HASH_MISMATCH");
 
         // make sure event was not processed
         _checkEventProcessed(eventHash);
@@ -241,7 +245,7 @@ contract Bridge {
         BridgeContract storage bridgeContract = networks[_targetChainId].bridgeContracts[_targetBridge];
         address _originToken = bridgeContract.bridgedTokenToOrigin[_bridgeToken];
 
-        bytes32 eventDataHash = BridgeCrosschainEvents.hashEventData_BridgedBurn(
+        bytes32 eventDataHash = hashEventData_BridgedBurn(
             _originToken,
             _receiver,
             _amount,
@@ -279,7 +283,7 @@ contract Bridge {
     )
         public
     {
-        bytes32 eventDataHash = BridgeCrosschainEvents.hashEventData_BridgedBurn(
+        bytes32 eventDataHash = hashEventData_BridgedBurn(
             _token,
             _receiver,
             _amount,

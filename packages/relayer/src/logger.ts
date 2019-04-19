@@ -73,7 +73,7 @@ export class LoggerProvider implements Provider<any> {
 
     async value(): Promise<any> {
         let logger = winston.loggers.add(`default`, {
-            format: format(jsonFormatter)(),
+            format: format.simple(),
             transports: [
                 // new winston.transports.Console(consoleOpts),
                 new winston.transports.File({

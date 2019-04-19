@@ -3,7 +3,8 @@ const AbiCoder = require('web3-eth-abi').AbiCoder();
 // @ts-ignore
 import { keccak256 } from 'ethereumjs-util';
 import { Web3ProviderEngine } from "0x.js";
-import { AbiDefinition, Provider, TxData } from '@0x/web3-wrapper';
+import { BigNumber } from "@0x/utils"
+import { AbiDefinition, TxData } from '@0x/web3-wrapper';
 import { NonceTrackerSubprovider, RPCSubprovider } from '@0x/subproviders';
 
 
@@ -88,6 +89,8 @@ export function get0xArtifact(name: string) {
 }
 
 import { Web3Wrapper } from '@0x/web3-wrapper';
+import { randomHex } from 'web3-utils';
+import { Provider } from 'ethereum-types';
 
 
 export async function loadWeb3(config: { rpcUrl: string }) {
@@ -112,6 +115,10 @@ export async function loadWeb3(config: { rpcUrl: string }) {
     }
 }
 
+
+export const generateSalt = () => {
+    return new BigNumber(randomHex(32))
+}
 
 export {
     getDeployArgs,
