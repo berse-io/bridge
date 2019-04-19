@@ -4,6 +4,7 @@ import "../interfaces/IEventListener.sol";
 
 contract MockEventListener is IEventListener {
     function checkEvent(
+        uint256 _chainId,
         bytes32 _eventHash,
         bytes32[] calldata _eventsProof,
         bool[] calldata _eventsPaths,

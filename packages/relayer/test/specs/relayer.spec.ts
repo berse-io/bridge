@@ -84,8 +84,8 @@ describe('Relayer', function() {
                 web3: web32
             } = await loadWeb3(chain2));
             
-            // bchain1 = new BlockchainLifecycle(web31)
-            // bchain2 = new BlockchainLifecycle(web32)
+            bchain1 = new BlockchainLifecycle(web31)
+            bchain2 = new BlockchainLifecycle(web32)
         })
 
         before(async () => {
@@ -202,22 +202,22 @@ describe('Relayer', function() {
                 // eventEmitter.emitEvent.sendTransactionAsync('0x2235'),
                 // eventEmitter.emitEvent.sendTransactionAsync('0x2236'),
                 
-                // wrappers1.Bridge.deposit.sendTransactionAsync( 
-                //     bridgedToken1.address, 
-                //     account1, new BigNumber('300'), 
-                //     generateSalt(),
-                //     chain2.chainId,
-                //     chain2.bridgeAddress,
-                //     txDefaults1
-                // ),
-                // wrappers1.Bridge.bridge.sendTransactionAsync(
-                //     bridgedToken1.address, 
-                //     account1, new BigNumber('301'), 
-                //     generateSalt(),
-                //     chain2.chainId,
-                //     chain2.bridgeAddress,
-                //     txDefaults1
-                // ),
+                wrappers1.Bridge.deposit.sendTransactionAsync( 
+                    bridgedToken1.address, 
+                    account1, new BigNumber('300'), 
+                    generateSalt(),
+                    chain2.chainId,
+                    chain2.bridgeAddress,
+                    txDefaults1
+                ),
+                wrappers1.Bridge.deposit.sendTransactionAsync(
+                    bridgedToken1.address, 
+                    account1, new BigNumber('301'), 
+                    generateSalt(),
+                    chain2.chainId,
+                    chain2.bridgeAddress,
+                    txDefaults1
+                ),
                 wrappers2.Bridge.deposit.sendTransactionAsync(
                     bridgedToken2.address, 
                     account2, new BigNumber('300'), 

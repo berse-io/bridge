@@ -22,10 +22,10 @@ import { EventListenerAdapter, StateRootUpdated } from "./event_listener";
 import { Snapshot } from "../../db/entity/snapshot";
 const AbiCoder = require('web3-eth-abi').AbiCoder();
 
-const locks = require('locks');
 
+import { queue, AsyncQueue, cargo, AsyncCargo, retry, asyncify } from 'async';
+import { promisify } from "@0x/utils";
 
-const Queue = require('queue')
 
 type CrosschainEventTypes = TokensBridgedEvent;
 
@@ -60,13 +60,12 @@ export class EthereumChainTracker extends ChainTracker {
 
     pendingCrosschainEvs: CrosschainEvent<any>[] = [];
 
-    
     account: string;
 
-    txQueue = Queue({
-        autostart: true,
-        concurrency: 1
-    })
+    
+    txQueue: AsyncQueue<any>;
+    eventsForBridgingQueue: AsyncCargo;
+    
 
     @inject('repositories.Chain') chain: Repository<Chain>
     @inject('repositories.ChainEvent') chainEvent: Repository<ChainEvent>
@@ -241,7 +240,63 @@ export class EthereumChainTracker extends ChainTracker {
         // this.bridge.loadPreviousBridgeEvents()
     }
 
+    async processBridgeEvent(ev: CrosschainEvent<any>) {
+        this.logger.info(`Proving event ${ev.data.eventHash} for bridging`)
+
+        let proof = await this.crosschainStateService.proveEvent(
+            this.conf.chainId, 
+            ev.from.chainId, 
+            ev.eventHash
+        );
+
+        return new Promise((res, rej) => {
+            this.txQueue.push(
+                () => {
+                    return this.bridge.bridge(ev, proof)
+                },
+                (err) => {
+                    if(err) rej(err);
+                    else res()
+                }
+            )
+        })
+    }
+
     listen() {
+        this.txQueue = queue(
+            async (txFn) => {
+                return await txFn()
+            },  
+            1
+        )
+
+        this.eventsForBridgingQueue = queue(
+            async (ev) => {
+                return this.processBridgeEvent(ev).catch(ex => {
+                    this.logger.error(`${ev.eventHash} bridging failed, queueing for retry`)
+                    this.logger.error(ex)
+
+                    this.pendingCrosschainEvs.push(ev)
+                    
+                    // retry(
+                    //     {times: 5, interval: 200}, 
+                    //     (err, res) => {
+                    //         return 
+                    //     }, 
+                    //     (ex) => {
+                    //         if(ex) {
+                    //             this.logger.error(`${ev.eventHash} couldn't be bridged after retries`)
+                    //             this.logger.error(ex)
+                    //             throw ex;
+                    //         }
+                    //     }
+                    // );
+
+                    // this.eventsForBridgingQueue.push()
+                })
+            }
+        )
+
         this.logger.info(`listening to events on ${this.conf.eventEmitterAddress}`)
 
         this.eventEmitter.events.on('eventEmitted', async (event) => {
@@ -256,19 +311,29 @@ export class EthereumChainTracker extends ChainTracker {
         })
 
         this.eventListener.events.on('stateRootUpdated', async (update: StateRootUpdated) => {
-            let stateUpdate = { 
-                ...update,
-                chain: this.conf.chainId
-            }
-            await this.stateUpdate.insert(stateUpdate)
+            let stateUpdate = new InterchainStateUpdate
+            stateUpdate.blockHash = update.blockHash
+            stateUpdate.blockTime = update.blockTime
+            stateUpdate.eventRoot = update.eventRoot
+            stateUpdate.stateRoot = update.stateRoot
+            stateUpdate.chain = this.conf.chainId
 
+            await this.stateUpdate.insert(stateUpdate)
 
             // Also link the state root update with the 
             // snapshot we inserted
-            let snapshot = await this.snapshots.findOne({
-                chain: this.conf.chainId,
-                stateRoot: normaliseAddress(update.stateRoot)
-            })
+            let snapshot = await this.snapshots.findOne(
+                {
+                    chain: this.conf.chainId,
+                    stateRoot: normaliseAddress(update.stateRoot)
+                },
+                {
+                    order: {
+                        id: "DESC"
+                    }
+                }
+            )
+
             if(!snapshot) {
                 throw new Error("Couldn't find snapshot for corresponding state root update. UNEXPECTED!")
             }
@@ -290,20 +355,29 @@ export class EthereumChainTracker extends ChainTracker {
             await snapshot.save()
 
 
-
             this.logger2.info('debug', update)
 
             // Also try process acknowledged events
-            // await wait(1500)
-            await this.processBridgeEvents()
-        
-            // for(let chain of Object.values(this.chains)) {
-            //     try {
-            //         await chain.processBridgeEvents(null)
-            //     } catch(ex) {
-            //         throw ex;
-            //     }
-            // }
+            let evs = this.pendingCrosschainEvs.slice()
+            this.pendingCrosschainEvs = []
+            
+            let events = await ChainEvent.createQueryBuilder('event')
+                .where('event.eventHash IN (:bridgeEventHashes)', { bridgeEventHashes: evs.map(ev => ev.eventHash) })
+                .where('event.blockTime <= :stateRootUpdateBlocktime', { stateRootUpdateBlocktime: stateUpdate_inserted.blockTime })
+                .getMany();
+            
+            let eventsToProcess = events.map(event => event.eventHash);
+            
+            let toProcess = evs.filter( ({ eventHash }) => {
+                return eventsToProcess.includes(eventHash)
+            })
+            let toNotProcess = evs.filter( ({ eventHash }) => {
+                return !eventsToProcess.includes(eventHash)
+            })
+            
+            toProcess.map(task => this.eventsForBridgingQueue.push(task))
+            this.pendingCrosschainEvs = toNotProcess;
+            
         })
 
         this.bridge.events.on('tokensBridged', async (tokensBridgedEv: TokensBridgedEvent) => {
@@ -331,17 +405,43 @@ export class EthereumChainTracker extends ChainTracker {
         this.bridge.listen()
 
         let self = this;
+    }
 
-        this.txQueue.start(function (err) {
-            if (err) {
-                this.logger.error(err);
-            }
-        })
+    async processBridgeEvents() {
+        // let failed = [];
 
-        this.txQueue.on('error', err => {
-            this.logger.error(err);
-            throw err;
-        })
+        // let evs = this.pendingCrosschainEvs.slice();
+
+        // try {
+        //     // Now process any events on this bridge for the user
+        //     for(let ev of evs) {
+        //         this.logger.info(`Proving event ${ev.data.eventHash} for bridging`)
+        //         let proof = await this.crosschainStateService.proveEvent(
+        //             this.conf.chainId, 
+        //             ev.from.chainId, 
+        //             ev.eventHash
+        //         );
+                
+        //         try {
+        //             await new Promise((res, rej) => {
+        //                 this.txQueue.push(
+        //                     () => this.bridge.bridge(ev, proof),
+        //                     (err) => {
+        //                         if(err) rej(err);
+        //                         else res()
+        //                     }
+        //                 )
+        //             })
+        //         } catch(ex) {
+        //             failed.push(ev)
+        //         }
+        //     }
+            
+        // } catch(ex) {
+        //     this.logger.error(`processBridgeEvents failed`)
+        //     this.logger.error(ex)
+        //     throw ex;
+        // }
     }
 
     async updateStateRoot(): Promise<any> 
@@ -354,23 +454,22 @@ export class EthereumChainTracker extends ChainTracker {
             
             this.logger.info(`computeUpdatedStateRoot: root=${stateRootUpdate.root} eventRoot=${stateRootUpdate.eventRoot} ackdEvent=${eventsCount - 1}`)
 
-            this.txQueue.push(async _ => {
+            this.txQueue.push(async () => {
                 try {
-                    await this.eventListener.updateStateRoot(stateRootUpdate)
+                    return await this.eventListener.updateStateRoot(stateRootUpdate)
                 } catch(ex) {
                     // we can't get revert messages back
                     // but we can try ascertain if the error was due to something we can understand
                     
                     // we can just count the number of events
                     let eventsCountNow = await this.chainEvent.count({ chain: this.conf.chainId })
-                    this.logger.info(eventsCount, eventsCountNow)
+                    // this.logger.info(eventsCount, eventsCountNow)
                     if(eventsCountNow > eventsCount) {
                         this.logger.info(`State root update failed, newer events emitted`)
                         this.logger.info(`ChainEvent.count BEFORE=${eventsCount} NOW=${eventsCountNow}`)
                     } else {
                         throw ex;
                     }
-                    
                 }
             })
         } catch(err) {
@@ -379,39 +478,6 @@ export class EthereumChainTracker extends ChainTracker {
         }
     }
 
-    processBridgeEvents_mutex = locks.createMutex();
-
-    async processBridgeEvents() {
-        await new Promise((res,rej) => this.processBridgeEvents_mutex.lock(res))
-
-
-        // process all events
-        try {
-            // Now process any events on this bridge for the user
-            for(let ev of this.pendingCrosschainEvs) {
-                this.logger.info(`Proving event ${ev.data.eventHash} for bridging`)
-                let proof = await this.crosschainStateService.proveEvent(
-                    this.conf.chainId, 
-                    ev.from.chainId, 
-                    ev.eventHash
-                )
-                
-                this.txQueue.push(async _ => {
-                    await this.bridge.bridge(ev, proof)
-                    this.pendingCrosschainEvs.shift()
-                })
-            }
-            
-        } catch(ex) {
-            this.logger.error(`processBridgeEvents failed`)
-            this.logger.error(ex)
-            this.processBridgeEvents_mutex.unlock()
-            throw ex;
-        } finally {
-            this.processBridgeEvents_mutex.unlock()
-        }
-    }
-    
     get bridgeIds(): string[] {
         return [
             normaliseAddress(this.bridge.bridgeContract.address)

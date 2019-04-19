@@ -83,6 +83,8 @@ class MerkleTree {
 	}
 
 	generateProof(idx: number): MerkleTreeProof {
+		if(idx < 0 || idx >= this.layers[0].length) throw new RangeError;
+
 		let proofs: Buffer[] = new Array(this.nLayers - 1);
 		let paths = [];
 		let leaf = this.layers[0][idx]

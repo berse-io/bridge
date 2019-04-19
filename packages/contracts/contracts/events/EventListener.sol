@@ -8,7 +8,11 @@ import "../interfaces/IEventListener.sol";
 contract EventListener is IEventListener {
     // The interchain state root.
     bytes32 public stateRoot;
-    bytes32 public eventsRoot;
+
+    // Previous roots
+    bytes32[] public previousRoots;
+
+    // bytes32 public eventsRoot;
 
     bytes32 public lastUpdated;
     
@@ -26,13 +30,15 @@ contract EventListener is IEventListener {
     function _updateStateRoot(bytes32 _root, bytes32 _eventsRoot) internal {
         lastUpdated = blockhash(block.number);
         stateRoot = _root;
-        eventsRoot = _eventsRoot;
+        // eventsRoot = _eventsRoot;
         emitter.acknowledge();
-
-        emit StateRootUpdated(stateRoot, eventsRoot);
+        previousRoots.push(_root);
+        
+        emit StateRootUpdated(stateRoot, _eventsRoot);
     }
 
     function checkEvent(
+        uint256 _chainId,
         bytes32 _eventHash,
         bytes32[] memory _eventsProof,
         bool[] memory _eventsPaths,
@@ -41,28 +47,52 @@ contract EventListener is IEventListener {
     ) public returns (bool) {
         bytes32 eventLeaf = MerkleTreeVerifier._hashLeaf(_eventHash);
 
-        require(
-            MerkleTreeVerifier._verify(
-                eventLeaf,
-                eventsRoot,
-                _eventsProof,
-                _eventsPaths
-            ) == true,
-            "_eventHash INVALID_PROOF"
+        // Compute the events root from the proof
+        bytes32 eventsRoot = MerkleTreeVerifier._computeRoot(_eventsProof, _eventsPaths, eventLeaf);
+
+        // Prove the events root is member of the current state root
+        // and in doing so, prove the event is valid
+        bytes32 stateRoot_comp = SparseMerkleTree.getRoot(
+            eventsRoot, 
+            _chainId, 
+            _stateProofBitmap,
+            _stateProof
         );
 
-        require(
-            SparseMerkleTree.verify(
-                stateRoot,
-                emitter.chainId(),
-                eventsRoot,
-                _stateProofBitmap,
-                _stateProof
-            ) == true,
-            "_eventsRoot INVALID_PROOF"
-        );
+        // Loop backwards through previous roots.
 
-        return true;
+        for(uint256 i = previousRoots.length; i > 0; i--) {
+            if(
+                stateRoot_comp == previousRoots[i - 1]
+            ) return true;
+        }
+
+        require(false, "_eventsRoot INVALID_PROOF");
+
+
+        // require(
+        //     SparseMerkleTree.verify(
+        //         stateRoot,
+        //         _chainId,
+        //         eventsRoot,
+        //         _stateProofBitmap,
+        //         _stateProof
+        //     ) == true,
+        //     "_eventsRoot INVALID_PROOF"
+        // );
+
+        // Prove the eventHash is a member of the eventsRoot
+        // require(
+        //     MerkleTreeVerifier._verify(
+        //         eventLeaf,
+        //         eventsRoot,
+        //         _eventsProof,
+        //         _eventsPaths
+        //     ) == true,
+        //     "_eventHash INVALID_PROOF"
+        // );
+
+        // return true;
     }
     
     // TODO only the relayer(s) should be able to update the proof

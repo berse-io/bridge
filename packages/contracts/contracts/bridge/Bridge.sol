@@ -205,6 +205,7 @@ contract Bridge is BridgeCrosschainEvents {
         
         require(
             eventListener.checkEvent(
+                _originChainId,
                 eventHash,
                 _eventsProof,
                 _eventsPaths,
@@ -299,6 +300,7 @@ contract Bridge is BridgeCrosschainEvents {
         
         require(
             eventListener.checkEvent(
+                _originChainId,
                 eventHash,
                 _eventsProof,
                 _eventsPaths,

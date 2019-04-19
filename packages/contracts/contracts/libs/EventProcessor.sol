@@ -46,6 +46,8 @@ contract EventProcessor {
         bytes memory _stateProof = RLP.toData(params[3]);
 
         require(eventListener.checkEvent(
+            // TODO(liamz): replace with actual id
+            0,
             _eventHash,
             // _eventsProof,
             _eventsProof,

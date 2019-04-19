@@ -202,46 +202,54 @@ describe.only('CrosschainStateService', function() {
         })
     })
 
+    class Clock {
+        T = 0
+        step() {
+            this.T++
+        }
+    }
+
     describe.only('#proveEvent', () => {
         it('gets the correct Snapshot', async () => {
             let { chain1, T } = await givenMockChain(4)
             let { chain1: chain2 } = await givenMockChain(42)
 
-            let event1 = await givenMockEvent(chain1, '1', T + 1)
-            let event2 = await givenMockEvent(chain1, '2', T + 1)
-            let event3 = await givenMockEvent(chain2, '3', T + 1)
-            let event4 = await givenMockEvent(chain1, '4', T + 2)
+            let clock = new Clock
+
+            let event1 = await givenMockEvent(chain1, '1', clock.T)
+            let event2 = await givenMockEvent(chain1, '2', clock.T)
+            let event3 = await givenMockEvent(chain2, '3', clock.T)
+            clock.step()
+            let event4 = await givenMockEvent(chain1, '4', clock.T)
 
             let stateTree = await crosschainStateService.getStateTree()
 
-            let stateUpdate1 = await givenStateUpdate(chain2, T + 2, stateTree)
+            let stateUpdate1 = await givenStateUpdate(chain2, clock.T, stateTree)
             await givenSnapshot(chain2, stateTree, stateUpdate1)
-            let stateUpdate2 = await givenStateUpdate(chain1, T + 2, stateTree)
+            let stateUpdate2 = await givenStateUpdate(chain1, clock.T, stateTree)
             await givenSnapshot(chain1, stateTree, stateUpdate2)
-            let stateUpdate3 = await givenStateUpdate(chain2, T + 3, stateTree)
+            let stateUpdate3 = await givenStateUpdate(chain2, clock.T, stateTree)
             await givenSnapshot(chain2, stateTree, stateUpdate3)
 
 
-            let event5 = await givenMockEvent(chain1, '5', T + 4)
+            let event5 = await givenMockEvent(chain1, '5', clock.T)
             let stateTree2 = await crosschainStateService.getStateTree()
 
-            let stateUpdate4 = await givenStateUpdate(chain1, T + 4, stateTree2)
+            let stateUpdate4 = await givenStateUpdate(chain1, clock.T, stateTree2)
             await givenSnapshot(chain1, stateTree2, stateUpdate4)
 
-            console.log(
-                await InterchainStateUpdate.find({ loadRelationIds: true })
-            )
-            console.log(
-                await Snapshot.find({ loadRelationIds: true })
-            )
+            // console.log(
+            //     await InterchainStateUpdate.find({ loadRelationIds: true })
+            // )
+            // console.log(
+            //     await Snapshot.find({ loadRelationIds: true })
+            // )
             let proof = await crosschainStateService.proveEvent(
                 chain2.chainId, 
                 chain1.chainId, 
                 event2.eventHash
             );
-
-            // let snapshot = await stateUpdate1.getSnapshot()
-            // snapshot.stateTree
+                
         })
 
 

@@ -33,12 +33,6 @@
     "wsrun": "^3.6.4"
   },
   "dependencies": {
-<<<<<<< HEAD
     "dotenv": "^7.0.0"
-=======
-    "@0x/web3-wrapper": "6.0.4",
-    "dotenv": "^7.0.0",
-    "ethereum-types": "^2.1.2"
->>>>>>> feat-upgrade-0x-deps
   }
 }
