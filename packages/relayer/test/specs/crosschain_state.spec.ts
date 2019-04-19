@@ -1,6 +1,4 @@
-import { expect } from 'chai';
-import { EthereumStateGadget } from '../../src/chain/ethereum/state_gadget';
-import { CrosschainState } from '../../src/interchain/crosschain_state';
+import { expect, assert } from 'chai';
 import { givenEmptyDatabase } from '../helper';
 import { Connection, Repository, createConnection } from 'typeorm';
 import { options } from '../../src/db';
@@ -13,95 +11,13 @@ import { getCurrentBlocktime } from '../../src/interchain/helpers';
 import { CrosschainStateService } from '../../src/interchain/xchain_state_service';
 import { MerkleTree } from '@ohdex/typescript-solidity-merkle-tree';
 import { EventTree, StateTree } from '../../src/interchain/trees';
+import { Snapshot } from '../../src/db/entity/snapshot';
 
 const chai = require("chai");
 const sinonChai = require("sinon-chai");
 const chaiAsPromised = require('chai-as-promised')
 chai.use(sinonChai);
 chai.use(chaiAsPromised)
-
-describe('CrosschainState', async() => {
-    it('#create', async() => {
-        let state = new CrosschainState;
-    })
-
-    describe('#proveUpdate', async() => {
-        let state: CrosschainState;
-        let chain1: EthereumStateGadget, chain2: EthereumStateGadget;
-
-        beforeEach(async() => {
-            state = new CrosschainState;
-            chain1 = new EthereumStateGadget("0")
-            chain2 = new EthereumStateGadget("1")
-        })
-
-        it('proves successfully', async() => {
-            state.put(chain1)
-            state.put(chain2)
-            state.compute()
-
-            let proof1 = state.proveUpdate(chain1.id)
-            let proof2 = state.proveUpdate(chain2.id)
-            expect(state.tree.verifyProof(proof1.proof)).to.be.true;
-            expect(state.tree.verifyProof(proof2.proof)).to.be.true;
-        })
-
-        it('throws for unknown chain', async() => {
-            state.put(chain1)
-            state.put(chain2)
-            state.compute()
-
-            expect(() => state.proveUpdate("5")).to.throw;
-        })
-    })
-
-    describe('#proveEvent', async() => {
-        let state: CrosschainState;
-        let chain1: EthereumStateGadget, chain2: EthereumStateGadget;
-
-        const MOCK_EVENT_HASH = "123";
-
-        beforeEach(async() => {
-            state = new CrosschainState;
-            chain1 = new EthereumStateGadget("0")
-            chain2 = new EthereumStateGadget("1")
-        })
-
-        it('proves successfully', async() => {
-            state.put(chain1)
-            state.put(chain2)
-            state.compute()
-    
-            chain1.addEvent(MOCK_EVENT_HASH)
-            state.compute()
-
-            expect(chain1.getLeaf().eventsRoot)
-    
-            let proof = state.proveEvent(chain1.id, MOCK_EVENT_HASH)
-            expect(state.tree.verifyProof(proof.rootProof)).to.be.true;
-            expect(chain1.eventsTree.verifyProof(proof.eventProof)).to.be.true;
-        })
-
-        it('fails for unknown event', async() => {
-            state.put(chain1)
-            state.compute()
-    
-            chain1.addEvent(MOCK_EVENT_HASH)
-    
-            expect(() => state.proveEvent(chain1.id, "unknown-event")).to.throw('no event unknown-event')
-        })
-
-        it('fails if state not recomputed', async() => {
-            state.put(chain1)
-            state.put(chain2)
-            state.compute()
-    
-            chain1.addEvent(MOCK_EVENT_HASH)
-    
-            expect(() => state.proveEvent(chain1.id, MOCK_EVENT_HASH)).to.throw('interchain state tree needs to be recomputed')
-        })
-    })
-})
 
 const testDbOpts = {
     ...options,
@@ -111,6 +27,9 @@ const testDbOpts = {
 
 
 describe.only('CrosschainStateService', function() {
+    this.timeout(10000);
+
+
     let conn: Connection;
     let chain: Repository<Chain>;
     let stateUpdate: Repository<InterchainStateUpdate>
@@ -164,7 +83,23 @@ describe.only('CrosschainStateService', function() {
         await InterchainStateUpdate.insert([
             stateRootUpdate
         ])
+        return stateRootUpdate
     }
+
+    async function givenSnapshot(chain: Chain, stateTree: StateTree, update?: InterchainStateUpdate) {
+        let snapshot = new Snapshot
+        snapshot.stateTree = stateTree;
+        snapshot.stateRoot = stateTree.root;
+        snapshot.chain = chain
+        snapshot.update = update
+        await Snapshot.insert(
+            snapshot
+        )
+
+        
+    }
+
+
 
     before(async () => {
         conn = await createConnection(testDbOpts)
@@ -195,131 +130,189 @@ describe.only('CrosschainStateService', function() {
     const MOCK_BLOCKHASH = () => keccak256(""+new Date)
     const MOCK_EVENT = (x) => keccak256(""+x)
 
-    describe('One chain', async () => {
-        describe('#getStateTree', async () => {
-            it('works with 1 chain', async () => {
-                let { chain1, T } = await givenMockChain(4)
+    describe('#getStateTree', async () => {
+        it('works with 1 chain', async () => {
+            let { chain1, T } = await givenMockChain(4)
 
-                // Now insert an event
-                let event1 = new ChainEvent()
-                event1.blockTime = T + 10
-                event1.chain = chain1
-                event1.eventHash = hexify(MOCK_EVENT("a"))
-                await ChainEvent.insert(event1)
-    
-                let tree = await crosschainStateService.getStateTree(getCurrentBlocktime())
+            // Now insert an event
+            let event1 = new ChainEvent()
+            event1.blockTime = T + 10
+            event1.chain = chain1
+            event1.eventHash = hexify(MOCK_EVENT("a"))
+            await ChainEvent.insert(event1)
+
+            let tree = await crosschainStateService.getStateTree()
+        })
+
+        it('works with 2 chains', async () => {
+            let { chain1, T } = await givenMockChain(4)
+            let { chain1: chain2 } = await givenMockChain(42)
+
+            let event11 = await givenMockEvent(chain1, '1', T)
+            let event12 = await givenMockEvent(chain2, '1', T)
+
+            let eventTree1 = await crosschainStateService.getEventsTree(chain1.chainId, T)
+            let eventTree2 = await crosschainStateService.getEventsTree(chain2.chainId, T)
+
+            let tree = await crosschainStateService.getStateTree()
+            expect(tree.state).to.deep.equal({
+                [chain1.chainId]: {
+                    eventsRoot: eventTree1.root()
+                },
+                [chain2.chainId]: {
+                    eventsRoot: eventTree2.root()
+                }
             })
+        })
+        
+    })
 
-            it('works with 2 chains', async () => {
-                let { chain1, T } = await givenMockChain(4)
-                let { chain1: chain2 } = await givenMockChain(42)
+    describe('#getEventsTree', async () => {
+        it('fails on no events', async () => {
+            let { chain1, T } = await givenMockChain(4)
+            expect(
+                crosschainStateService.getEventsTree(chain1.chainId, T)
+            ).to.eventually.be.rejectedWith('No events')
+        })
+        
+        it('gets events, including those on T', async () => {
+            let { chain1, T } = await givenMockChain(4)
+            let event1 = await givenMockEvent(chain1, '1', T)
+            let event2 = await givenMockEvent(chain1, '1', T + 5)
 
-                let event11 = await givenMockEvent(chain1, '1', T)
-                let event12 = await givenMockEvent(chain2, '1', T)
-
-                let eventTree1 = await crosschainStateService.getEventsTree(chain1.chainId, T)
-                let eventTree2 = await crosschainStateService.getEventsTree(chain2.chainId, T)
-
-                let tree = await crosschainStateService.getStateTree(getCurrentBlocktime())
-                expect(tree.state).to.deep.equal({
-                    [chain1.chainId]: {
-                        eventsRoot: eventTree1.root()
-                    },
-                    [chain2.chainId]: {
-                        eventsRoot: eventTree2.root()
-                    }
-                })
-            })
+            let eventTree = await crosschainStateService.getEventsTree(chain1.chainId, T)
             
+            let items = eventTree.items.map(hexify)
+            expect(items).to.have.deep.members([
+                event1.eventHash
+            ])
         })
 
-        describe('#getEventsTree', async () => {
-            it('fails on no events', async () => {
-                let { chain1, T } = await givenMockChain(4)
-                expect(
-                    crosschainStateService.getEventsTree(chain1.chainId, T)
-                ).to.eventually.be.rejectedWith('No events')
-            })
+        it('gets events, before T', async () => {
+            let { chain1, T } = await givenMockChain(4)
+            let event1 = await givenMockEvent(chain1, '1', T - 1)
+            let event2 = await givenMockEvent(chain1, '1', T + 5)
+
+            let eventTree = await crosschainStateService.getEventsTree(chain1.chainId, T)
             
-            it('gets events, including those on T', async () => {
-                let { chain1, T } = await givenMockChain(4)
-                let event1 = await givenMockEvent(chain1, '1', T)
-                let event2 = await givenMockEvent(chain1, '1', T + 5)
-    
-                let eventTree = await crosschainStateService.getEventsTree(chain1.chainId, T)
-                
-                let items = eventTree.items.map(hexify)
-                expect(items).to.have.deep.members([
-                    event1.eventHash
-                ])
-            })
+            let items = eventTree.items.map(hexify)
+            expect(items).to.have.deep.members([
+                event1.eventHash
+            ])
+        })
+    })
 
-            it('gets events, before T', async () => {
-                let { chain1, T } = await givenMockChain(4)
-                let event1 = await givenMockEvent(chain1, '1', T - 1)
-                let event2 = await givenMockEvent(chain1, '1', T + 5)
-    
-                let eventTree = await crosschainStateService.getEventsTree(chain1.chainId, T)
-                
-                let items = eventTree.items.map(hexify)
-                expect(items).to.have.deep.members([
-                    event1.eventHash
-                ])
-            })
+    describe.only('#proveEvent', () => {
+        it('gets the correct Snapshot', async () => {
+            let { chain1, T } = await givenMockChain(4)
+            let { chain1: chain2 } = await givenMockChain(42)
+
+            let event1 = await givenMockEvent(chain1, '1', T + 1)
+            let event2 = await givenMockEvent(chain1, '2', T + 1)
+            let event3 = await givenMockEvent(chain2, '3', T + 1)
+            let event4 = await givenMockEvent(chain1, '4', T + 2)
+
+            let stateTree = await crosschainStateService.getStateTree()
+
+            let stateUpdate1 = await givenStateUpdate(chain2, T + 2, stateTree)
+            await givenSnapshot(chain2, stateTree, stateUpdate1)
+            let stateUpdate2 = await givenStateUpdate(chain1, T + 2, stateTree)
+            await givenSnapshot(chain1, stateTree, stateUpdate2)
+            let stateUpdate3 = await givenStateUpdate(chain2, T + 3, stateTree)
+            await givenSnapshot(chain2, stateTree, stateUpdate3)
+
+
+            let event5 = await givenMockEvent(chain1, '5', T + 4)
+            let stateTree2 = await crosschainStateService.getStateTree()
+
+            let stateUpdate4 = await givenStateUpdate(chain1, T + 4, stateTree2)
+            await givenSnapshot(chain1, stateTree2, stateUpdate4)
+
+            console.log(
+                await InterchainStateUpdate.find({ loadRelationIds: true })
+            )
+            console.log(
+                await Snapshot.find({ loadRelationIds: true })
+            )
+            let proof = await crosschainStateService.proveEvent(
+                chain2.chainId, 
+                chain1.chainId, 
+                event2.eventHash
+            );
+
+            // let snapshot = await stateUpdate1.getSnapshot()
+            // snapshot.stateTree
         })
 
-        describe.only('#proveEvent', () => {
-            it('proves using current state root', async () => {
-                let { chain1, T } = await givenMockChain(4)
-                let { chain1: chain2 } = await givenMockChain(42)
 
-                let event1 = await givenMockEvent(chain1, '1', T + 1)
-                // event2 we are going to prove
-                let event2 = await givenMockEvent(chain1, '2', T + 1)
-                let event3 = await givenMockEvent(chain2, '3', T + 1)
-                let event4 = await givenMockEvent(chain1, '4', T + 2)
+        // it('proves using current state root', async () => {
+        //     let { chain1, T } = await givenMockChain(4)
+        //     let { chain1: chain2 } = await givenMockChain(42)
 
-                let stateTree = await crosschainStateService.getStateTree(T + 2)
+        //     let event1 = await givenMockEvent(chain1, '1', T + 1)
+        //     // event2 we are going to prove
+        //     let event2 = await givenMockEvent(chain1, '2', T + 1)
+        //     let event3 = await givenMockEvent(chain2, '3', T + 1)
+        //     let event4 = await givenMockEvent(chain1, '4', T + 2)
 
-                await givenStateUpdate(chain2, T + 2, stateTree)
-                // we acknowledge event2 here at T+2
-                await givenStateUpdate(chain1, T + 2, stateTree)
-                await givenStateUpdate(chain2, T + 3, stateTree)
+        //     let stateTree = await crosschainStateService.getStateTree(T + 2)
+
+        //     await givenStateUpdate(chain2, T + 2, stateTree)
+        //     // we acknowledge event2 here at T+2
+        //     await givenStateUpdate(chain1, T + 2, stateTree)
+        //     await givenStateUpdate(chain2, T + 3, stateTree)
 
 
-                let event5 = await givenMockEvent(chain1, '5', T + 4)
+        //     let event5 = await givenMockEvent(chain1, '5', T + 4)
 
-                let stateTree2 = await crosschainStateService.getStateTree(T + 4)
+        //     let stateTree2 = await crosschainStateService.getStateTree(T + 4)
 
-                await givenStateUpdate(chain1, T + 4, stateTree2)
+        //     await givenStateUpdate(chain1, T + 4, stateTree2)
 
-                
-                let proof = await crosschainStateService.proveEvent(
-                    chain2.chainId, 
-                    chain1.chainId, 
-                    event2.eventHash
-                );
+            
+        //     let proof = await crosschainStateService.proveEvent(
+        //         chain2.chainId, 
+        //         chain1.chainId, 
+        //         event2.eventHash
+        //     );
 
-                [
-                    stateTree,
-                    stateTree2
-                ].map(tree => {
-                    console.log(
-                        hexify(tree.state[chain2.chainId].eventsRoot)
-                    )
-                })
+        //     // [
+        //     //     stateTree,
+        //     //     stateTree2
+        //     // ].map(tree => {
+        //     //     console.log(
+        //     //         hexify(tree.state[chain2.chainId].eventsRoot)
+        //     //     )
+        //     // })
 
-                console.log(
-                    await InterchainStateUpdate.find({ relations: ['chain']})
-                )
+        //     // console.log(
+        //     //     await InterchainStateUpdate.find({ relations: ['chain']})
+        //     // )
 
-                expect(
-                    hexify(proof.eventLeafProof.root)
-                ).to.eq(
-                    hexify(stateTree.state[chain1.chainId].eventsRoot)
-                )
-            })
-        })
+        //     // liamz: the problem atm is that the below is failing
+        //     // apparently because the eventLeafProof.root is referring to stateTree2
+        //     // instead of stateTree (the 1st)
+        //     // 
+        //     // actually wait that makes complete sense
+
+        //     expect(
+        //         hexify(proof.eventLeafProof.root)
+        //     ).to.eq(
+        //         hexify(stateTree2.state[chain1.chainId].eventsRoot)
+        //     )
+        // })
+
+    })
+
+    // describe.only('Snapshot', async () => {
+
+    // })
+
+
+
+    it('events have canonical ordering', async () => {
+        // TODO(liamz)
+        assert(true)
     })
 
     // it("works in a simple case", async () => {

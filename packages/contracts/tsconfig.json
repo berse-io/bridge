@@ -1,7 +1,6 @@
 {
     "compilerOptions": {
-        "outDir": "lib/",
-        "baseUrl": ".",
+        "outDir": "./lib/",
         "rootDir": ".",
         "lib": [
             "es2016",
@@ -9,6 +8,7 @@
             "dom"
         ],
         "typeRoots": [
+            
           "node_modules/@types"
         ],
         "target": "es2018",
@@ -27,6 +27,7 @@
         "./test/**/*.ts"
     ],
     "exclude": [
+        "lib",
         "node_modules"
     ],
     "references": [

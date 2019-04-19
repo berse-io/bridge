@@ -10,7 +10,7 @@ import {
 } from '../build/wrappers/slave';
 
 import { Web3ProviderEngine, RPCSubprovider, BigNumber } from "0x.js";
-import { Web3Wrapper, AbiDefinition, Provider, TxData } from '@0x/web3-wrapper';
+import { Web3Wrapper, AbiDefinition, TxData } from '@0x/web3-wrapper';
 import { BridgedTokenContract } from '../build/wrappers/bridged_token';
 import { BaseContract } from '@0x/base-contract';
 import { ethers } from 'ethers';

@@ -8,14 +8,14 @@
         "test:specific": "NODE_ENV=development mocha 'lib/test/specs/relayer.spec.js'"
     },
     "dependencies": {
-        "0x.js": "^3.0.3",
+        "0x.js": "^6.0.6",
         "@0x/abi-gen-templates": "^1.0.2",
-        "@0x/base-contract": "^3.0.13",
+        "@0x/base-contract": "^5.0.5",
+        "@0x/sol-compiler": "^3.0.3",
+        "@0x/subproviders": "^4.0.5",
+        "@0x/utils": "^4.3.1",
+        "@0x/web3-wrapper": "^6.0.4",
         "@0x/dev-utils": "^2.2.0",
-        "@0x/sol-compiler": "^2.0.2",
-        "@0x/subproviders": "^2.1.11",
-        "@0x/utils": "^3.0.1",
-        "@0x/web3-wrapper": "6.0.4",
         "@0xproject/abi-gen": "^1.0.13",
         "@loopback/context": "^1.8.1",
         "@types/sinon": "^7.0.10",
@@ -40,6 +40,7 @@
         "openzeppelin-solidity": "^2.1.2",
         "queue": "^6.0.1",
         "reflect-metadata": "^0.1.13",
+        "serialize-json": "^1.0.3",
         "sinon": "^7.2.3",
         "sinon-chai": "^3.3.0",
         "snarkjs": "^0.1.9",
@@ -55,8 +56,6 @@
         "winston": "^3.2.1"
     },
     "devDependencies": {
-        "@types/chai": "^4.1.7",
-        "@types/chai-as-promised": "^7.1.0",
         "@types/ethereumjs-util": "^5.2.0",
         "@types/lodash": "^4.14.120",
         "@types/mocha": "^5.2.5",

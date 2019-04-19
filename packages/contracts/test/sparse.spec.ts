@@ -1,5 +1,5 @@
 import { toBN, bincn, toBuf } from "./sparse";
-import { BigNumber } from "0x.js";
+import { BigNumber } from "@0x/utils";
 import { expect } from 'chai';
 import { soliditySha3 } from "web3-utils";
 
@@ -25,7 +25,7 @@ describe('sparse mt', async () => {
     it('parses hex into BigNumber', async () => {
         let hex = '0x000000000000000000000000000000000000000000000000000000000000007b'
         let x = new BigNumber(hex)
-        expect(x.equals(123)).to.be.true;
+        expect(x.eq(123)).to.be.true;
     })
 
     it('hashes with the 0x prefix', async () => {

@@ -1,8 +1,9 @@
-import { Web3ProviderEngine, BigNumber } from "0x.js";
+import { Web3ProviderEngine } from "0x.js";
+import { BigNumber } from "@0x/utils"
 import { waitUntilConnected, get0xArtifact, dehexify, hexify } from "./helpers";
 import { getDeployArgs, deployLibraries } from '@ohdex/deployer'
 // let getDeployArgs;
-import { Web3Wrapper, AbiDefinition, Provider, TxData } from '@0x/web3-wrapper';
+import { Web3Wrapper } from '@0x/web3-wrapper';
 import { GanacheSubprovider } from "@0x/subproviders";
 import { EventEmitterContract } from "../build/wrappers/event_emitter";
 import { WhitelistContract } from "../build/wrappers/whitelist";

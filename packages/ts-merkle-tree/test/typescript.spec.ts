@@ -20,7 +20,8 @@ import {
     TestTreeFactory, hexify, keccak256, waitUntilConnected, prefix0x, getDeployArgs
 } from './helpers'
 
-import { Web3ProviderEngine, RPCSubprovider, BigNumber } from "0x.js";
+import { Web3ProviderEngine, RPCSubprovider } from "0x.js";
+import { BigNumber } from "@0x/utils"
 import { Web3Wrapper, AbiDefinition, Provider, TxData } from '@0x/web3-wrapper';
 import { TruffleArtifactAdapter, RevertTraceSubprovider } from '@0x/sol-trace';
 

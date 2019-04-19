@@ -130,7 +130,7 @@ async function _deploy(configMgr: ConfigManager, network: string) {
     let balance = await web3.getBalanceInWeiAsync(account)
     logger.info(`Using account ${account} (${fromWei(balance.toString(), 'ether')} ETH)`)
 
-    if(balance.lessThan(toWei('1', 'ether'))) {
+    if(balance.isLessThan(toWei('1', 'ether'))) {
         try {
             throw new Error(`Balance may be insufficent`)
         } catch(ex) {

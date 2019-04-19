@@ -1,6 +1,5 @@
 // import { ITokenBridgeEventArgs } from "@ohdex/contracts/lib/build/wrappers/i_token_bridge";
 import { EthereumChainTracker, CrosschainEvent } from "../chain/ethereum";
-import { CrosschainState } from "../interchain/crosschain_state";
 import { defaultLogger } from "../logger";
 
 import { createContext } from './context';
@@ -28,8 +27,6 @@ type chainId = string;
 export class Relayer {
     chains: { [k: string]: EthereumChainTracker };
 
-    crosschainState: CrosschainState;
-
     logger;
     config: any;
     ctx: Context
@@ -40,8 +37,6 @@ export class Relayer {
         
         this.logger = defaultLogger();
         this.ctx = createContext()
-        this.crosschainState = new CrosschainState();
-
     }
 
     async start() {

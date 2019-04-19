@@ -1,4 +1,5 @@
-import { BigNumber } from '0x.js';
+// import { BigNumber } from '0x.js';
+import { BigNumber } from "@0x/utils"
 
 import { soliditySha3, numberToHex } from 'web3-utils';
 import { dehexify, hexify } from './helpers';
@@ -12,7 +13,7 @@ export function toBN(num) {
 
 export function bincn(bn: BigNumber, level: number) {
     let x = new BigNumber(2).pow(level)
-    return bn.add(x)
+    return bn.plus(x)
 }
 
 // returns hex string of bn
@@ -34,11 +35,11 @@ function createTree(orderedLeaves, depth, defaultNodes) {
             halfIndex = toBN(index).dividedToIntegerBy(2).toString();
             value = treeLevel[index];
             if (toBN(index).mod(2).isZero()) {
-                let coIndex = toBN(index).add(1).toString();
+                let coIndex = toBN(index).plus(1).toString();
                 nextLevel[halfIndex] =
                     soliditySha3(value, treeLevel[coIndex] || defaultNodes[level]);
             } else {
-                let coIndex = toBN(index).sub(1).toString();
+                let coIndex = toBN(index).plus(1).toString();
                 if (treeLevel[coIndex] === undefined) {
                       nextLevel[halfIndex] =
                         soliditySha3(defaultNodes[level], value);
@@ -99,7 +100,7 @@ export class SparseMerkleTree {
         let siblingIndex;
         let siblingHash;
         for (let level=0; level < this.depth; level++) {
-            siblingIndex = index.mod(2).eq(0) ? index.add(1) : index.sub(1);
+            siblingIndex = index.mod(2).eq(0) ? index.plus(1) : index.minus(1);
 
             siblingHash = this.tree[level][siblingIndex.toString()];
 

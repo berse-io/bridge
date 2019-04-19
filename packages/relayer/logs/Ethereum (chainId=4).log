@@ -602,3 +602,675 @@
 [32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0xdb73c3e836ba9618a326cf13f7feec609673bf3c59b30cd22830772bf633cf0a
 [32minfo[39m Ethereum (chainId=4): 	Proving event 0xf02930688b339b2e7444201b2c8d74704ec0a53bff7e96b6eb639d576e9dab5d for bridging
 [31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=6
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #34, 0 events
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0xdb73c3e836ba9618a326cf13f7feec609673bf3c59b30cd22830772bf633cf0a
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x707c7975e393a1b6cdf847aeb0b32b395cd8f16cca620271627eb7e3c78a633a
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0x953994aee69594cc7ffc2fcf38a07446ebae0890bb3be00070474b4e89b5f6a4
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0x3dd46766d8b75c0d3ca37fe3bcf44baaf8d3632b95ef3351e2b9fb0037586576 eventRoot=0x707c7975e393a1b6cdf847aeb0b32b395cd8f16cca620271627eb7e3c78a633a ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0x3dd46766d8b75c0d3ca37fe3bcf44baaf8d3632b95ef3351e2b9fb0037586576
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0x953994aee69594cc7ffc2fcf38a07446ebae0890bb3be00070474b4e89b5f6a4 for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=7
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #39, 0 events
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x3dd46766d8b75c0d3ca37fe3bcf44baaf8d3632b95ef3351e2b9fb0037586576
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x707c7975e393a1b6cdf847aeb0b32b395cd8f16cca620271627eb7e3c78a633a
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0x22297b598e3d2e8ab65daf3a5ac18cbdab296e12e43f4bba62495af8ff8cec84
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0xaa21816ffa8ce80e2e6a3124bd52d6e175d2a274f278e1d800c694b090b8f3b2 eventRoot=0x707c7975e393a1b6cdf847aeb0b32b395cd8f16cca620271627eb7e3c78a633a ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0xaa21816ffa8ce80e2e6a3124bd52d6e175d2a274f278e1d800c694b090b8f3b2
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0x22297b598e3d2e8ab65daf3a5ac18cbdab296e12e43f4bba62495af8ff8cec84 for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=8
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #44, 0 events
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0xaa21816ffa8ce80e2e6a3124bd52d6e175d2a274f278e1d800c694b090b8f3b2
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x707c7975e393a1b6cdf847aeb0b32b395cd8f16cca620271627eb7e3c78a633a
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0xf6aec35a0da4ed33e6ae0f7e838f7fa3de96d4c7b6026cf316a9a7edd72465c2
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0x9678634770f6b1a4ccc80f6c9c551ed152d0c0dffb83af5a13015dcbdc200de5 eventRoot=0x707c7975e393a1b6cdf847aeb0b32b395cd8f16cca620271627eb7e3c78a633a ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0x9678634770f6b1a4ccc80f6c9c551ed152d0c0dffb83af5a13015dcbdc200de5
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0xf6aec35a0da4ed33e6ae0f7e838f7fa3de96d4c7b6026cf316a9a7edd72465c2 for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=9
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #49, 0 events
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x9678634770f6b1a4ccc80f6c9c551ed152d0c0dffb83af5a13015dcbdc200de5
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x707c7975e393a1b6cdf847aeb0b32b395cd8f16cca620271627eb7e3c78a633a
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0xe9739d5a097f3c8d7cbe6fadd5758a40a549b6c142e5b0331b7d45b7196d19d7
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0x5158beed7eabe0f2510d225ababc024cb4e89abfaf747414e873743084e6e693 eventRoot=0x707c7975e393a1b6cdf847aeb0b32b395cd8f16cca620271627eb7e3c78a633a ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0x5158beed7eabe0f2510d225ababc024cb4e89abfaf747414e873743084e6e693
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0xe9739d5a097f3c8d7cbe6fadd5758a40a549b6c142e5b0331b7d45b7196d19d7 for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=10
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #54, 0 events
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x5158beed7eabe0f2510d225ababc024cb4e89abfaf747414e873743084e6e693
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x707c7975e393a1b6cdf847aeb0b32b395cd8f16cca620271627eb7e3c78a633a
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[31merror[39m Ethereum (chainId=4): 	duplicate at 12
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=10
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #57, 0 events
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x5158beed7eabe0f2510d225ababc024cb4e89abfaf747414e873743084e6e693
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x707c7975e393a1b6cdf847aeb0b32b395cd8f16cca620271627eb7e3c78a633a
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[31merror[39m Ethereum (chainId=4): 	duplicate at 11
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=10
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #60, 0 events
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x5158beed7eabe0f2510d225ababc024cb4e89abfaf747414e873743084e6e693
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x707c7975e393a1b6cdf847aeb0b32b395cd8f16cca620271627eb7e3c78a633a
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[31merror[39m Ethereum (chainId=4): 	duplicate at 11
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=1
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #12, 0 events
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0xf4eee2427923e135d681bdb074e22d27c28c960cf8f9025bd497d736206362d2
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0xfd2f2ebcf0979f852dbb4f6bf6f995fb8d441e0bc249644404cacd821d7282e2
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0x9dddde46502a455244b4d278eff4998a033a8060dbd6844805b205be3da27ae8 eventRoot=0xfd2f2ebcf0979f852dbb4f6bf6f995fb8d441e0bc249644404cacd821d7282e2 ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0x9dddde46502a455244b4d278eff4998a033a8060dbd6844805b205be3da27ae8
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=2
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #16, 0 events
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x9dddde46502a455244b4d278eff4998a033a8060dbd6844805b205be3da27ae8
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0xfd2f2ebcf0979f852dbb4f6bf6f995fb8d441e0bc249644404cacd821d7282e2
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[31merror[39m Ethereum (chainId=4): 	duplicate at 4
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=1
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #12
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x90c78d6acd5328eb3f89b1502e154ddae6f894df5b32860d447afca54381800e
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x36469e01d8da26efa2f02c7afaad82dbc54faf6717078166e16408c00089699a
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0xbe487c80af07131ec218824ee896bb62352677839c9c16ce23be24379e9b6e08 eventRoot=0x36469e01d8da26efa2f02c7afaad82dbc54faf6717078166e16408c00089699a ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0xbe487c80af07131ec218824ee896bb62352677839c9c16ce23be24379e9b6e08 eventRoot=0x36469e01d8da26efa2f02c7afaad82dbc54faf6717078166e16408c00089699a ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0x4ecfbc5b7b83b048beadaad005a4245e9bba72f72a467f56cc88d5c1bc7f3a35 eventRoot=0x36469e01d8da26efa2f02c7afaad82dbc54faf6717078166e16408c00089699a ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0xbe487c80af07131ec218824ee896bb62352677839c9c16ce23be24379e9b6e08
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0xbe487c80af07131ec218824ee896bb62352677839c9c16ce23be24379e9b6e08
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0x4ecfbc5b7b83b048beadaad005a4245e9bba72f72a467f56cc88d5c1bc7f3a35
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=4
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #18
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x4ecfbc5b7b83b048beadaad005a4245e9bba72f72a467f56cc88d5c1bc7f3a35
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x36469e01d8da26efa2f02c7afaad82dbc54faf6717078166e16408c00089699a
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0x263574a4665f8d7143b42649c208a21b3d7b71811b9eef8eb94107353d104d77
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0x9026e3e981dda5528ac8fafa98d44904b18d4a38139ced2f1e69f579fb641b2e eventRoot=0x36469e01d8da26efa2f02c7afaad82dbc54faf6717078166e16408c00089699a ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0x9026e3e981dda5528ac8fafa98d44904b18d4a38139ced2f1e69f579fb641b2e
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0x263574a4665f8d7143b42649c208a21b3d7b71811b9eef8eb94107353d104d77 for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=1
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #12
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x81cffa7e1a16b1b80bee551d193efc4fe2ba69f783ca6bcbf44540f9690dc206
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0xdf1cf5542abeeaa8d000fbc0e465308d4ebe0c0f71a2dc8bc4e756295e531d94
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0xb76e309925267927f409f7dc478d5bd20da58670914caa8a408ae6d96f340955
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0xd7d3c9bc3f5134a0cb28b4cbaee431ea56345b1ecdfc5697a5dec7eb5e6d2fc6 eventRoot=0xdf1cf5542abeeaa8d000fbc0e465308d4ebe0c0f71a2dc8bc4e756295e531d94 ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0xd7d3c9bc3f5134a0cb28b4cbaee431ea56345b1ecdfc5697a5dec7eb5e6d2fc6
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0xb76e309925267927f409f7dc478d5bd20da58670914caa8a408ae6d96f340955 for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=1
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #12
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x5793e24cc60b9e4d267b9c451b60d6d544faf1e75aa433bc4f0c3ccf8493fcf8
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x5793e24cc60b9e4d267b9c451b60d6d544faf1e75aa433bc4f0c3ccf8493fcf8
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0x769c7a2ba0abd1d8d913fb67e147a4f3f41a07b90ba4bcb69accae8ed7ab244c
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0x2e13428ccc1de201eaf896065a4d141facea3f8f47879d655d1d7381f9ce0344 eventRoot=0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0x2e13428ccc1de201eaf896065a4d141facea3f8f47879d655d1d7381f9ce0344
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0x769c7a2ba0abd1d8d913fb67e147a4f3f41a07b90ba4bcb69accae8ed7ab244c for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=2
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #17
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x2e13428ccc1de201eaf896065a4d141facea3f8f47879d655d1d7381f9ce0344
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0x631d08fb6e9789a434276f34033b01c69139bb6887a4546fff43d6f98d3fb1d2
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0xa2c1ef7c4dfa634e98697c1bc26a1df69bb88900d0993e784f4512e06c4092e6 eventRoot=0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0xa2c1ef7c4dfa634e98697c1bc26a1df69bb88900d0993e784f4512e06c4092e6
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0x631d08fb6e9789a434276f34033b01c69139bb6887a4546fff43d6f98d3fb1d2 for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=3
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #22
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0xa2c1ef7c4dfa634e98697c1bc26a1df69bb88900d0993e784f4512e06c4092e6
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0x7bf56976d17fe3d4b457ee1bad32cc9f376c620945cae41f42a108c774bc5658
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0x135802e1b4317735b8a2db5cd58eeffdad11095e6249737a19fc87b68a98ed9b eventRoot=0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0x135802e1b4317735b8a2db5cd58eeffdad11095e6249737a19fc87b68a98ed9b
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0x7bf56976d17fe3d4b457ee1bad32cc9f376c620945cae41f42a108c774bc5658 for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=4
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #27
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x135802e1b4317735b8a2db5cd58eeffdad11095e6249737a19fc87b68a98ed9b
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0x8ee45d84df3a272d1266ca06fece7513368cdd2994024d0d6b9ccdca2955009d
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0x8429ad951c54f17aded0b6efddbd560344e60253252aaa824a1f0f22b8d7cf19 eventRoot=0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0x8429ad951c54f17aded0b6efddbd560344e60253252aaa824a1f0f22b8d7cf19
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0x8ee45d84df3a272d1266ca06fece7513368cdd2994024d0d6b9ccdca2955009d for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=5
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #32
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x8429ad951c54f17aded0b6efddbd560344e60253252aaa824a1f0f22b8d7cf19
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0x526198b1349ffb03fab369a4dea0d586263619512cab44ad07969969791ab2a5
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0xa31c55ea9fc49a49812bca09710285f90803e385ca6f30cda5c9c9b99c94ea5b eventRoot=0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0xa31c55ea9fc49a49812bca09710285f90803e385ca6f30cda5c9c9b99c94ea5b
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0x526198b1349ffb03fab369a4dea0d586263619512cab44ad07969969791ab2a5 for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=6
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #37
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0xa31c55ea9fc49a49812bca09710285f90803e385ca6f30cda5c9c9b99c94ea5b
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0xcfde74059b66173d7f48f47c603650b4e0ad0fddf32fac801cfbe18ca940c06b
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0x8a9e26baff0ebdc55926449a90178b85975b464b8499a4c60439c30f1e40e187 eventRoot=0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0x8a9e26baff0ebdc55926449a90178b85975b464b8499a4c60439c30f1e40e187
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0xcfde74059b66173d7f48f47c603650b4e0ad0fddf32fac801cfbe18ca940c06b for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=7
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #42
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x8a9e26baff0ebdc55926449a90178b85975b464b8499a4c60439c30f1e40e187
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0xf0db7ba76306ec248383b2c41a15c4349fb9275d9fd65edc1962d5c57a3e504c
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0x141e17d9e5c8ae6fdf0d6b534d932e55864c17450e56b15ddf2294089f30c0bd eventRoot=0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0x141e17d9e5c8ae6fdf0d6b534d932e55864c17450e56b15ddf2294089f30c0bd
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0xf0db7ba76306ec248383b2c41a15c4349fb9275d9fd65edc1962d5c57a3e504c for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=8
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #47
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x141e17d9e5c8ae6fdf0d6b534d932e55864c17450e56b15ddf2294089f30c0bd
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0x568380d0580e76c9a65b28a967bdba4f5ace0999377fd472e1e017844a92db6a
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0x9885be1f605a1543dbd24851c87016719451d0f657453d478607a817393f7576 eventRoot=0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0x9885be1f605a1543dbd24851c87016719451d0f657453d478607a817393f7576
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0x568380d0580e76c9a65b28a967bdba4f5ace0999377fd472e1e017844a92db6a for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=9
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #52
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x9885be1f605a1543dbd24851c87016719451d0f657453d478607a817393f7576
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0xddff57ca5079551d6921eb1cd8aea3eb1e0a492c2ea79361f288a2af4ded9b1a
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0x7fd83856cca126da05448f428bb2e867d3c936118cf5c8c566d59d881e5bb62d eventRoot=0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0x7fd83856cca126da05448f428bb2e867d3c936118cf5c8c566d59d881e5bb62d
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0xddff57ca5079551d6921eb1cd8aea3eb1e0a492c2ea79361f288a2af4ded9b1a for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=10
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #57
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x7fd83856cca126da05448f428bb2e867d3c936118cf5c8c566d59d881e5bb62d
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0x139f76c7517676c8adf84a5bf4e7d187577aee1a61eb3fce7f6242fcbda32d28
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0xbbf90b038e480060d5266fbdd6ff0f64f1a86408b21f431628fc229bff6a879c eventRoot=0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0xbbf90b038e480060d5266fbdd6ff0f64f1a86408b21f431628fc229bff6a879c
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0x139f76c7517676c8adf84a5bf4e7d187577aee1a61eb3fce7f6242fcbda32d28 for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=11
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #62
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0xbbf90b038e480060d5266fbdd6ff0f64f1a86408b21f431628fc229bff6a879c
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0xd4590cbaf3fcff6eee884cac3fcb60079c8adc3b344220c3fae1368dee691c63
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0x7207a58b110fe460bdba9bb72fc04ef7d3f2e00520b7a455ba3755b622b931d8 eventRoot=0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0x7207a58b110fe460bdba9bb72fc04ef7d3f2e00520b7a455ba3755b622b931d8
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0xd4590cbaf3fcff6eee884cac3fcb60079c8adc3b344220c3fae1368dee691c63 for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=12
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #67
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x7207a58b110fe460bdba9bb72fc04ef7d3f2e00520b7a455ba3755b622b931d8
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0x773bfecd8eb21fdc8d9d5952479ce4c8de3030c7572ef28956ddf4f902a321ac
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0x812d05fd2e3f6f358511462a4452c205f6911146b9c8a07d16442f7e43d90581 eventRoot=0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0x812d05fd2e3f6f358511462a4452c205f6911146b9c8a07d16442f7e43d90581
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0x773bfecd8eb21fdc8d9d5952479ce4c8de3030c7572ef28956ddf4f902a321ac for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=13
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #72
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x812d05fd2e3f6f358511462a4452c205f6911146b9c8a07d16442f7e43d90581
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0x50e2b0e67f7f3355747d029c31d52edb63906d3ec05493486bf5b9a5832cadfb
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0x0c87280211f775c02e9a2c9671355da2428078a076435fa3504215dfa3d8e8f9 eventRoot=0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0x0c87280211f775c02e9a2c9671355da2428078a076435fa3504215dfa3d8e8f9
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0x50e2b0e67f7f3355747d029c31d52edb63906d3ec05493486bf5b9a5832cadfb for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=14
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #77
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x0c87280211f775c02e9a2c9671355da2428078a076435fa3504215dfa3d8e8f9
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0xc83178febb5becc2ff75afb54b8f701883e66f35210e4551711d6cb399218210
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0xafdda40cb5c67cd9f18cf1af321d068665520c4545b58458bf4d90190a17ab40 eventRoot=0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0xafdda40cb5c67cd9f18cf1af321d068665520c4545b58458bf4d90190a17ab40
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0xc83178febb5becc2ff75afb54b8f701883e66f35210e4551711d6cb399218210 for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=15
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #82
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0xafdda40cb5c67cd9f18cf1af321d068665520c4545b58458bf4d90190a17ab40
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0x349032086c58b9f549b42ca298ad76be3cc9deb8d256da2a051d35e8dec17d5c
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0x62236bac211e994ba4cc316b5c3b93e61df32f91194a01ee40bd2509c97361df eventRoot=0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0x62236bac211e994ba4cc316b5c3b93e61df32f91194a01ee40bd2509c97361df
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0x349032086c58b9f549b42ca298ad76be3cc9deb8d256da2a051d35e8dec17d5c for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=16
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #87
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x62236bac211e994ba4cc316b5c3b93e61df32f91194a01ee40bd2509c97361df
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0x28961860e85ec32b8e4b1da7e10a89af547158a9d2642f4cdaeadb9da1977fae
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0xd1330abdd163aa18a5403b1b31cfc42f3ba3a4da90773ccb3ced8b8c036b4e20 eventRoot=0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0xd1330abdd163aa18a5403b1b31cfc42f3ba3a4da90773ccb3ced8b8c036b4e20
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0x28961860e85ec32b8e4b1da7e10a89af547158a9d2642f4cdaeadb9da1977fae for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=17
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #92
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0xd1330abdd163aa18a5403b1b31cfc42f3ba3a4da90773ccb3ced8b8c036b4e20
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0xc766a53e2b818adab64f3afa63a093c745d112664c46dadf655c57367fd921da
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0x3c39896b77e98d01b1833728ea4f9a2b70d74ca4c0b688e4e62ce1ad6b88d84b eventRoot=0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0x3c39896b77e98d01b1833728ea4f9a2b70d74ca4c0b688e4e62ce1ad6b88d84b
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0xc766a53e2b818adab64f3afa63a093c745d112664c46dadf655c57367fd921da for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=18
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #97
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x3c39896b77e98d01b1833728ea4f9a2b70d74ca4c0b688e4e62ce1ad6b88d84b
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0x131e74c27b378d6506493c9c03c91dac5852555b10bd699524f5a4c951755092
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0x361674514cbc602243cea106eb7c251e10f67b7c7ef680d5eb51ce856419fe31 eventRoot=0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0x361674514cbc602243cea106eb7c251e10f67b7c7ef680d5eb51ce856419fe31
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0x131e74c27b378d6506493c9c03c91dac5852555b10bd699524f5a4c951755092 for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=19
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #102
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x361674514cbc602243cea106eb7c251e10f67b7c7ef680d5eb51ce856419fe31
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0xdc315da6bf4841daf097d16fcb3bb45a7f47c0053988787643deb0eafd5f0f39
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0x0907a04c2c1843561cf7db2484e564ac114a5c0b891a0294f1a6706d5e26c7f5 eventRoot=0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0x0907a04c2c1843561cf7db2484e564ac114a5c0b891a0294f1a6706d5e26c7f5
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0xdc315da6bf4841daf097d16fcb3bb45a7f47c0053988787643deb0eafd5f0f39 for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=20
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #107
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x0907a04c2c1843561cf7db2484e564ac114a5c0b891a0294f1a6706d5e26c7f5
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0x7d1b924c382d17ff3a5c9871041a793e4ec9bc0e4e5c1bd0d9353f7051ade0d5
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0x87654596aaa6abd318104e8d313bf629f05fdc6e60bcd456f2d785c5e05fb407 eventRoot=0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0x87654596aaa6abd318104e8d313bf629f05fdc6e60bcd456f2d785c5e05fb407
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0x7d1b924c382d17ff3a5c9871041a793e4ec9bc0e4e5c1bd0d9353f7051ade0d5 for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=21
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #112
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x87654596aaa6abd318104e8d313bf629f05fdc6e60bcd456f2d785c5e05fb407
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0xab761cdb3de3381871d2f6775810714c0217eab37709cbc0b4e83c6302e1b323
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0xfba0f2d1bcead6bbf2e2a6329c726d53e010c1893c3963c8f027f13d6ee1c344 eventRoot=0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0xfba0f2d1bcead6bbf2e2a6329c726d53e010c1893c3963c8f027f13d6ee1c344
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0xab761cdb3de3381871d2f6775810714c0217eab37709cbc0b4e83c6302e1b323 for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=22
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #117
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0xfba0f2d1bcead6bbf2e2a6329c726d53e010c1893c3963c8f027f13d6ee1c344
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0xff83f31df2c6e720713c1efeb95980805351df4c4705a8ef36f2fb97b4ad94ee
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0x71c4728e3ecc9fcded263ac5cd513b67410626f4850f7f99f944ab2a3984a033 eventRoot=0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0x71c4728e3ecc9fcded263ac5cd513b67410626f4850f7f99f944ab2a3984a033
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0xff83f31df2c6e720713c1efeb95980805351df4c4705a8ef36f2fb97b4ad94ee for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=23
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #122
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x71c4728e3ecc9fcded263ac5cd513b67410626f4850f7f99f944ab2a3984a033
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0x005ebde663ec4823743565688f9633bb443c41cd811465f95f79d61f69114324
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0x9d1d49fbdc56336c0a103faa68e00ef6e834966a736713749d4f4a8451385278 eventRoot=0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0x9d1d49fbdc56336c0a103faa68e00ef6e834966a736713749d4f4a8451385278
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0x005ebde663ec4823743565688f9633bb443c41cd811465f95f79d61f69114324 for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=24
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #127
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x9d1d49fbdc56336c0a103faa68e00ef6e834966a736713749d4f4a8451385278
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0x9706a510b1a44b2e6891a50f8ec37741558591e507cd4ba8fde195110a12a93e
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0x26aeabc718474b92702cb2d498b9d2b9272aba39f74d89a9595ce2bbbcb2b243 eventRoot=0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0x26aeabc718474b92702cb2d498b9d2b9272aba39f74d89a9595ce2bbbcb2b243
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0x9706a510b1a44b2e6891a50f8ec37741558591e507cd4ba8fde195110a12a93e for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=25
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #132
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x26aeabc718474b92702cb2d498b9d2b9272aba39f74d89a9595ce2bbbcb2b243
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0x0afca5943c2273b1c24c076c19860a64fd4d8abd15a8d882b391727cfbca6008
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0x7bcabdd3eac66f911e99265e480c0e2667f9ba94c20368f621c1e44952ca810b eventRoot=0x631d26c03834f8fb86fb79ee78f327455209ee6d6d06e1a6384d255d81fd274b ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0x7bcabdd3eac66f911e99265e480c0e2667f9ba94c20368f621c1e44952ca810b
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0x0afca5943c2273b1c24c076c19860a64fd4d8abd15a8d882b391727cfbca6008 for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=1
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #12
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x92d2d9282df59b917c352046ec3f99c7bf52d52ba5861a81f53d7ca0f8309544
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x92d2d9282df59b917c352046ec3f99c7bf52d52ba5861a81f53d7ca0f8309544
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0xc3b11d04a3861d85aa82f4b1d471aaa3f53f97bd790f7844dd331872d02e7753
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0x9665892d52dd4ff0c58554b95aea3bd23b9a3d4c3c4735256209e01a2a0df38c eventRoot=0x9ffa4c06b5ebe8a0f7e5caa8d587ea03e3d992b459d5a54ceae7c9a13f2c9f37 ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0x9665892d52dd4ff0c58554b95aea3bd23b9a3d4c3c4735256209e01a2a0df38c
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0xc3b11d04a3861d85aa82f4b1d471aaa3f53f97bd790f7844dd331872d02e7753 for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert EVENT_HASH_MISMATCH
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=2
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #17
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x9665892d52dd4ff0c58554b95aea3bd23b9a3d4c3c4735256209e01a2a0df38c
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x9ffa4c06b5ebe8a0f7e5caa8d587ea03e3d992b459d5a54ceae7c9a13f2c9f37
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0xc8502563d98abafd05a8bcdb545ac72d03b55217d990254be5456fc26a1fcdb9
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0x5ba63e9d155e304f799fc6b274863717ce8fe77e5cf0ce578f581efed9d68837 eventRoot=0x9ffa4c06b5ebe8a0f7e5caa8d587ea03e3d992b459d5a54ceae7c9a13f2c9f37 ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0x5ba63e9d155e304f799fc6b274863717ce8fe77e5cf0ce578f581efed9d68837
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0xc8502563d98abafd05a8bcdb545ac72d03b55217d990254be5456fc26a1fcdb9 for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert EVENT_HASH_MISMATCH
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=1
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #12
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x8cc65428fa9458da81ebd3abaf770f80e2e4fa90e97e394456adef452a9bcdc8
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x8cc65428fa9458da81ebd3abaf770f80e2e4fa90e97e394456adef452a9bcdc8
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0xe9bb5acd2709bab6ce0b35c00be3a9ee239a1543f3a299953167f17dd1bb0865
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0x22bb960f4f74e28916badc70ebf27ffc931f3a928489ef5d8a7e0c82ad562a55 eventRoot=0x0e5bf3078a5383bd332c5d7fc0b129f73c0bf201b7a9399b95b6c85090d021a1 ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0x22bb960f4f74e28916badc70ebf27ffc931f3a928489ef5d8a7e0c82ad562a55
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0xe9bb5acd2709bab6ce0b35c00be3a9ee239a1543f3a299953167f17dd1bb0865 for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=1
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #12
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x8bf2477a37d8b1865c666e56c46fbe391d0c11ad0e06cf13cf069a49dc52eff8
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x8bf2477a37d8b1865c666e56c46fbe391d0c11ad0e06cf13cf069a49dc52eff8
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0x663c21d3302df8d41613b698ff387fee3b9fc2398aeb20dfa6cb194c61fb8164
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0x48b17e4a4b89ce271367ce244f6609b574abf774833f4d41f9bf5750491f3ef1 eventRoot=0x672f4b4b63b2f49f6cd8a286ab8499d7aa91e3149e8a0ea0915f32c68771cebe ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0x48b17e4a4b89ce271367ce244f6609b574abf774833f4d41f9bf5750491f3ef1
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0x663c21d3302df8d41613b698ff387fee3b9fc2398aeb20dfa6cb194c61fb8164 for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=2
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #17
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x48b17e4a4b89ce271367ce244f6609b574abf774833f4d41f9bf5750491f3ef1
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x672f4b4b63b2f49f6cd8a286ab8499d7aa91e3149e8a0ea0915f32c68771cebe
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0xded9e35b35949dc9813734c75d6b9217405c9458b1d58d434f06e20f8fb3c9c8
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0x4242a0203728d8ba3196c2acf2b5c52f1a111f8c2cff89a010672e70eb67ea3c eventRoot=0x672f4b4b63b2f49f6cd8a286ab8499d7aa91e3149e8a0ea0915f32c68771cebe ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0x4242a0203728d8ba3196c2acf2b5c52f1a111f8c2cff89a010672e70eb67ea3c
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0xded9e35b35949dc9813734c75d6b9217405c9458b1d58d434f06e20f8fb3c9c8 for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=1
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #12
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x66217a065619dd6a301a47c4ed2f8a94c849142fd921a929094edb82cbae9ca2
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x66217a065619dd6a301a47c4ed2f8a94c849142fd921a929094edb82cbae9ca2
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0xfe41133a8151c4c837798a6af1d4ae8e3cb0ba0300f6d22ff84410b6775cd871
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0x2a507e0ecf20034ebbe2fd0a077bf2f14501a52eb56ddd9ac8b7fd09749e719e eventRoot=0x9be5e3fddd6cf705289a636d8e1a9302506c194a3cf432000ea57137473e538a ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0x2a507e0ecf20034ebbe2fd0a077bf2f14501a52eb56ddd9ac8b7fd09749e719e
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0xfe41133a8151c4c837798a6af1d4ae8e3cb0ba0300f6d22ff84410b6775cd871 for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=1
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #12
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0xfb14e19fe6b98f8a79fcbd949e4dd49d445f6bf4888add5aeb53450166c1a498
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0xfb14e19fe6b98f8a79fcbd949e4dd49d445f6bf4888add5aeb53450166c1a498
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0x6115f9b0e089dd93d87d696bbbfae85911a3d23630a6872cfe9469cad2a442be
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0x592e322087b14d7cea76beba4db1284577be35f9ef7adb3e46569e253c67ff90 eventRoot=0x3a901386d5b5643fec8b0542d65322afd75e2cec1fc71f6af1dc279560c27405 ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0x592e322087b14d7cea76beba4db1284577be35f9ef7adb3e46569e253c67ff90
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0x6115f9b0e089dd93d87d696bbbfae85911a3d23630a6872cfe9469cad2a442be for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=2
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #17
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x592e322087b14d7cea76beba4db1284577be35f9ef7adb3e46569e253c67ff90
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x3a901386d5b5643fec8b0542d65322afd75e2cec1fc71f6af1dc279560c27405
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0xfd0f1475756cc9f42c411f279588989f49eec6351941c75f432986bb7003bc42
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0x240a64441b620a95ac1cfb008f1ea96165f5d65d902c4854c85293240a5d62fb eventRoot=0x3a901386d5b5643fec8b0542d65322afd75e2cec1fc71f6af1dc279560c27405 ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0x240a64441b620a95ac1cfb008f1ea96165f5d65d902c4854c85293240a5d62fb
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0xfd0f1475756cc9f42c411f279588989f49eec6351941c75f432986bb7003bc42 for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF
+[32minfo[39m Ethereum (chainId=4): 	Connecting to http://localhost:10001
+[32minfo[39m Ethereum (chainId=4): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=4): 	pastEvents=1 pastStateUpdates=3
+[32minfo[39m Ethereum (chainId=4): 	Sync'd to block #22
+[32minfo[39m Ethereum (chainId=4): 	
+[32minfo[39m Ethereum (chainId=4): 	stateRoot = 0x240a64441b620a95ac1cfb008f1ea96165f5d65d902c4854c85293240a5d62fb
+[32minfo[39m Ethereum (chainId=4): 	eventsRoot = 0x3a901386d5b5643fec8b0542d65322afd75e2cec1fc71f6af1dc279560c27405
+[32minfo[39m Ethereum (chainId=4): 	Bridges:
+[32minfo[39m Ethereum (chainId=4): 		0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66
+[32minfo[39m Ethereum (chainId=4): 	listening to events on 0xaba19d9dc85ece02661379521927bc3e8c3ec964
+[32minfo[39m Ethereum (chainId=4): 	receiveCrosschainMessage fromChain=42 eventHash=0x131619583b97b49561577e219d778b32f784a8c8d1caa92ee2481e837611f827
+[32minfo[39m Ethereum (chainId=4): 	computeUpdatedStateRoot: root=0x2a7978cd86c8aea94679beb603415a5ff5acc846f7fb1d1f01aa1623db885d18 eventRoot=0x3a901386d5b5643fec8b0542d65322afd75e2cec1fc71f6af1dc279560c27405 ackdEvent=0
+[32minfo[39m Ethereum (chainId=4): 	StateRootUpdated root=0x2a7978cd86c8aea94679beb603415a5ff5acc846f7fb1d1f01aa1623db885d18
+[32minfo[39m Ethereum (chainId=4): 	Proving event 0x131619583b97b49561577e219d778b32f784a8c8d1caa92ee2481e837611f827 for bridging
+[31merror[39m Ethereum (chainId=4): 	VM Exception while processing transaction: revert _eventHash INVALID_PROOF

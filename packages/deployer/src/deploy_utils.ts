@@ -1,6 +1,6 @@
-import { Web3ProviderEngine, AbiDefinition, Provider } from "0x.js";
-import { TxData } from "ethereum-types";
+import { Web3ProviderEngine, AbiDefinition } from "0x.js";
 
+import { Provider } from 'ethereum-types'
 const assert = require('assert');
 const linker = require('solc/linker')
 
@@ -10,6 +10,7 @@ type DeployArgs = [ string, AbiDefinition[], Provider, Partial<TxData> ]
 
 import { SparseMerkleTreeContract } from '@ohdex/contracts/lib/build/wrappers/sparse_merkle_tree';
 import { MerkleTreeVerifierContract } from '@ohdex/contracts/lib/build/wrappers/merkle_tree_verifier';
+import { TxData } from "ethereum-types";
 
 export async function deployLibraries(pe: any, account: string) {
     // Deploy libraries
@@ -43,17 +44,7 @@ export function addLibrary(name: string, address: string) {
     // eg.
     // libraryHashPlaceholder('/Users/liamz/Documents/open-source/0dex/packages/contracts/contracts/MerkleTreeVerifier.sol:MerkleTreeVerifier')
     // '$1eb98b648b444978ea3820de6fcdeb48d6$'
-
-
     
-    // get the full path of this source
-    // eg. /Users/liamz/Documents/open-source/0dex/packages/contracts/contracts/MerkleTreeVerifier.sol
-    // let paths = Object.keys(metadata.sources);
-    // paths.filter(path => path.endsWith(artifact.name))
-
-    // let linkReferences = compilerOutput.evm.deployedBytecode.linkReferences;
-
-    // libraries[name] = address;
     console.log(`Registered library ${name} to ${key}`)
 
     libraries[key] = address;
