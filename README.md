@@ -1,13 +1,22 @@
-ohdex
-=====
+Berse
 
-[![CircleCI](https://circleci.com/gh/liamzebedee/ohdex/tree/master.svg?style=svg)](https://circleci.com/gh/liamzebedee/ohdex/tree/master)
+---
 
-Bridge tokens between chains. PoC WIP.
+[Berse][website-url] is a bridging platform between Ethereum blockchains.
 
-Copyright Liam Zebedee and Mick de Graaf, 2019.
+This repository is a monorepo including the Berse protocol smart contracts and numerous developer tools.
 
-## Setup
+[![Activity](https://img.shields.io/github/last-commit/berse-io/monorepo.svg)](https://github.com/berse-io)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
+## Usage
+
+Node version >= 6.12 is required.
+
+### Demo
+
+This document is a work-in-progress, and will be updated in the coming week.
+
 ```
 yarn
 cd packages/
@@ -27,4 +36,42 @@ NODE_ENV=development yarn start
 
 cd bridge-ui/
 NODE_ENV=development yarn dev
+```
+
+## Contributing
+
+We strongly recommend that the community help us make improvements and determine the future direction of the protocol. To report bugs within this package, please create an issue in this repository.
+
+#### Read our [contribution guidelines](./CONTRIBUTING.md).
+
+### Install dependencies
+
+Make sure you are using Yarn v1.9.4. To install using brew:
+
+```bash
+brew install yarn@1.9.4
+```
+
+Then install dependencies
+
+```bash
+yarn install
+```
+
+### Build
+
+To build all packages:
+
+```bash
+yarn build
+```
+
+To build a specific package:
+
+### Watch
+
+To re-build all packages on change:
+
+```bash
+yarn watch
 ```
