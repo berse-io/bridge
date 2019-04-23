@@ -1,8 +1,7 @@
 Berse
+=====
 
----
-
-[Berse][website-url] is a bridging platform between Ethereum blockchains.
+[Berse][https://berse.io] is a bridging platform between Ethereum blockchains.
 
 This repository is a monorepo including the Berse protocol smart contracts and numerous developer tools.
 
@@ -41,8 +40,6 @@ NODE_ENV=development yarn dev
 ## Contributing
 
 We strongly recommend that the community help us make improvements and determine the future direction of the protocol. To report bugs within this package, please create an issue in this repository.
-
-#### Read our [contribution guidelines](./CONTRIBUTING.md).
 
 ### Install dependencies
 
