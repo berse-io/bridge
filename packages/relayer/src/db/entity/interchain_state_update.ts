@@ -30,6 +30,9 @@ export class InterchainStateUpdate extends BaseEntity {
     @Column()
     eventRoot: string;
 
+    // @Column()
+    // acknowledged: ChainEvent[];
+
     // @Column({ nullable: true })
     // acksUntil: ChainEvent;
 

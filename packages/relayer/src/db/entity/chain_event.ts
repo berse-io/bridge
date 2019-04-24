@@ -1,6 +1,7 @@
-import {Entity, PrimaryColumn, Column, ManyToOne, OneToMany, JoinColumn, BaseEntity, PrimaryGeneratedColumn} from "typeorm";
+import {Entity, PrimaryColumn, Column, ManyToOne, OneToMany, JoinColumn, BaseEntity, PrimaryGeneratedColumn, OneToOne} from "typeorm";
 import { Chain } from "./chain";
 import { dehexify } from "@ohdex/shared";
+import { InterchainStateUpdate } from "./interchain_state_update";
 
 @Entity()
 export class ChainEvent extends BaseEntity {
@@ -16,6 +17,9 @@ export class ChainEvent extends BaseEntity {
 
     @Column()
     blockTime: number;
+
+    // @OneToOne(InterchainStateUpdate, update => update.acknowledged)
+    // ackdBy: InterchainStateUpdate;
     
     static getEventsBeforeTime(chainId: number, blockTime: number): Promise<ChainEvent[]> {
         return this.createQueryBuilder('event')
