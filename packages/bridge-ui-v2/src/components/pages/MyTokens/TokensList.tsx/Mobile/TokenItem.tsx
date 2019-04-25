@@ -34,7 +34,7 @@ class TokenItem extends React.Component<any>{
     }
 
     handleButtonPress = () =>  {
-        this.buttonPressTimer = setTimeout(() => alert('long press activated'), 1500);
+        this.buttonPressTimer = setTimeout(() => this.props.onDeleteClicked(this.props.token), 1500);
     }
 
     handleButtonRelease = () => {

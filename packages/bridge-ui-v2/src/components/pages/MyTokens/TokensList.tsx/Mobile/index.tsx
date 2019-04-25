@@ -14,7 +14,7 @@ class Mobile extends React.Component<any> {
         return(
             <List> 
                 {tokens.map((token:any) => (
-                    <TokenItem onTokenClicked={this.props.onTokenClicked} token={token}/>
+                    <TokenItem onDeleteClicked={this.props.onDeleteClicked} onTokenClicked={this.props.onTokenClicked} token={token}/>
                 ))} 
             </List>
         )
