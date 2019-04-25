@@ -37,10 +37,19 @@
 		"0xb2fbcd12c58ef05e22de310885b3635e5c5e8c14": {
 			"balance": "0x8AC7230489E800000"
 		},
+		"0x5409ed021d9299bf6814279a6a1411a7e866a631": {
+			"balance": "0x8AC7230489E800000"
+		},
+		"0x6ecbe1db9ef729cbe972c83fb886247691fb6beb": {
+			"balance": "0x8AC7230489E800000"
+		},
+		"0xe36ea790bc9d7ab70c55260c66d52b1eca985f84": {
+			"balance": "0x8AC7230489E800000"
+		},
 
 		"0x7ef5a6135f1fd6a02593eedc869c6d41d934aef8": {
-		"balance": "0x1"
-	  },
+			"balance": "0x8AC7230489E800000"
+	  	},
 
 		"0000000000000000000000000000000000000000": {
 			"balance": "0x1"

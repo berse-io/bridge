@@ -1,38 +1,11 @@
-import { BlockWithTransactionData } from "ethereum-protocol";
-import { EventEmitter } from "../declarations";
 import { IChain } from "@ohdex/multichain";
-import { ITokenBridgeEventArgs } from "@ohdex/contracts/lib/build/wrappers/i_token_bridge";
-const eventEmitter = require("events");
-
-
-import Event from 'events'
 import { chainLogger } from "../logger";
+import { EventEmitter } from "events";
 
-
-interface EventEmittedEvent {
-    eventHash: string;
-    newChainRoot: string;
-    newChainIndex: string;
-}
-
-type chainId = string
-interface MessageSentEvent {
-    fromChain: chainId;
-    fromChainId: number;
-    toBridge: string;
-    data: ITokenBridgeEventArgs;
-    eventHash: string;
-}
-
-interface ChainEvents {
-    "EventEmitter.EventEmitted": EventEmittedEvent,
-    "ITokenBridge.TokensBridgedEvent": MessageSentEvent,
-    "StateRootUpdated": any
-}
 
 abstract class IChainTracker {
     logger: any;
-    events: EventEmitter<ChainEvents>;
+    events: EventEmitter
     id: string;
 
     abstract async start(): Promise<any>;
@@ -41,11 +14,11 @@ abstract class IChainTracker {
 
 
 abstract class ChainTracker extends IChainTracker implements IChain {    
-    constructor(chainId: chainId) {
+    constructor(chainId: string) {
         super();
         this.id = chainId;
 
-        this.events = new eventEmitter();
+        this.events = new EventEmitter();
         this.logger = chainLogger(chainId)
     }
 
@@ -57,8 +30,5 @@ abstract class ChainTracker extends IChainTracker implements IChain {
 }
 
 export {
-    ChainEvents,
     ChainTracker,
-    EventEmittedEvent,
-    MessageSentEvent
 }

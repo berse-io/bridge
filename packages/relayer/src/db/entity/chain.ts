@@ -1,6 +1,7 @@
 import {Entity, PrimaryColumn, Column, ManyToOne, OneToMany, PrimaryGeneratedColumn} from "typeorm";
 import { InterchainStateUpdate } from "./interchain_state_update";
 import { ChainEvent } from "./chain_event";
+import { Snapshot } from "./snapshot";
 
 @Entity()
 export class Chain {
@@ -15,4 +16,7 @@ export class Chain {
 
     @OneToMany(type => InterchainStateUpdate, u => u.chain)
     stateUpdates: InterchainStateUpdate[];
+
+    @OneToMany(type => Snapshot, s => s.chain)
+    snapshots: Snapshot[];
 }

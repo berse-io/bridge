@@ -23,31 +23,30 @@ export class TestchainFactory {
     static async fork(rpcUrl: string, port: string): Promise<Testchain> {
         let nonce = new Date;
         const server = ganache.server({ 
-            ws: true,
+            // ws: true,
             // logger: {
             //     log: () => false // console.log
             // },
 
             total_accounts: 100,
             s: "TestRPC is awesome! " + nonce, // I didn't choose this
-            gasPrice: 0,
-            gas: 1,
+            // gasPrice: 0,
+            // gas: 1,
             // networkId: 420,
             // debug: false,
             defaultBalanceEther: '1000000000',
             unlock: [0, 1],
-            fork: rpcUrl
+            fork: rpcUrl,
+            
         });
 
         return new Promise<any>((res, rej) => {
             server.listen(port, (err, state) => {
-                console.log(err)
                 if(err) rej(err);
                 
                 let chain = new Testchain()
                 chain.port = port;
                 res(chain)
-                // else res(state)
             })
         });
         
@@ -118,6 +117,7 @@ import { InterchainStateUpdate } from "../src/db/entity/interchain_state_update"
 import { EthereumChainTracker } from "../src/chain/ethereum";
 import { CrosschainStateService } from "../src/interchain/xchain_state_service";
 import { DbConnProvider } from "../src/db/provider";
+import { NonceTrackerSubprovider } from "@0x/subproviders";
 
 export function sinonStrEqual(str: string) {
     return sinon.match(caseInsensitiveEquals(str), `${str}`)
@@ -129,26 +129,46 @@ export function sinonBignumEq(x: any) {
     })
 }
 
-export async function loadWeb3(config: { rpcUrl: string }) {
-    let pe = new Web3ProviderEngine();
-    
+export function getRevertTraceSubprovider(account: string) {
     const artifactAdapter = new SolCompilerArtifactAdapter(
         `${require("@ohdex/contracts")}/build/artifacts`,
         `${require("@ohdex/contracts")}/contracts`
     );
     const revertTraceSubprovider = new RevertTraceSubprovider(
         artifactAdapter, 
-        '0',
+        account,
         true
     );
-    pe.addProvider(revertTraceSubprovider);
+    return revertTraceSubprovider;
+}
 
+function prependSubprovider(provider: Web3ProviderEngine, subprovider: any): void {
+    subprovider.setEngine(provider);
+    // HACK: We use implementation details of provider engine here
+    // https://github.com/MetaMask/provider-engine/blob/master/index.js#L68
+    (provider as any)._providers = [subprovider, ...(provider as any)._providers];
+}
+
+export function addRevertTraces(pe, account) {
+    prependSubprovider(pe, getRevertTraceSubprovider(account))
+    // pe.addProvider(getRevertTraceSubprovider(account))
+    return;
+}
+
+export async function loadWeb3(config: { rpcUrl: string }) {
+    let pe = new Web3ProviderEngine();
+    pe.addProvider(new NonceTrackerSubprovider())
     pe.addProvider(new RPCSubprovider(config.rpcUrl))
     pe.start()
     let web3 = new Web3Wrapper(pe);
     let accounts = await web3.getAvailableAddressesAsync()
-    let account = accounts[0]
+    let account = accounts[2]
+
+    // console.log(accounts)
+
     let txDefaults = { from: account }
+    // , gas: 10000000
+
     return {
         pe,
         web3,

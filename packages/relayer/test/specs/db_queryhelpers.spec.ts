@@ -5,6 +5,9 @@ import { Chain } from "../../src/db/entity/chain";
 import { ChainEvent } from "../../src/db/entity/chain_event";
 import { InterchainStateUpdate } from "../../src/db/entity/interchain_state_update";
 import { clearDb } from '../helper';
+import { Snapshot } from '../../src/db/entity/snapshot';
+import { EventTree, StateTree } from '../../src/interchain/trees';
+import { keccak256 } from '../../src/utils';
 
 const testDbOpts = {
     ...options,
@@ -55,21 +58,21 @@ describe('Query helpers', function() {
                 "blockHash": "0xf21fa0398570971415a4166cb9284f595f81524767e3637082f2a6f5924803ff",
                 chain,
                 "stateRoot": "0xd8b363bc579954571ec3cdd892e0056399381bf69a62d02bf64a99ca822504fb",
+                eventRoot: "0x0000000000000000000000000000000000000000000000000000000000000000"
             },
             {
                 "blockTime": 1553695776 + 5,
                 "blockHash": "0x021fa0398570971415a4166cb9284f595f81524767e3637082f2a6f5924803ff",
                 chain,
                 "stateRoot": "0xe8b363bc579954571ec3cdd892e0056399381bf69a62d02bf64a99ca822504fb",
+                eventRoot: "0x0000000000000000000000000000000000000000000000000000000000000000"
             },
             {
                 "blockTime": 1553695776 + 10,
                 "blockHash": "0xa21fa0398570971415a4166cb9284f595f81524767e3637082f2a6f5924803ff",
-                // "chain": {
-                //   "chainId": 42
-                // },
                 chain,
                 "stateRoot": "0x38b363bc579954571ec3cdd892e0056399381bf69a62d02bf64a99ca822504fb",
+                eventRoot: "0x0000000000000000000000000000000000000000000000000000000000000000"
             }
         ];
 
@@ -148,5 +151,30 @@ describe('Query helpers', function() {
         expect(latest).to.have.length(2)
         expect(fixtures[0]).to.deep.include(latest[0])
         expect(fixtures[1]).to.deep.include(latest[1])
+    })
+
+    async function givenEventTree(items: any[]) {
+        let tree = new EventTree(items.map(keccak256))
+        return tree;
+    }
+
+    async function givenStateTree(chainIds: number[], eventTrees: EventTree[]) {
+        let state = Object.assign(
+            {},
+            ...chainIds.map((id, i) => {
+                return {
+                    [id]: eventTrees[i].root()
+                }
+            })
+        )
+        let tree = new StateTree(state)
+        return tree;
+    }
+
+    it('loads Snapshot', async () => {
+        let snapshot = new Snapshot()
+
+        // snapshot.eventTree = await givenEventTree([ 1,2,3,4,5 ])
+        
     })
 })

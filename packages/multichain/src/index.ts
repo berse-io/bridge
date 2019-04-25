@@ -9,7 +9,8 @@ import { AccountsConfig } from './accounts';
 
 
 const chains: { [k: string]: any } = {
-    'ethereum': EthereumChainGeth
+    // 'ethereum': EthereumChainGeth
+    'ethereum': EthereumChain
 };
 
 require('yargs')

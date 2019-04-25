@@ -3,6 +3,7 @@ import { Chain } from "./entity/chain";
 import { InterchainStateUpdate } from "./entity/interchain_state_update";
 import { ChainEvent } from "./entity/chain_event";
 import { Provider } from '@loopback/context'
+import { Snapshot } from "./entity/snapshot";
 
 export let options: ConnectionOptions = {
     "type": "sqlite",
@@ -14,6 +15,7 @@ export let options: ConnectionOptions = {
     entities: [
         Chain,
         InterchainStateUpdate,
-        ChainEvent
+        ChainEvent,
+        Snapshot
     ]
 }

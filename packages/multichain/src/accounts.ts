@@ -53,9 +53,17 @@ class AccountsConfig implements IAccountsConfig {
             }
         }
 
+        // Load everything under *
         for(let accountConf of data['*']) {
             await loadAccount(accountConf)
         }
+
+        // Load other named accounts (relayer, deployment)
+        for(let k of Object.keys(data)) {
+            if(k == '*') continue;
+            await loadAccount(data[k])
+        } 
+
         
         return new AccountsConfig(
             data,

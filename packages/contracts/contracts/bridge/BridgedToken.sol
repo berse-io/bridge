@@ -10,7 +10,7 @@ contract BridgedToken is ERC20 {
         factory = msg.sender;
     }
 
-    function mint(address _to, uint256 _amount) public  {
+    function mint(address _to, uint256 _amount) public returns (bool) {
         require(msg.sender == factory, "INVALID_MINTING_ADDRESS");
         require(_to != address(0), "Cannot mint to 0x address");
         require(_amount != 0, "Amount cannot be zero"); 

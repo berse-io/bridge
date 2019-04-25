@@ -1,7 +1,13 @@
 pragma solidity ^0.5.0;
 
-contract MerkleTreeVerifier {
-    function math_log2(uint x) public pure returns (uint y){
+library MerkleTreeVerifier {
+    function math_log2(
+        uint x
+    ) 
+        public 
+        pure 
+        returns (uint y)
+    {
         assembly {
             let arg := x
             x := sub(x,1)
@@ -32,14 +38,21 @@ contract MerkleTreeVerifier {
         }  
     }
 
-    function _computeMerkleRoot(bytes32[] memory items) public pure returns (bytes32) {
-        for(uint i = 0; i < items.length; i++) {
-            items[i] = _hashLeaf(items[i]);
-        }
-
+    function _computeMerkleRoot(
+        bytes32[] memory items
+    ) 
+        public 
+        pure 
+        returns (bytes32) 
+    {
         // extend layer to be a power of 2
         // this simplifies logic later
         bytes32[] memory layer = _getBalancedLayer(items);
+
+        // Hash leaves
+        for(uint i = 0; i < layer.length; i++) {
+            layer[i] = _hashLeaf(layer[i]);
+        }
 
         while(layer.length > 1) {
             layer = _computeLayer(layer);
@@ -48,40 +61,52 @@ contract MerkleTreeVerifier {
         return layer[0];
     }
 
-    function _getBalancedLayer(bytes32[] memory items) public pure returns (bytes32[] memory) {
+    function _getBalancedLayer(
+        bytes32[] memory items
+    ) 
+        public 
+        pure 
+        returns (bytes32[] memory) 
+    {
         uint powerOf2Size = 2 ** math_log2(items.length);
         if(items.length == 1) {
-            powerOf2Size = 2; 
+            powerOf2Size = 2;
         }
+
         bytes32[] memory layer = new bytes32[](powerOf2Size);
+
         for(uint i = 0; i < layer.length; i++) {
             if(i < items.length) {
                 layer[i] = items[i];
             } else {
-                // duplicate last leaf
-                layer[i] = items[items.length - 1];
+                // The rest of the leaves are empty.
+                layer[i] = bytes32(0);
             }
         }
         return layer;
     }
 
-    function _computeLayer(bytes32[] memory layer) public pure returns (bytes32[] memory) {
-        // uint nLayers = log2(layer.length);
-        // bytes32[] memory nextLayer = new bytes32[](2**(nLayers-1));
-        require(layer.length == 2 ** math_log2(layer.length), "NOT_PERFECT_POWEROF2");
+    function _computeLayer(
+        bytes32[] memory layer
+    ) 
+        public 
+        pure 
+        returns (bytes32[] memory) 
+    {
+        // require(
+        //     layer.length == (2 ** math_log2(layer.length)), 
+        //     "NOT_PERFECT_POWEROF2"
+        // );
+        require(
+            layer.length > 1,
+            "Layer too small, redundant call"
+        );
         
         bytes32[] memory nextLayer = new bytes32[](layer.length / 2);
         
         for(uint i = 0; i < nextLayer.length; i++) {
             uint left = i * 2;
             uint right = left + 1;
-
-            // if(layer.length % 2 == 1) {
-            //     if(right == layer.length) {
-            //         right = left;
-            //     }
-            // }
-
             nextLayer[i] = _hashBranch(layer[left], layer[right]);
         }
 
@@ -96,12 +121,29 @@ contract MerkleTreeVerifier {
      * @param root Merkle root
      * @param leaf Leaf of Merkle tree
      */
-    function _verify(bytes32[] memory proof, bool[] memory paths, bytes32 root, bytes32 leaf) public pure returns (bool) {
+    function _verify(
+        bytes32 leaf,
+        bytes32 root, 
+        bytes32[] memory proof, 
+        bool[] memory paths
+    ) 
+        public 
+        pure 
+        returns (bool) 
+    {
         // Check if the computed hash (root) is equal to the provided root
         return _computeRoot(proof, paths, leaf) == root;
     }
 
-    function _computeRoot(bytes32[] memory proof, bool[] memory paths, bytes32 leaf) public pure returns (bytes32) {        
+    function _computeRoot(
+        bytes32[] memory proof, 
+        bool[] memory paths, 
+        bytes32 leaf
+    ) 
+        public 
+        pure 
+        returns (bytes32) 
+    {        
         bytes32 node = leaf;
 
         for (uint256 i = 0; i < proof.length; i++) {
@@ -119,12 +161,25 @@ contract MerkleTreeVerifier {
         return node;
     }
     
-    function _hashLeaf(bytes32 leaf) public pure returns (bytes32) {
+    function _hashLeaf(
+        bytes32 leaf
+    ) 
+        public 
+        pure 
+        returns (bytes32) 
+    {
         bytes1 LEAF_PREFIX = 0x00;
         return keccak256(abi.encodePacked(LEAF_PREFIX, leaf));
     }
 
-    function _hashBranch(bytes32 left, bytes32 right) public pure returns (bytes32) {
+    function _hashBranch(
+        bytes32 left, 
+        bytes32 right
+    ) 
+        public 
+        pure 
+        returns (bytes32) 
+    {
         bytes1 BRANCH_PREFIX = 0x01;
         return keccak256(abi.encodePacked(BRANCH_PREFIX, left, right));
     }

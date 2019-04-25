@@ -1,3 +1,5 @@
+import { Provider } from "@loopback/context";
+
 const winston = require('winston');
 const { format } = winston;
 
@@ -19,7 +21,9 @@ export const logFormat = (formats) => format.combine(
 const { combine, label, json, simple } = format;
 
 export let consoleOpts = {
-    silent: process.env.NODE_ENV !== 'test'
+    // silent: process.env.NODE_ENV !== 'test',
+    silent: false,
+    handleExceptions: true
 }
 
 export function chainLogger(chainId: string) {
@@ -28,7 +32,11 @@ export function chainLogger(chainId: string) {
             label({ label: chainId })
         ]),
         transports: [
-            new winston.transports.Console(consoleOpts)
+            new winston.transports.Console(consoleOpts),
+            new winston.transports.File({
+                filename: `logs/${chainId}.log`,
+                level: 'debug'
+            })
         ]
     });
 }
@@ -38,6 +46,45 @@ export const defaultLogger = () => winston.loggers.add(`relayer`, {
         label({ label: "Relayer" })
     ]),
     transports: [
-        new winston.transports.Console(consoleOpts)
+        new winston.transports.Console(consoleOpts),
+        new winston.transports.File({
+            filename: `logs/default.log`,
+            level: 'debug'
+        })
     ]
 });
+
+const MESSAGE = Symbol.for('message');
+
+const jsonFormatter = (logEntry) => {
+    const base = { timestamp: new Date() };
+    const json = Object.assign(base, logEntry)
+    if(typeof logEntry == 'object') {
+        logEntry[MESSAGE] = JSON.stringify(json, null, 1);
+    } else {
+        logEntry[MESSAGE] = logEntry;
+    }
+    return logEntry;
+  }
+
+export class LoggerProvider implements Provider<any> {
+    constructor(
+    ) {
+    }
+
+    async value(): Promise<any> {
+        let logger = winston.loggers.add(`default`, {
+            format: format.simple(),
+            transports: [
+                // new winston.transports.Console(consoleOpts),
+                new winston.transports.File({
+                    filename: `logs/default.log`,
+                    level: 'debug'
+                })
+            ]
+        });
+
+        
+        return logger;
+    }
+}

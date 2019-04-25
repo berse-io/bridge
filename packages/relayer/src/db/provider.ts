@@ -3,6 +3,7 @@ import { Entity, Connection, createConnection, Repository, getRepository, BaseEn
 import { Chain } from "./entity/chain";
 import { ChainEvent } from "./entity/chain_event";
 import { InterchainStateUpdate } from "./entity/interchain_state_update";
+import { Snapshot } from "./entity/snapshot";
 
 export class DbConnProvider implements Provider<Connection> {
     connOpts: any;
@@ -70,6 +71,19 @@ export class InterchainStateUpdateRepoProvider {
     }
 
     value(): Repository<InterchainStateUpdate> {
+        return getRepository(this.entityClass, this.conn.name)
+    }
+}
+
+export class SnapshotRepoProvider {
+    entityClass = Snapshot;
+
+    constructor(
+        @inject('db.conn') private conn: Connection,
+    ) {
+    }
+
+    value(): Repository<Snapshot> {
         return getRepository(this.entityClass, this.conn.name)
     }
 }

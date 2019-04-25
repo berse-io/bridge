@@ -34,7 +34,7 @@
         "ethereum-types": "^1.1.6",
         "ethereumjs-util": "^6.0.0",
         "ethers": "^4.0.23",
-        "ganache-core": "2.5.3",
+        "ganache-core": "2.5.1",
         "inversify": "^5.0.1",
         "level-rocksdb": "^3.0.1",
         "leveldown": "^4.0.1",

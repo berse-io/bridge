@@ -17,9 +17,17 @@ export function get0xArtifact(name: string) {
     return require(`@ohdex/contracts/lib/build/artifacts/${name}.json`)
 }
 
+
+
+import { randomHex } from "web3-utils";
+
 export const _salt = new BigNumber(0);
-export const generateSalt = () => BigNumber.random();
-export const _chainId = new BigNumber(0);
+export const bnify = (hex) => {
+    return new BigNumber(hex.slice(2), 16)
+}
+export const generateSalt = () => {
+    return bnify(randomHex(32))
+}
 
 export class ContractWrappers { 
     EventEmitter: EventEmitterContract;

@@ -1,72 +1,93 @@
 import { inject } from "@loopback/context";
-import { MerkleTreeProof } from "@ohdex/typescript-solidity-merkle-tree";
-import { ChainStateLeaf, CrosschainEventProof } from "./crosschain_state";
+import { MerkleTreeProof, SparseMerkleTree, SparseMerkleProof, deconstructProof } from "@ohdex/typescript-solidity-merkle-tree";
 import { Repository } from "typeorm";
 import { Chain } from "../db/entity/chain";
 import { ChainEvent } from "../db/entity/chain_event";
 import { InterchainStateUpdate } from "../db/entity/interchain_state_update";
 import _ from 'lodash'
 import { dehexify, hexify } from "@ohdex/shared";
-import { EthereumStateLeaf } from "../chain/ethereum/state_gadget";
 import { getCurrentBlocktime } from "./helpers";
-import { StateTree, EventTree } from "./trees";
+import { StateTree, EventTree, ChainRoot, InterchainState, EventTreeFactory } from "./trees";
+import { BlockWithTransactionData } from "ethereum-protocol";
+import { Snapshot } from "../db/entity/snapshot";
+
+export interface StateRootUpdate {
+    root: string;
+    eventRoot: string;
+    proof: SparseMerkleProof;
+}
+
+export interface EventProof {
+    stateProof: SparseMerkleProof;
+    eventLeafProof: MerkleTreeProof;
+}
 
 
 export class CrosschainStateService {
     @inject('repositories.Chain') chain: Repository<Chain>
     @inject('repositories.ChainEvent') chainEvent: Repository<ChainEvent>
     @inject('repositories.InterchainStateUpdate') stateUpdate: Repository<InterchainStateUpdate>
+    @inject('repositories.Snapshot') snapshots: Repository<Snapshot>
+    @inject('logging.default') logger;
 
     constructor(    
     ) {
     }
 
-    async computeUpdatedStateRoot(chainId: number): Promise<{ proof: MerkleTreeProof, leaf: ChainStateLeaf }> {
+    async getStateTree(): Promise<StateTree> {
         const time = getCurrentBlocktime()
-        
+
         // Get all exchain state roots
         let chains = (await this.chain.find()).map(({ chainId }) => chainId)
 
-        let exchainRoots = await Promise.all(chains.map(async chainId => {
-            let events = await ChainEvent.getEventsBeforeTime(chainId, time);
-            let eventsTree = EventTree(events)
-            return {
-                chain: { chainId, },
-                eventRoot: hexify(eventsTree.root())
+        let state: InterchainState = {}
+
+        await Promise.all(chains.map(async chainId => {
+            let eventsTree = await this.getEventsTree(chainId, time);
+            let root: ChainRoot = {
+                eventsRoot: eventsTree.root(),
+                eventsTree: eventsTree
             }
-            // return InterchainStateUpdate.getLatestStaterootAtTime(chainId, time)
+            state[chainId] = root;
         }))
+
+        let stateTree = new StateTree(state)
+
+        return stateTree
+    }
+
+    async getEventsTree(chainId: number, time: number) {
+        let events = await ChainEvent.getEventsBeforeTime(chainId, time);
+        if(!events.length) throw new Error("No events");
+        return await EventTreeFactory.create(events)
+    }
+
+    async addSnapshot(chainId: number, stateTree: StateTree) {
+        let snapshot = new Snapshot()
+        snapshot.stateTree = stateTree;
+        snapshot.stateRoot = stateTree.root;
+        snapshot.chain = await this.chain.findOne(chainId)
+        // await snapshot.save()
+        await Snapshot.insert(snapshot)
+    }
+
+    async proveStateRootUpdate(chainId: number): Promise<StateRootUpdate> {
+        let stateTree = await this.getStateTree()
+        let proof = deconstructProof(stateTree.generateProof(chainId))
         
-        // Compute our (new) state root
-        let evs = await ChainEvent.getEventsBeforeTime(chainId, time)
-        let eventsTree = EventTree(evs)
-        
+        await this.addSnapshot(chainId, stateTree)
 
-        // note: we don't use merkle-patricia trees yet because of implementation cost
-        // so we have to canonically sort the items for the merkle tree computation
-        // I've decided sorting based on chainId of the bridges is reasonable for now
-        // exchainRoots = [...exchainRoots, update]
-        let items = _.sortBy(exchainRoots, 'chain.chainId')
-
-        let thisChainIdx = _.findIndex(items, x => x.chain.chainId == chainId)
-        items[thisChainIdx].eventRoot = hexify(eventsTree.root());
-
-        
-        let stateTree = StateTree(items)
-        
-        let proof = stateTree.generateProof(thisChainIdx)
-        // if(!stateTree.verifyProof(proof, eventsTree.hashLeaf(eventsTree.root()) )) throw new Error()
-
-        let leaf = new EthereumStateLeaf
-        leaf.eventsRoot = eventsTree.root()
-
-        // console.log(stateTree.toString())
-        // console.log(eventsTree.toString())
-
-        return {
-            proof,
-            leaf
+        let stateRootUpdate: StateRootUpdate = {
+            root: stateTree.root,
+            eventRoot: hexify(stateTree.state[chainId].eventsRoot),
+            proof
         }
+
+        this.logger.log('debug', `computeUpdatedStateRoot(chainId=${chainId})`)
+        this.logger.log('debug', stateTree.state)
+        this.logger.log('debug', stateRootUpdate)
+
+        return stateRootUpdate
     }
 
     // Proves an event for a chain (chainId) from an external chain (exchainId)
@@ -74,61 +95,78 @@ export class CrosschainStateService {
     // This involves reconstructing the state tree of this chain,
     // and reconstructing the events tree of the exchain at the time it was acknowledged in the state update
     // of this chain.
-    async proveEvent(chainId: number, exchainId: number, eventHash: string): Promise<CrosschainEventProof> {
-        const time = getCurrentBlocktime()
+    async proveEvent(chainId: number, exchainId: number, eventHash: string): Promise<EventProof> {
+        this.logger.debug(`proveEvent(${JSON.stringify(arguments,null,1)})`)
 
-        // we have to reconstruct the merkle tree at the time of that event
-        // so we can construct a proof that will be valid on that chain
-
-        // first we get the time of that event on the exchain
-        let ev = await this.chainEvent.findOne({ eventHash }, { relations: ['chain'] })
-        if(!ev) throw new Error("couldn't find event")
-        if(ev.chain.chainId !== exchainId) throw new Error("found event but it is from a different chain")
-
-        // and then we get the most recent state update of this chain
-        let latestStateUpdate = await InterchainStateUpdate.getLatestStaterootAtTime(chainId, time+10)
-
-        // we figure out what the event tree would've looked like **for the exchain**
-        let exchainEvents = await ChainEvent.getEventsBeforeTime(exchainId, latestStateUpdate.blockTime);
-        // console.log(await ChainEvent.find({ relations: ['chain']}))
-        // console.log(latestStateUpdate)
+        // Reconstruct the most recent state update of this chain
         
-        if(!exchainEvents.length) throw new Error('no events');
-        if(_.findIndex(exchainEvents, x => x.eventHash == eventHash) === -1) throw new Error("couldn't find event in exchain history")
-
-        let exchainEventsTree = EventTree(exchainEvents)
-        let exchainEventIdx = _.findIndex(exchainEvents, x => x.eventHash == eventHash)
-
-        // then we recompute the state tree for this chain
-        // taking into account the latest state roots at that time
-        let chains = (await this.chain.find()).map(({ chainId }) => chainId)
-        let chainRoots = await Promise.all(chains.map(chainId_ => {
-            return InterchainStateUpdate.getLatestStaterootAtTime(chainId_, latestStateUpdate.blockTime)
-        }))
-        let items = _.sortBy(chainRoots, 'chain.chainId')
-
-        let stateTree = StateTree(items)
-        let exchainStateIdx = _.findIndex(items, x => x.chain.chainId == exchainId)
-
-        let stateProof = stateTree.generateProof(exchainStateIdx)
-        let eventProof = exchainEventsTree.generateProof(exchainEventIdx)
-
-        
-        // console.log(stateTree.toString())
-        // console.log(exchainEventsTree.toString())
-
-        // console.log(await this.stateUpdate.find({ relations: ['chain'] }))
-        // console.log((await this.chainEvent.find({ relations: ['chain'] })))
-
-        // if(stateProof.leaf != )
-    
-        // if(!stateTree.verifyProof(stateProof, exchainEventsTree.hashLeaf(eventProof.root) )) throw new Error()
-        if(!stateTree.verifyProof(stateProof)) throw new Error()
-
-
-        return {
-            rootProof: stateProof,
-            eventProof
+        // 1) first we get the time of that event on the exchain
+        let ev = await this.chainEvent.findOne(
+            { eventHash }, 
+            { relations: ['chain'] }
+        )
+        if(!ev) {
+            throw new Error("Couldn't find event")
         }
+        if(ev.chain.chainId !== exchainId) {
+            throw new Error("Found event but it is from a different chain")
+        }
+
+        this.logger.debug(
+            (await Snapshot.find({ loadRelationIds: true })).map(x => x.stateTree.toString()).join('\n\n\n')
+        )
+
+        // 2) now reconstruct the trees
+        let latestStateUpdate = await InterchainStateUpdate.getLatestStaterootAtTime(
+            chainId, 
+            getCurrentBlocktime()
+        )
+
+        if(ev.blockTime > latestStateUpdate.blockTime) {
+            throw new Error('Exchain event not acknowledged on chain')
+        }
+        
+        let snapshot = latestStateUpdate.snapshot
+
+        if(!snapshot) {
+            throw new Error
+        }
+
+        // check the snapshot
+        if(snapshot.stateRoot != latestStateUpdate.stateRoot) {
+            throw new Error
+        }
+
+        if(snapshot.stateTree.root != snapshot.stateRoot) {
+            throw new Error
+        }
+
+
+
+        if(hexify(snapshot.stateTree.state[chainId].eventsRoot) != latestStateUpdate.eventRoot) {
+            throw new Error
+        }
+
+        if(
+            hexify(snapshot.stateTree.state[chainId].eventsTree.root()) != 
+            hexify(snapshot.stateTree.state[chainId].eventsRoot)
+        ) {
+            throw new Error;
+        }
+
+
+        // 3) prove
+        let stateProof = deconstructProof(snapshot.stateTree.generateProof(exchainId))
+        let eventsTree = snapshot.stateTree.getEventsTree(exchainId)
+        let eventIdx = eventsTree.findLeafIndex(dehexify(ev.eventHash))
+        let eventLeafProof = eventsTree.generateProof(eventIdx)
+        eventsTree.verifyProof(eventLeafProof)
+
+        let eventProof: EventProof = {
+            stateProof,
+            eventLeafProof
+        };
+
+        return eventProof;
     }
 }

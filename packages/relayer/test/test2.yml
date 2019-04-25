@@ -1,7 +1,6 @@
-rpcUrl: http://localhost:11000
+rpcUrl: http://localhost:10001
 contracts:
   artifacts: ./../../packages/contracts/build/artifacts/*.json
   addresses:
-    - Escrow: '0x5f728299dbea6538c0415352be79ff7c17cdf16b'
-    - EventListener: '0xd89f2e1baa14dd3638af3aadad4fb4e4da550854'
-  watch_new: true
+    - Bridge: '0x82ac0ab2db794ae1376ac18318ae3560f8dc40b6'
+  watch_new: false
