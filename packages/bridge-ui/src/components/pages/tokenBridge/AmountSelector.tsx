@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import bridgeActionTypes from '../../../reducers/bridge/bridgeActionTypes';
 import ERC20ABI from '../../../abis/ERC20';
 import { fromWei } from 'web3-utils';
+import getConfigValue, {getConfigValueByName} from '../../../utils/getConfigValue';
 
 
 const styles = (theme:any) => ({
@@ -101,15 +102,25 @@ class AmountSelector extends React.Component<any> {
     }
 
     setBridgeBack = async () => {
-        // const {drizzle, drizzleState} = this.props;
-        // const {tokenAddress} = this.props.bridge;
+        const {drizzle, drizzleState} = this.props;
+        const {tokenAddress, chainB} = this.props.bridge;
         // const {chainB} = this.props.bridge;
 
-        // const bridgeContract = drizzle.contracts.Bridge;
+        const bridgeContract = drizzle.contracts.Bridge;
         // const originToken = await bridgeContract.methods.getOriginToken(tokenAddress).call();
         
+        // function isBridgedToken(
+        //     address _bridgedToken,
+        //     uint256 _originChainId,
+        //     address _originBridge
+        // )
+        const chainBID = getConfigValueByName(chainB, "chainId");
+        const bridgeBAddress = getConfigValueByName(chainB, "bridgeAddress")
+
+        const bridgingBack = await bridgeContract.methods.isBridgedToken(tokenAddress, chainBID, bridgeBAddress).call();
+
         // let bridgingBack = false;
-        // let originTokenAddress = "";
+        let originTokenAddress = "";
 
         // //If token is being bridged back
         // if(originToken.network == chainB){
@@ -117,11 +128,12 @@ class AmountSelector extends React.Component<any> {
         //     originTokenAddress = originToken.address;
         // }
 
-        // this.props.dispatch({
-        //     type: bridgeActionTypes.SET_BRIDGING_BACK,
-        //     bridgingBack,
-        //     originTokenAddress
-        // }) 
+        // TODO remove originTokenAddress
+        this.props.dispatch({
+            type: bridgeActionTypes.SET_BRIDGING_BACK,
+            bridgingBack,
+            originTokenAddress
+        })  
 
     }
 }

@@ -381,6 +381,18 @@ contract Bridge is BridgeCrosschainEvents {
     {
         return networks[_originChainId].bridgeContracts[_originBridge].originTokenToBridged[_originToken];
     }
+
+    function isBridgedToken(
+        address _bridgedToken,
+        uint256 _originChainId,
+        address _originBridge
+    )
+        public
+        view
+        returns (bool)
+    {
+        return (networks[_originChainId].bridgeContracts[_originBridge].bridgedTokenToOrigin[_bridgedToken] != address(0));
+    }
     
 
     function _checkEventProcessed(

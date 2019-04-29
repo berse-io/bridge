@@ -22,6 +22,7 @@
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "react-jss": "^8.6.1",
+    "react-redux": "^7.0.2",
     "redux": "^4.0.1",
     "web3": "^1.0.0-beta.46",
     "web3-utils": "^1.0.0-beta.43"
