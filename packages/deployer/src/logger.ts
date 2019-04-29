@@ -1,12 +1,6 @@
 const winston = require('winston');
 const { format } = winston;
 
-// const logger = winston.createLogger({
-//     transports: [
-//         new winston.transports.Console()
-//     ]
-// });
-
 export const logFormat = (formats) => format.combine(
     ...formats,
     format.colorize(),
