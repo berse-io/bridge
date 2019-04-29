@@ -16,3 +16,4 @@ contracts/devchain/keys
 
 
 packages/**/lib
+packages/relayer/logs/

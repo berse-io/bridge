@@ -5,10 +5,10 @@
   "author": "0dex",
   "license": "MIT",
   "scripts": {
-    "dev": "NODE_ENV=development next",
+    "dev": "NODE_ENV=development next -p 3001",
     "build": "next build",
     "start": "next start",
-    "kill": "kill $(lsof -t -i :3000)",
+    "kill": "kill $(lsof -t -i :3001)",
     "test": "echo 0"
   },
   "dependencies": {

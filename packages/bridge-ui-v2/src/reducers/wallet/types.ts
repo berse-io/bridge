@@ -4,6 +4,15 @@ export interface WalletState {
     mnemonic: string,
     ethereum: KeyPair| undefined,
     tokens: Token[],
+    trackedTransactions: TrackedTransaction[],
+}
+
+
+export interface TrackedTransaction {
+    txID: string,
+    network: string,
+    confirmations: string,
+    error: undefined|string,
 }
 
 export interface Token {

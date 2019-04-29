@@ -5,6 +5,7 @@ import {
 
 import Web3Interface from '../../utils/coinInterfaces/Web3/Web3Interface';
 import {WalletState} from './types';
+import {randomHex, toBN} from 'web3-utils';
 
 export const getWallet = (state:any) => state.wallet
 
@@ -19,11 +20,6 @@ function* tryGetBalance(action: any) {
         tokenIndex: action.tokenIndex,
         balance: balance
     })
-
-    // console.log(balance);
-    // console.log(token);
-    
-    // console.log(action);
 }
 
 function* tryGetAllBalances(action: any) {
@@ -66,12 +62,26 @@ function* trySendToken(action: any) {
 
 }
 
+function* tryBridgeToken(action: any) {
+    const wallet:WalletState = yield select(getWallet);
+    const token = wallet.tokens[action.tokenIndex];
+
+    console.log("Bridging token");
+
+    const salt = toBN(randomHex(32)).toString();
+
+    // bridge (from:string, to:string, amount:string, token:any, targetChain:string, fee:number)
+    const listeners = yield call(Web3Interface.bridge, wallet.ethereum.address, wallet.ethereum.address, action.amount, token, action.targetChain, action.fee, salt, console.log); 
+
+}
+
 
 
 export default function* saga() {
     yield all([
         takeEvery(actions.UPDATE_TOKEN_BALANCE, tryGetBalance),
         takeEvery(actions.UPDATE_ALL_BALANCES, tryGetAllBalances),
-        takeEvery(actions.SEND_TOKEN, trySendToken)
+        takeEvery(actions.SEND_TOKEN, trySendToken),
+        takeEvery(actions.BRIDGE_TOKEN, tryBridgeToken)
     ]);
 }

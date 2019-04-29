@@ -23,6 +23,7 @@ const initialState : WalletState = {
             address: "native",
         }
     ],
+    trackedTransactions: []
 };
 
 const mapping = {

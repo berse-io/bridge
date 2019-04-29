@@ -655,3 +655,73 @@
 [32minfo[39m Ethereum (chainId=42): 	EventEmitted, block=#44 eventHash=0x1d395e70e663a977802ed3dbe28b586302964f8f1d7a9f14afe19547cb520298
 [32minfo[39m Ethereum (chainId=42): 	computeUpdatedStateRoot: root=0x2f31acb23373e510b14f21b5cdde30da4fd11e0165289ceb8b95d14a19116895 eventRoot=0x4fda8b854c421a174ae8d8628e46874d38e5cbf4249d394f161428d75ba95d06 ackdEvent=6
 [32minfo[39m Ethereum (chainId=42): 	StateRootUpdated root=0x2f31acb23373e510b14f21b5cdde30da4fd11e0165289ceb8b95d14a19116895
+[32minfo[39m Ethereum (chainId=42): 	Connecting to http://localhost:10000
+[32minfo[39m Ethereum (chainId=42): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=42): 	pastEvents=1 pastStateUpdates=1
+[32minfo[39m Ethereum (chainId=42): 	Sync'd to block #53
+[32minfo[39m Ethereum (chainId=42): 	
+[32minfo[39m Ethereum (chainId=42): 	stateRoot = 0x174d76f482c2199c7f8e586010cda0d7a62e7936ac09ef86d9080fcedf7cb7de
+[32minfo[39m Ethereum (chainId=42): 	eventsRoot = 0x174d76f482c2199c7f8e586010cda0d7a62e7936ac09ef86d9080fcedf7cb7de
+[32minfo[39m Ethereum (chainId=42): 	Bridges:
+[32minfo[39m Ethereum (chainId=42): 		0xa5cc235aac456e5334062eacb81131ea29d35e03
+[32minfo[39m Ethereum (chainId=42): 	listening to events on 0x7b119b777d28d8b5926655acbb32065cd79b792c
+[32minfo[39m Ethereum (chainId=42): 	Connecting to http://localhost:10000
+[32minfo[39m Ethereum (chainId=42): 	Using account 0xa7b224751e9f023b9315726c99ca4ac4fb174dae (18.446744073709551615 ETH)
+[32minfo[39m Ethereum (chainId=42): 	pastEvents=1 pastStateUpdates=1
+[32minfo[39m Ethereum (chainId=42): 	Sync'd to block #53
+[32minfo[39m Ethereum (chainId=42): 	
+[32minfo[39m Ethereum (chainId=42): 	stateRoot = 0x174d76f482c2199c7f8e586010cda0d7a62e7936ac09ef86d9080fcedf7cb7de
+[32minfo[39m Ethereum (chainId=42): 	eventsRoot = 0x174d76f482c2199c7f8e586010cda0d7a62e7936ac09ef86d9080fcedf7cb7de
+[32minfo[39m Ethereum (chainId=42): 	Bridges:
+[32minfo[39m Ethereum (chainId=42): 		0xa5cc235aac456e5334062eacb81131ea29d35e03
+[32minfo[39m Ethereum (chainId=42): 	listening to events on 0x7b119b777d28d8b5926655acbb32065cd79b792c
+[32minfo[39m Ethereum (chainId=42): 	receiveCrosschainMessage fromChain=4 eventHash=0x7d176ff9712c49cb7ad4e167614a16efde4e6b3df136221e1d1530f27abd1fad
+[32minfo[39m Ethereum (chainId=42): 	computeUpdatedStateRoot: root=0x05d0cd3c47fdea95d337c9c6f7d2e5ac6ef3afa8b2836a5fde3041797a8cc90c eventRoot=0xe51453e7d439ac5e466909b818040930161cdbdd6fd7cd59d94ec11f43788336 ackdEvent=0
+[32minfo[39m Ethereum (chainId=42): 	StateRootUpdated root=0x05d0cd3c47fdea95d337c9c6f7d2e5ac6ef3afa8b2836a5fde3041797a8cc90c
+[32minfo[39m Ethereum (chainId=42): 	Proving event 0x7d176ff9712c49cb7ad4e167614a16efde4e6b3df136221e1d1530f27abd1fad for bridging
+[32minfo[39m Ethereum (chainId=42): 	bridged ev: 0x7d176ff9712c49cb7ad4e167614a16efde4e6b3df136221e1d1530f27abd1fad for bridge 0xa5cc235aac456e5334062eacb81131ea29d35e03
+[32minfo[39m Ethereum (chainId=42): 	receiveCrosschainMessage fromChain=4 eventHash=0x1ea726cb2c69fea7a7b21940067a70b8693704d2921b88a430f6f19d365cea96
+[32minfo[39m Ethereum (chainId=42): 	computeUpdatedStateRoot: root=0x00d7ccee98c0d525a04b0611f7fd473426ac461cd1e6cb91265b03f1fd898ea5 eventRoot=0xe51453e7d439ac5e466909b818040930161cdbdd6fd7cd59d94ec11f43788336 ackdEvent=0
+[32minfo[39m Ethereum (chainId=42): 	StateRootUpdated root=0x00d7ccee98c0d525a04b0611f7fd473426ac461cd1e6cb91265b03f1fd898ea5
+[32minfo[39m Ethereum (chainId=42): 	Proving event 0x1ea726cb2c69fea7a7b21940067a70b8693704d2921b88a430f6f19d365cea96 for bridging
+[32minfo[39m Ethereum (chainId=42): 	bridged ev: 0x1ea726cb2c69fea7a7b21940067a70b8693704d2921b88a430f6f19d365cea96 for bridge 0xa5cc235aac456e5334062eacb81131ea29d35e03
+[32minfo[39m Ethereum (chainId=42): 	receiveCrosschainMessage fromChain=4 eventHash=0x312b4e966c90f976e8aa3f33d18030187761688f8bec9d6ca1d36b68959ecb4c
+[32minfo[39m Ethereum (chainId=42): 	computeUpdatedStateRoot: root=0x4225d55abf01d2c44a97ecffc1cb1d6115573792fb63c617e15917423bddf408 eventRoot=0xe51453e7d439ac5e466909b818040930161cdbdd6fd7cd59d94ec11f43788336 ackdEvent=0
+[32minfo[39m Ethereum (chainId=42): 	StateRootUpdated root=0x4225d55abf01d2c44a97ecffc1cb1d6115573792fb63c617e15917423bddf408
+[32minfo[39m Ethereum (chainId=42): 	Proving event 0x312b4e966c90f976e8aa3f33d18030187761688f8bec9d6ca1d36b68959ecb4c for bridging
+[32minfo[39m Ethereum (chainId=42): 	bridged ev: 0x312b4e966c90f976e8aa3f33d18030187761688f8bec9d6ca1d36b68959ecb4c for bridge 0xa5cc235aac456e5334062eacb81131ea29d35e03
+[32minfo[39m Ethereum (chainId=42): 	receiveCrosschainMessage fromChain=4 eventHash=0xbfe5db18749c758ae04e94dee73d08d2a697139274be8812da503a1775d901eb
+[32minfo[39m Ethereum (chainId=42): 	computeUpdatedStateRoot: root=0x2d0412f75aa288cb22f783a564c5c133df7ccbe396edde3f7e4806e016bdc9f0 eventRoot=0xe51453e7d439ac5e466909b818040930161cdbdd6fd7cd59d94ec11f43788336 ackdEvent=0
+[32minfo[39m Ethereum (chainId=42): 	StateRootUpdated root=0x2d0412f75aa288cb22f783a564c5c133df7ccbe396edde3f7e4806e016bdc9f0
+[32minfo[39m Ethereum (chainId=42): 	Proving event 0xbfe5db18749c758ae04e94dee73d08d2a697139274be8812da503a1775d901eb for bridging
+[32minfo[39m Ethereum (chainId=42): 	bridged ev: 0xbfe5db18749c758ae04e94dee73d08d2a697139274be8812da503a1775d901eb for bridge 0xa5cc235aac456e5334062eacb81131ea29d35e03
+[32minfo[39m Ethereum (chainId=42): 	receiveCrosschainMessage fromChain=4 eventHash=0x7f02a7b2ed3529af84e24e94bf92cbf3cd6676899ace2e88c4140758d5fcf75b
+[32minfo[39m Ethereum (chainId=42): 	computeUpdatedStateRoot: root=0x276e2a789e7fe2727c6eb2cb8a7450418a087d7aa3c3ef02ad360e3c7f2f0d79 eventRoot=0xe51453e7d439ac5e466909b818040930161cdbdd6fd7cd59d94ec11f43788336 ackdEvent=0
+[32minfo[39m Ethereum (chainId=42): 	StateRootUpdated root=0x276e2a789e7fe2727c6eb2cb8a7450418a087d7aa3c3ef02ad360e3c7f2f0d79
+[32minfo[39m Ethereum (chainId=42): 	Proving event 0x7f02a7b2ed3529af84e24e94bf92cbf3cd6676899ace2e88c4140758d5fcf75b for bridging
+[32minfo[39m Ethereum (chainId=42): 	bridged ev: 0x7f02a7b2ed3529af84e24e94bf92cbf3cd6676899ace2e88c4140758d5fcf75b for bridge 0xa5cc235aac456e5334062eacb81131ea29d35e03
+[32minfo[39m Ethereum (chainId=42): 	receiveCrosschainMessage fromChain=4 eventHash=0xf0b69b7c57aa853de3062727bd5ceaebda1f1b9b3c47b6a3af709ebabe1e9998
+[32minfo[39m Ethereum (chainId=42): 	computeUpdatedStateRoot: root=0x72804b769724ae132c59b66a80debba16a847c97b07997f15c95b3172b4bae85 eventRoot=0xe51453e7d439ac5e466909b818040930161cdbdd6fd7cd59d94ec11f43788336 ackdEvent=0
+[32minfo[39m Ethereum (chainId=42): 	StateRootUpdated root=0x72804b769724ae132c59b66a80debba16a847c97b07997f15c95b3172b4bae85
+[32minfo[39m Ethereum (chainId=42): 	Proving event 0xf0b69b7c57aa853de3062727bd5ceaebda1f1b9b3c47b6a3af709ebabe1e9998 for bridging
+[32minfo[39m Ethereum (chainId=42): 	bridged ev: 0xf0b69b7c57aa853de3062727bd5ceaebda1f1b9b3c47b6a3af709ebabe1e9998 for bridge 0xa5cc235aac456e5334062eacb81131ea29d35e03
+[32minfo[39m Ethereum (chainId=42): 	receiveCrosschainMessage fromChain=4 eventHash=0xc3941a1c99dd17b6537a374d2efac83af9890a3cbf1cf732bad2a1a091fa54b0
+[32minfo[39m Ethereum (chainId=42): 	computeUpdatedStateRoot: root=0x20f33e748d5ec84fe4bb68f03092710e2bde07d2c2c056c15df31cf6018aa853 eventRoot=0xe51453e7d439ac5e466909b818040930161cdbdd6fd7cd59d94ec11f43788336 ackdEvent=0
+[32minfo[39m Ethereum (chainId=42): 	StateRootUpdated root=0x20f33e748d5ec84fe4bb68f03092710e2bde07d2c2c056c15df31cf6018aa853
+[32minfo[39m Ethereum (chainId=42): 	Proving event 0xc3941a1c99dd17b6537a374d2efac83af9890a3cbf1cf732bad2a1a091fa54b0 for bridging
+[32minfo[39m Ethereum (chainId=42): 	bridged ev: 0xc3941a1c99dd17b6537a374d2efac83af9890a3cbf1cf732bad2a1a091fa54b0 for bridge 0xa5cc235aac456e5334062eacb81131ea29d35e03
+[32minfo[39m Ethereum (chainId=42): 	receiveCrosschainMessage fromChain=4 eventHash=0x8fabfa49bb573b3de8409858f8ffe749b52324ae0a8fdd2dd014c96b797c8f50
+[32minfo[39m Ethereum (chainId=42): 	computeUpdatedStateRoot: root=0x0532c99326b85a4876d993830900420c4e387c854f66b8c16abe7862451110fc eventRoot=0xe51453e7d439ac5e466909b818040930161cdbdd6fd7cd59d94ec11f43788336 ackdEvent=0
+[32minfo[39m Ethereum (chainId=42): 	StateRootUpdated root=0x0532c99326b85a4876d993830900420c4e387c854f66b8c16abe7862451110fc
+[32minfo[39m Ethereum (chainId=42): 	Proving event 0x8fabfa49bb573b3de8409858f8ffe749b52324ae0a8fdd2dd014c96b797c8f50 for bridging
+[32minfo[39m Ethereum (chainId=42): 	bridged ev: 0x8fabfa49bb573b3de8409858f8ffe749b52324ae0a8fdd2dd014c96b797c8f50 for bridge 0xa5cc235aac456e5334062eacb81131ea29d35e03
+[32minfo[39m Ethereum (chainId=42): 	receiveCrosschainMessage fromChain=4 eventHash=0xec9ac8c7ec51573c80aa88aa8d03359e22753dabe6975abfbc3ef76dba71a772
+[32minfo[39m Ethereum (chainId=42): 	computeUpdatedStateRoot: root=0x34aa215996ca8166e17aeeac8b902c9a7f19ae683a389c6bf88eb3215cf356fa eventRoot=0xe51453e7d439ac5e466909b818040930161cdbdd6fd7cd59d94ec11f43788336 ackdEvent=0
+[32minfo[39m Ethereum (chainId=42): 	StateRootUpdated root=0x34aa215996ca8166e17aeeac8b902c9a7f19ae683a389c6bf88eb3215cf356fa
+[32minfo[39m Ethereum (chainId=42): 	Proving event 0xec9ac8c7ec51573c80aa88aa8d03359e22753dabe6975abfbc3ef76dba71a772 for bridging
+[32minfo[39m Ethereum (chainId=42): 	bridged ev: 0xec9ac8c7ec51573c80aa88aa8d03359e22753dabe6975abfbc3ef76dba71a772 for bridge 0xa5cc235aac456e5334062eacb81131ea29d35e03
+[32minfo[39m Ethereum (chainId=42): 	receiveCrosschainMessage fromChain=4 eventHash=0x7ad6a363acac83665f678371e886bfa49692e8fe911c3cb710d68a78a320233a
+[32minfo[39m Ethereum (chainId=42): 	computeUpdatedStateRoot: root=0x3e0f60b4d37741ec5d7c8a07a4089451a69b4530a2d6b75feaf691fcd82fba95 eventRoot=0xe51453e7d439ac5e466909b818040930161cdbdd6fd7cd59d94ec11f43788336 ackdEvent=0
+[32minfo[39m Ethereum (chainId=42): 	StateRootUpdated root=0x3e0f60b4d37741ec5d7c8a07a4089451a69b4530a2d6b75feaf691fcd82fba95
+[32minfo[39m Ethereum (chainId=42): 	Proving event 0x7ad6a363acac83665f678371e886bfa49692e8fe911c3cb710d68a78a320233a for bridging
+[32minfo[39m Ethereum (chainId=42): 	bridged ev: 0x7ad6a363acac83665f678371e886bfa49692e8fe911c3cb710d68a78a320233a for bridge 0xa5cc235aac456e5334062eacb81131ea29d35e03

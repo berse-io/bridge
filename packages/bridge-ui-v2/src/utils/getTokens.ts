@@ -10,6 +10,12 @@ const getTokensObject = () => {
     tokens = tokens.concat( addNetworkToTokens("Ethereum Goerli Testnet", "Goerli Ether", "GETH" , []));
     tokens = tokens.concat( addNetworkToTokens("PepChain Testnet", "Test PEP", "TPEP" , []));
     tokens = tokens.concat( addNetworkToTokens("POA SOKOL Testnet", "SOKOL POA", "SPOA" , []));
+    tokens = tokens.concat( addNetworkToTokens("XDAI", "xDAI", "xDAI" , []));
+
+    if(process.env.NODE_ENV == 'development') {
+        tokens = tokens.concat( addNetworkToTokens("Fake Kovan", "Fake Kovan Ether", "FKETH" , []));
+        tokens = tokens.concat( addNetworkToTokens("Fake Rinkeby", "Fake Rinkeby Ether", "FRETH" , []));
+    }
 
     return tokens;
 }

@@ -53,5 +53,10 @@
         "chainId": 13371337,
         "chainType": "ethereum",
         "rpcUrl": "https://churchill-rpc.pepchain.io/"
+    },
+    "xdai": {
+        "chainId": 100,
+        "chainType": "ethereum",
+        "rpcUrl": "https://dai.poa.network"
     }
 }
