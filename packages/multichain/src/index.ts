@@ -23,13 +23,6 @@ require('yargs')
 .argv
 
 
-
-// let args = process.argv;
-// program.parse(args);
-
-
-
-
 async function run(cmd) {
     const config = require("@ohdex/config/test_networks.json");
     const accountsConfig = await AccountsConfig.load(require('@ohdex/config/test_accounts.json'))

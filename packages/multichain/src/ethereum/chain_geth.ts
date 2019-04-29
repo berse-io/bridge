@@ -47,34 +47,7 @@ export class EthereumChainGeth implements IChain {
             'geth',
             `-v--nodiscover --ipcdisable --networkid ${conf.chainId} --datadir=devChain --unlock 7ef5a6135f1fd6a02593eedc869c6d41d934aef8,0x5409ed021d9299bf6814279a6a1411a7e866a631,0x6ecbe1db9ef729cbe972c83fb886247691fb6beb,0xe36ea790bc9d7ab70c55260c66d52b1eca985f84 --etherbase 7ef5a6135f1fd6a02593eedc869c6d41d934aef8 --password _pw.txt --port 0 --rpc --rpcapi eth,net,web3,admin,debug,personal,miner,txpool --rpcaddr localhost --rpcport ${conf.port} --rpccorsdomain '0.0.0.0' --mine`.split(' '),
             { cwd: dbpath, stdio: 'inherit' }
-        )
-
-        
-        // let pe = new Web3ProviderEngine();
-        // pe.addProvider(new RPCSubprovider(`http://127.0.0.1:${conf.port}`, 300))
-        // pe.on('error', () => {
-        //     console.log(arguments)
-        // })
-        // pe.start()
-        // let web3 = new Web3Wrapper(pe);
-
-        // let addresses = await web3.getAvailableAddressesAsync()
-
-        // firstStart = true;
-        // if(firstStart) {
-        //     console.log(`Funding accounts`)
-    
-        //     for(let addr of accountsConf.getAddresses()) {
-        //         await web3.awaitTransactionSuccessAsync(
-        //             await web3.sendTransactionAsync({
-        //                 from: addresses[0],
-        //                 to: addr,
-        //                 value: DEFAULT_BALANCE_ETHER
-        //             })
-        //         )
-        //     }
-        //     pe.stop()
-        // }
+        );
 
         console.log("");
         console.log("Accounts");
