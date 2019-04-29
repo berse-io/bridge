@@ -1,4 +1,8 @@
-# config
+config
+======
+
+Contains project-wide configuration of chains and accounts.
+
 `*_accounts.json` contains the config of different accounts. This includes:
  - deployment accounts (for Ethereum)
  - relayer/validator account - for now, while we have a single relayer for MVP
@@ -10,7 +14,7 @@
  - rpcUrl's for connecting to the network
 
 
-## todo
+## TODO
 ```
 "mainnet": {
     "chainId": 1,
