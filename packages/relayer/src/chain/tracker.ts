@@ -10,8 +10,8 @@ abstract class IChainTracker {
 
     abstract async start(): Promise<any>;
     abstract async stop(): Promise<any>;
+    abstract listen();
 }
-
 
 abstract class ChainTracker extends IChainTracker implements IChain {    
     constructor(chainId: string) {
@@ -22,11 +22,6 @@ abstract class ChainTracker extends IChainTracker implements IChain {
         this.logger = chainLogger(chainId)
     }
 
-    abstract listen();
-    // abstract computeStateLeaf(): Buffer;
-
-    // abstract getStateRoot(): Buffer;
-    // abstract getInterchainStateRoot(): Buffer;
 }
 
 export {

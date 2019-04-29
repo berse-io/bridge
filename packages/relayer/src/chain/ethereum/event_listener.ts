@@ -1,11 +1,9 @@
-import { ethers } from "ethers";
 import { Web3ProviderEngine } from "0x.js";
-import { EventListenerContract, EventListenerEvents } from "@ohdex/contracts/lib/build/wrappers/event_listener";
-import { EventEmitter } from "events";
-import { MerkleTreeProof } from "@ohdex/typescript-solidity-merkle-tree";
-import { hexify } from "@ohdex/shared";
-import { StateRootUpdate } from "../../interchain/xchain_state_service";
 import { Web3Wrapper } from "@0x/web3-wrapper";
+import { EventListenerContract, EventListenerEvents } from "@ohdex/contracts/lib/build/wrappers/event_listener";
+import { ethers } from "ethers";
+import { EventEmitter } from "events";
+import { StateRootUpdate } from "../../interchain/xchain_state_service";
 
 export interface StateRootUpdated { 
     blockHash: string;

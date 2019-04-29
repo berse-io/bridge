@@ -2,30 +2,23 @@ import { RPCSubprovider, Web3ProviderEngine } from "0x.js";
 import { NonceTrackerSubprovider, PrivateKeyWalletSubprovider } from "@0x/subproviders";
 import { Web3Wrapper } from '@0x/web3-wrapper';
 import { inject } from '@loopback/context';
-import { EventListenerContract } from '@ohdex/contracts/lib//build/wrappers/event_listener';
-import { zxWeb3Connected, wait } from '@ohdex/shared';
-import { MerkleTreeProof } from "@ohdex/typescript-solidity-merkle-tree";
+import { zxWeb3Connected } from '@ohdex/shared';
+import { AsyncCargo, AsyncQueue, queue } from 'async';
 import { ethers } from 'ethers';
 import { Repository } from "typeorm";
 import { fromWei, toWei } from 'web3-utils';
-import { addRevertTraces } from "../../../test/helper";
 import { Chain } from "../../db/entity/chain";
 import { ChainEvent } from "../../db/entity/chain_event";
 import { InterchainStateUpdate } from "../../db/entity/interchain_state_update";
+import { Snapshot } from "../../db/entity/snapshot";
 import { getCurrentBlocktime } from "../../interchain/helpers";
 import { CrosschainStateService } from "../../interchain/xchain_state_service";
-import { hexify, normaliseAddress } from "../../utils";
+import { normaliseAddress } from "../../utils";
 import { ChainTracker } from "../tracker";
 import { BridgeAdapter, TokensBridgedEvent } from "./bridge";
 import { EventEmitterAdapter } from "./event_emitter";
 import { EventListenerAdapter, StateRootUpdated } from "./event_listener";
-import { Snapshot } from "../../db/entity/snapshot";
 const AbiCoder = require('web3-eth-abi').AbiCoder();
-
-
-import { queue, AsyncQueue, cargo, AsyncCargo, retry, asyncify } from 'async';
-import { promisify } from "@0x/utils";
-
 
 type CrosschainEventTypes = TokensBridgedEvent;
 
@@ -277,22 +270,6 @@ export class EthereumChainTracker extends ChainTracker {
                     this.logger.error(ex)
 
                     this.pendingCrosschainEvs.push(ev)
-                    
-                    // retry(
-                    //     {times: 5, interval: 200}, 
-                    //     (err, res) => {
-                    //         return 
-                    //     }, 
-                    //     (ex) => {
-                    //         if(ex) {
-                    //             this.logger.error(`${ev.eventHash} couldn't be bridged after retries`)
-                    //             this.logger.error(ex)
-                    //             throw ex;
-                    //         }
-                    //     }
-                    // );
-
-                    // this.eventsForBridgingQueue.push()
                 })
             }
         )
@@ -405,43 +382,6 @@ export class EthereumChainTracker extends ChainTracker {
         this.bridge.listen()
 
         let self = this;
-    }
-
-    async processBridgeEvents() {
-        // let failed = [];
-
-        // let evs = this.pendingCrosschainEvs.slice();
-
-        // try {
-        //     // Now process any events on this bridge for the user
-        //     for(let ev of evs) {
-        //         this.logger.info(`Proving event ${ev.data.eventHash} for bridging`)
-        //         let proof = await this.crosschainStateService.proveEvent(
-        //             this.conf.chainId, 
-        //             ev.from.chainId, 
-        //             ev.eventHash
-        //         );
-                
-        //         try {
-        //             await new Promise((res, rej) => {
-        //                 this.txQueue.push(
-        //                     () => this.bridge.bridge(ev, proof),
-        //                     (err) => {
-        //                         if(err) rej(err);
-        //                         else res()
-        //                     }
-        //                 )
-        //             })
-        //         } catch(ex) {
-        //             failed.push(ev)
-        //         }
-        //     }
-            
-        // } catch(ex) {
-        //     this.logger.error(`processBridgeEvents failed`)
-        //     this.logger.error(ex)
-        //     throw ex;
-        // }
     }
 
     async updateStateRoot(): Promise<any> 
