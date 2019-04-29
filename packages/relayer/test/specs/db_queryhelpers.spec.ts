@@ -154,7 +154,7 @@ describe('Query helpers', function() {
     })
 
     async function givenEventTree(items: any[]) {
-        let tree = new EventTree(items.map(keccak256))
+        let tree = new EventTree(items.map(keccak256), keccak256)
         return tree;
     }
 
