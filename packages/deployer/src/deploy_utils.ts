@@ -44,8 +44,6 @@ export function addLibrary(name: string, address: string) {
     // libraryHashPlaceholder('/Users/liamz/Documents/open-source/0dex/packages/contracts/contracts/MerkleTreeVerifier.sol:MerkleTreeVerifier')
     // '$1eb98b648b444978ea3820de6fcdeb48d6$'
 
-
-    
     // get the full path of this source
     // eg. /Users/liamz/Documents/open-source/0dex/packages/contracts/contracts/MerkleTreeVerifier.sol
     // let paths = Object.keys(metadata.sources);
@@ -63,7 +61,6 @@ export function getDeployArgs(
     name: string, pe: Web3ProviderEngine, from: string,
     link = false
 ) : DeployArgs {
-    // let json = require(`@ohdex/contracts/lib/build/contracts/${name}.json`);
     let json = require(`@ohdex/contracts/lib/build/artifacts/${name}.json`);
     let bytecode = json.compilerOutput.evm.bytecode.object;
 

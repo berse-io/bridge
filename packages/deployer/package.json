@@ -8,12 +8,8 @@
     "build": "tsc -b",
     "deploy:kovan": "NETWORK=kovan yarn deploy",
     "deploy:rinkeby": "NETWORK=rinkeby yarn deploy",
-    "deploy:testnets": "NODE_ENV=test NETWORK=all yarn deploy",
-    "redploy:testnets": "NODE_ENV=test NETWORK=all ts-node src/test/index.ts",
+    "deploy:testnets": "NODE_ENV=development NETWORK=all yarn deploy",
     "deploy": "node lib/src/index.js",
-    "init-contracts:kovan:rinkeby": "NETWORK_A=kovan NETWORK_B=rinkeby yarn init-contracts",
-    "init-contracts:rinkeby:kovan": "NETWORK_A=rinkeby NETWORK_B=kovan yarn init-contracts",
-    "init-contracts": "ts-node src/init.ts",
     "debug": "node lib/src/debug"
   },
   "dependencies": {

@@ -1,47 +1,19 @@
-import { Web3ProviderEngine, RPCSubprovider, BigNumber} from "0x.js";
+import { RPCSubprovider, Web3ProviderEngine } from "0x.js";
 import { PrivateKeyWalletSubprovider } from "@0x/subproviders";
-import { Web3Wrapper, AbiDefinition, Provider, TxData } from '@0x/web3-wrapper';
-import { SparseMerkleTreeContract } from '@ohdex/contracts/lib/build/wrappers/sparse_merkle_tree';
-import { MerkleTreeVerifierContract } from '@ohdex/contracts/lib/build/wrappers/merkle_tree_verifier';
-
-import {
-    WhitelistContract
-} from '@ohdex/contracts/lib/build/wrappers/whitelist';
-
-import {
-    EventListenerContract
-} from '@ohdex/contracts/lib/build/wrappers/event_listener';
-
-import {
-    EventEmitterContract,
-} from '@ohdex/contracts/lib/build/wrappers/event_emitter';
-
-import {
-    BridgeContract
-}   from '@ohdex/contracts/lib/build/wrappers/bridge';
-
-import {
-    WETH9Contract
-}   from '@ohdex/contracts/lib/build/wrappers/weth9';
-
-import { ConfigManager } from "./config";
-import { toWei, fromWei } from "web3-utils";
-
 import { logUtils } from '@0x/utils';
-
-import { AccountsConfig } from '@ohdex/multichain';
-import { getDeployArgs, addLibrary, deployLibraries } from "./deploy_utils";
-
-const assert = require('assert');
+import { Web3Wrapper } from '@0x/web3-wrapper';
+import { BridgeContract } from '@ohdex/contracts/lib/build/wrappers/bridge';
+import { EventEmitterContract } from '@ohdex/contracts/lib/build/wrappers/event_emitter';
+import { EventListenerContract } from '@ohdex/contracts/lib/build/wrappers/event_listener';
+import { WETH9Contract } from '@ohdex/contracts/lib/build/wrappers/weth9';
+import { WhitelistContract } from '@ohdex/contracts/lib/build/wrappers/whitelist';
+import { fromWei, toWei } from "web3-utils";
+import { ConfigManager } from "./config";
+import { deployLibraries, getDeployArgs } from "./deploy_utils";
 
 const winston = require('winston'); 
 const { format } = winston;
-const { combine, label, json, simple } = format;
-
-
-
-
-
+const { label } = format;
 
 
 async function deploy(configMgr: ConfigManager) {
@@ -61,9 +33,6 @@ async function deploy(configMgr: ConfigManager) {
     for(let net of networks) {
         await _deploy(configMgr, net)
     }
-    // await Promise.all(networks.map(net => {
-    //     return _deploy(configMgr, net)
-    // }));
 
     configMgr.save()
 }
@@ -104,27 +73,7 @@ async function _deploy(configMgr: ConfigManager, network: string) {
     web3 = new Web3Wrapper(pe);
     accounts = await web3.getAvailableAddressesAsync();
     account = accounts[0];
-    
-    // Deploy libraries
-    // let sparseMerkleTree = await SparseMerkleTreeContract.deployAsync(
-    //     ...getDeployArgs('SparseMerkleTree', pe, account)
-    // )
 
-    // let merkleTreeVerifier = await MerkleTreeVerifierContract.deployAsync(
-    //     ...getDeployArgs('MerkleTreeVerifier', pe, account)
-    // )
-
-    // addLibrary('SparseMerkleTree', sparseMerkleTree.address)
-    // addLibrary('MerkleTreeVerifier', merkleTreeVerifier.address)
-
-    await deployLibraries(pe, account)
-
-
-    // 0 Deploy whitelist
-
-    let whitelist = await WhitelistContract.deployAsync(
-        ...getDeployArgs('Whitelist', pe, account)
-    );
 
     // check the available balance
     let balance = await web3.getBalanceInWeiAsync(account)
@@ -140,6 +89,14 @@ async function _deploy(configMgr: ConfigManager, network: string) {
         }
     }
 
+    // 0 Deploy libraries
+    await deployLibraries(pe, account)
+
+    // 1 Deploy whitelist
+    let whitelist = await WhitelistContract.deployAsync(
+        ...getDeployArgs('Whitelist', pe, account)
+    );
+
     // 2 Deploy eventEmitter
     // @ts-ignore
     let eventEmitter = await EventEmitterContract.deployAsync(
@@ -149,6 +106,7 @@ async function _deploy(configMgr: ConfigManager, network: string) {
         config.chainId,
         network
     );
+
 
     // 3 Deploy eventListener
     
@@ -160,7 +118,7 @@ async function _deploy(configMgr: ConfigManager, network: string) {
     )
 
 
-    // 5 Deploy Bridge
+    // 4 Deploy Bridge
 
     // @ts-ignore
     let bridge = await BridgeContract.deployAsync(
@@ -172,7 +130,6 @@ async function _deploy(configMgr: ConfigManager, network: string) {
 
     config.eventEmitterAddress = eventEmitter.address.toLowerCase();
     config.eventListenerAddress = eventListener.address.toLowerCase();
-    // config.escrowAddress = escrow.address.toLowerCase();
     config.bridgeAddress = bridge.address.toLowerCase();
 
 
@@ -186,7 +143,4 @@ async function _deploy(configMgr: ConfigManager, network: string) {
     pe.stop();
 }
 
-export {
-    _deploy,
-    deploy
-}
+export { _deploy, deploy };
