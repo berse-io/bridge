@@ -1,0 +1,3 @@
+[submodule "chainlog"]
+	path = packages/chainlog
+	url = https://github.com/liamzebedee/chainlog

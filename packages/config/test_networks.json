@@ -4,31 +4,37 @@
         "chainType": "ethereum",
         "port": "10000",
         "rpcUrl": "http://localhost:10000",
-        "eventEmitterAddress": "0x2559d11bbcaf82b35848876e0bd66eddc8c337e5",
-        "eventListenerAddress": "0x7fa10b89dde2c050def85e17d9dd9cfc0cb3ffe3",
-        "escrowAddress": "0x3fc956bd7a2a861b23c816fa683a767db4c58585",
-        "bridgeAddress": "0xa1df06b078d4eca5d00a4ff0d753aeb690cfda37",
+        "eventEmitterAddress": "0x7b119b777d28d8b5926655acbb32065cd79b792c",
+        "eventListenerAddress": "0x3267dfbaad0aaa7b77c5b875d4817f5e5dc3fb00",
+        "escrowAddress": "0x02924e6ef06efdc84bd7e3c1ed6e9308196c58c3",
+        "bridgeAddress": "0xa5cc235aac456e5334062eacb81131ea29d35e03",
         "confirmationsNeeded": 1,
         "batchSize": 1,
         "eventUtilAddress": "0x7de4f930c8465f230525715c7a7bb5cffeb6272d",
-        "wethToken": "0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66",
+        "wethToken": "0x7133e6c155dea49ec5f0e34e8c4a4a87edfbf3db",
         "aliceToken": "0xaba19d9dc85ece02661379521927bc3e8c3ec964",
-        "bobToken": "0x82ac0ab2db794ae1376ac18318ae3560f8dc40b6"
+        "bobToken": "0x82ac0ab2db794ae1376ac18318ae3560f8dc40b6",
+        "deploymentInfo": {
+            "blockNumber": 5
+        }
     },
     "rinkeby": {
         "chainId": 4,
         "chainType": "ethereum",
         "port": "10001",
         "rpcUrl": "http://localhost:10001",
-        "eventEmitterAddress": "0x2559d11bbcaf82b35848876e0bd66eddc8c337e5",
-        "eventListenerAddress": "0x7fa10b89dde2c050def85e17d9dd9cfc0cb3ffe3",
-        "escrowAddress": "0x3fc956bd7a2a861b23c816fa683a767db4c58585",
-        "bridgeAddress": "0xa1df06b078d4eca5d00a4ff0d753aeb690cfda37",
+        "eventEmitterAddress": "0x7b119b777d28d8b5926655acbb32065cd79b792c",
+        "eventListenerAddress": "0x3267dfbaad0aaa7b77c5b875d4817f5e5dc3fb00",
+        "escrowAddress": "0x02924e6ef06efdc84bd7e3c1ed6e9308196c58c3",
+        "bridgeAddress": "0xa5cc235aac456e5334062eacb81131ea29d35e03",
         "confirmationsNeeded": 1,
         "batchSize": 1,
         "eventUtilAddress": "0xdb3205d73e0a885090279c601abf76a38a6af00c",
-        "wethToken": "0x9ad2b90fe370b9fb6caa7aa1f644069797e91f66",
+        "wethToken": "0x7133e6c155dea49ec5f0e34e8c4a4a87edfbf3db",
         "aliceToken": "0xaba19d9dc85ece02661379521927bc3e8c3ec964",
-        "bobToken": "0x82ac0ab2db794ae1376ac18318ae3560f8dc40b6"
+        "bobToken": "0x82ac0ab2db794ae1376ac18318ae3560f8dc40b6",
+        "deploymentInfo": {
+            "blockNumber": 5
+        }
     }
 }

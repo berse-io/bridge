@@ -4,23 +4,27 @@
         "rootDir": ".",
         "lib": [
             "es2018",
-            "dom"
-        ],
-        "typeRoots": [
-          "node_modules/@0x/typescript-typings/types",
-          "node_modules/@types"
+            "dom",
+            "esnext.asynciterable"
         ],
         "target": "es2018",
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": true,
         "moduleResolution": "node",
         "module": "commonjs",
-        "sourceMap": true
+        "sourceMap": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
     },
     "include": [
-        "./src/*"
+        "src",
+        "test",
     ],
     "exclude": [
-        "node_modules/**"
+        "**/node_modules"
+    ],
+    "references": [
+        { "path": "../contracts" },
+        { "path": "../multichain" }
     ]
 }

@@ -2,28 +2,27 @@
     "compilerOptions": {
         "composite": true,
         "lib": [
+            "dom",
             "es2018",
-            "dom"
         ],
         "rootDir": ".",
         "outDir": "lib",
-        "typeRoots": [
-          "node_modules/@0x/typescript-typings/types",
-          "node_modules/@types"
-        ],
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": true,
         "moduleResolution": "node",
         "module": "commonjs",
         "sourceMap": true,
         "declaration": true,
-        "declarationMap": true
+        "declarationMap": true,
+        "target": "es2018"
     },
     "include": [
-        "src/**/*.ts",
-        "build/wrappers/*.ts"
+        "src",
+        "test",
+        "build/wrappers/*.ts",
+        "build/artifacts/*.json"
     ],
     "exclude": [
-        "node_modules/**"
+        "**/node_modules"
     ]
 }

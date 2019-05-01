@@ -9,13 +9,15 @@ import {
     MerkleTree,
     hashBranch,
     hashLeaf,
+    getBalancedLayer,
+    EMPTY_BYTE32,
 } from "../src";
 
 
 import { MerkleTreeVerifierContract } from '../build/wrappers/merkle_tree_verifier';
 
 import { 
-    GanacheTestchain, TestTreeFactory, hexify, keccak256, waitUntilConnected, prefix0x, getDeployArgs
+    TestTreeFactory, hexify, keccak256, waitUntilConnected, prefix0x, getDeployArgs
 } from './helpers'
 
 import { Web3ProviderEngine, RPCSubprovider, BigNumber } from "0x.js";
@@ -33,7 +35,42 @@ function dehexify(str: string): Buffer {
     return Buffer.from(str, 'hex')
 }
 
+function toItems(items: any[]) {
+    return items.map(keccak256)
+}
+
+describe('keccak256', () => {
+    it('returns Buffer', () => {
+        expect(keccak256('123')).to.be.instanceof(Buffer);
+    })
+})
+
 describe('Typescript Merkle tree', function() {
+    describe('#getBalancedLayer', () => {
+        it('0 items', () => {
+            let layer = getBalancedLayer([])
+            expect(layer).to.have.members([])
+        })
+
+        it('1 items', () => {
+            let items = toItems([ 1 ])
+            let layer = getBalancedLayer(items)
+            expect(layer).to.have.members([ items[0], EMPTY_BYTE32 ])
+        })
+
+        it('2 items', () => {
+            let items = toItems([ 1, 2 ])
+            let layer = getBalancedLayer(items)
+            expect(layer).to.have.members([ items[0], items[1] ])
+        })
+
+        it('3 items', () => {
+            let items = toItems([ 1, 2, 3 ])
+            let layer = getBalancedLayer(items)
+            expect(layer).to.have.members([ items[0], items[1], items[2], EMPTY_BYTE32 ])
+        })
+    })
+
     it('runs example', async () => {
         let items = [
             Buffer.from('123', 'hex'),
@@ -43,8 +80,19 @@ describe('Typescript Merkle tree', function() {
         let tree = new MerkleTree(items, keccak256);
         
         let proof = tree.generateProof(1);
-        expect(tree.verifyProof(proof, tree.findLeaf(items[1]))).to.be.true;
-        expect(tree.verifyProof(proof, tree.findLeaf(items[0]))).to.be.false;
+        expect(
+            tree.verifyProof({
+                ...proof,
+                leaf: tree.findLeaf(items[1])
+            })
+        ).to.be.true;
+        
+        expect(
+            tree.verifyProof({
+                ...proof,
+                leaf: tree.findLeaf(items[0])
+            })
+        ).to.be.false;
     })
 
     it('handles two duplicate elements', async () => {
@@ -61,11 +109,8 @@ describe('Typescript Merkle tree', function() {
         // console.log(tree.toString())
         
         function verify(item, i) {
-            // console.log('item', item)
             let proof = tree.generateProof(i)
-            // console.log(proof)
-            let leaf = tree.leaves[i]
-            expect(tree.verifyProof(proof, leaf)).to.be.true;
+            expect(tree.verifyProof(proof)).to.be.true;
         } 
 
         items.map(verify)
@@ -77,6 +122,7 @@ describe('Typescript Merkle tree', function() {
         ];
         
         let tree = new MerkleTree(items, keccak256);
+        console.log(tree.toString())
 
         expect(tree.nLayers).to.eq(2)
 
@@ -85,21 +131,24 @@ describe('Typescript Merkle tree', function() {
         }
         
         expectArraysEqual(tree.layers[0][0], hashLeaf(keccak256, items[0]))
-        expectArraysEqual(tree.layers[0][1], hashLeaf(keccak256, items[0]))
+        expectArraysEqual(tree.layers[0][1], hashLeaf(keccak256, EMPTY_BYTE32))
         expectArraysEqual(tree.layers[1][0], hashBranch(keccak256, tree.layers[0][0], tree.layers[0][1]))
         expectArraysEqual(tree.root(), tree.layers[1][0])
         
         let proof = tree.generateProof(1);
-        expect(tree.verifyProof(proof, tree.findLeaf(items[0]))).to.be.true;
+        expect(
+            tree.verifyProof(
+                proof
+            )
+        ).to.be.true;
     })
 
-    it('fails on n=0 items', async () => {
+    it('throws on 0 items', async () => {
         let items = [
         ];
         
-        expect(() => {
-            let tree = new MerkleTree(items, keccak256);
-        }).to.throws('Invalid array length')
+        let tree = new MerkleTree(items, keccak256);
+        expect(() => tree.root()).to.throw('no leaves in tree')
     })
 
 
@@ -117,6 +166,7 @@ describe('Typescript Merkle tree', function() {
 
         // give it the item, not the leaf (hashed)
         let proof = tree.generateProof(i);
-        expect(tree.verifyProof(proof, leafToProve)).to.throw;
+        proof.leaf = tree.leaves[i];
+        expect(tree.verifyProof(proof)).to.throw;
     })
 })

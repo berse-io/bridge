@@ -35,7 +35,7 @@ class MyApp extends App {
         <Provider store={store}>
             <DrizzleContext.Provider drizzle={drizzle}>
                 <Head>
-                <title key="title">0Dex</title>
+                <title key="title">Berse.io</title>
                 <meta key="viewport" name="viewport" content="initial-scale=1.0, width=device-width" />
                 </Head>
                 {/* Wrap every page in Jss and Theme providers */}

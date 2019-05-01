@@ -1,7 +1,8 @@
 {
     "compilerOptions": {
-        "rootDir": ".",
         "outDir": "lib/",
+        "baseUrl": ".",
+        "rootDir": ".",
         "lib": [
             "es2016",
             "es2018",
@@ -15,19 +16,20 @@
         "esModuleInterop": true,
         "moduleResolution": "node",
         "module": "commonjs",
-        "inlineSourceMap": true,
+        "sourceMap": true,
         "declaration": true,
         "composite": true,
         "resolveJsonModule": true
     },
-    "references": [
-      { "path": "../ts-merkle-tree" }
-    ],
     "include": [
-        "./build/wrappers/*",
+        "./build/wrappers/*.ts",
         "./build/artifacts/*.json",
+        "./test/**/*.ts"
     ],
     "exclude": [
-        "node_modules/**"
+        "node_modules"
+    ],
+    "references": [
+        { "path": "../ts-merkle-tree" }
     ]
 }

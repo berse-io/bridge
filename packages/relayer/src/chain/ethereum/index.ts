@@ -1,37 +1,42 @@
-import Web3 from "web3";
+import { RPCSubprovider, Web3ProviderEngine } from "0x.js";
+import { NonceTrackerSubprovider, PrivateKeyWalletSubprovider } from "@0x/subproviders";
+import { Web3Wrapper } from '@0x/web3-wrapper';
+import { inject } from '@loopback/context';
+import { zxWeb3Connected } from '@ohdex/shared';
+import { AsyncCargo, AsyncQueue, queue } from 'async';
 import { ethers } from 'ethers';
-
-import { Web3ProviderEngine, RPCSubprovider, BigNumber} from "0x.js";
-import { PrivateKeyWalletSubprovider } from "@0x/subproviders";
-import { Web3Wrapper, AbiDefinition, Provider, TxData } from '@0x/web3-wrapper';
-import { ChainTracker, EventEmittedEvent, MessageSentEvent } from "../tracker";
-
-import { EventEmitterContract, EventEmitterEvents } from '../../../../contracts/build/wrappers/event_emitter';
-import { EventListenerContract, EventListenerEvents } from '../../../../contracts/build/wrappers/event_listener';
-import { ITokenBridgeEvents, ITokenBridgeEventArgs, ITokenBridgeContract } from '../../../../contracts/build/wrappers/i_token_bridge';
-import { BridgeEvents, BridgeContract } from '../../../../contracts/build/wrappers/bridge';
-import { EscrowEvents, EscrowContract } from '../../../../contracts/build/wrappers/escrow';
-import { hexify, dehexify, shortToLongBridgeId } from "../../utils";
-// import { MerkleTree, MerkleTreeProof } from "../../../../ts-merkle-tree/src";
-import { MerkleTree, MerkleTreeProof } from "@ohdex/typescript-solidity-merkle-tree";
-
-
-// @ts-ignore
-import { keccak256 } from 'ethereumjs-util';
-import { EtherscanProvider } from "ethers/providers";
-import { BaseContract } from "@0x/base-contract";
-import { CrosschainState, ChainStateLeaf } from "../../interchain";
-import { EthereumStateGadget, EthereumStateLeaf } from "./state";
-
-
+import { Repository } from "typeorm";
+import { fromWei, toWei } from 'web3-utils';
+import { Chain } from "../../db/entity/chain";
+import { ChainEvent } from "../../db/entity/chain_event";
+import { InterchainStateUpdate } from "../../db/entity/interchain_state_update";
+import { Snapshot } from "../../db/entity/snapshot";
+import { getCurrentBlocktime } from "../../interchain/helpers";
+import { CrosschainStateService } from "../../interchain/xchain_state_service";
+import { normaliseAddress } from "../../utils";
+import { ChainTracker } from "../tracker";
+import { BridgeAdapter, TokensBridgedEvent } from "./bridge";
+import { EventEmitterAdapter } from "./event_emitter";
+import { EventListenerAdapter, StateRootUpdated } from "./event_listener";
 const AbiCoder = require('web3-eth-abi').AbiCoder();
-import Event from 'events'
 
+type CrosschainEventTypes = TokensBridgedEvent;
 
-type hex = string;
+export interface CrosschainEvent<CrosschainEventTypes> {
+    data: CrosschainEventTypes;
+    
+    eventHash: string;
 
-type BridgeContractHandlerMethod = () => string;
-
+    // Might be different in future.
+    from: {
+        chainId: number;
+        bridge: string;
+    }
+    to: {
+        chainId: number;
+        targetBridge: string;
+    }
+}
 
 export class EthereumChainTracker extends ChainTracker {
     conf: any;
@@ -41,74 +46,108 @@ export class EthereumChainTracker extends ChainTracker {
     web3;
     ethersProvider: ethers.providers.Provider;
 
-
-    // eventEmitterContract: EventEmitterContract;
-    eventEmitter_web3: any;
-    eventEmitter_sub: ethers.Contract;
-
-    eventListener: EventListenerContract;
-    eventListener_sub: ethers.Contract;
-    interchainStateRoot: Buffer;
+    eventEmitter: EventEmitterAdapter;
+    eventListener: EventListenerAdapter;
+    bridge: BridgeAdapter;
 
 
-    bridgeContract: BridgeContract;
-    bridgeContract_sub: ethers.Contract;
-    escrowContract: EscrowContract;
-    escrowContract_sub: ethers.Contract;
-    pendingTokenBridgingEvs: MessageSentEvent[] = [];
+    pendingCrosschainEvs: CrosschainEvent<any>[] = [];
 
-    
     account: string;
 
+    
+    txQueue: AsyncQueue<any>;
+    eventsForBridgingQueue: AsyncCargo;
+    
 
-    state: EthereumStateGadget;
-
-    constructor(conf: any) {
+    @inject('repositories.Chain') chain: Repository<Chain>
+    @inject('repositories.ChainEvent') chainEvent: Repository<ChainEvent>
+    @inject('repositories.InterchainStateUpdate') stateUpdate: Repository<InterchainStateUpdate>
+    @inject('repositories.Snapshot') snapshots: Repository<Snapshot>
+    @inject('interchain.CrosschainStateService') crosschainStateService: CrosschainStateService;
+    @inject('logging.default') logger2: any;
+    
+    constructor(
+        conf: any
+    ) {
         super(`Ethereum (chainId=${conf.chainId})`);
         this.conf = conf;
     }
 
     async start() {
-        this.logger.info('Connecting')
+        this.logger.info(`Connecting to ${this.conf.rpcUrl}`)
 
+        await this.chain.createQueryBuilder()
+        .insert()
+        .values({
+            chainId: this.conf.chainId
+        })
+        .onConflict(`("chainId") DO NOTHING`)
+        .execute();
+
+        let relayerAccount = require("@ohdex/config").accounts.relayer;
+    
         this.pe = new Web3ProviderEngine();
-        this.pe.addProvider(new PrivateKeyWalletSubprovider("13d14e5f958796529e84827f6a62d8e19375019f8cf0110484bcef39c023edcc"));
+        this.pe.addProvider(new NonceTrackerSubprovider())
+        let key = new PrivateKeyWalletSubprovider(relayerAccount.privateKey);
+        let accounts = await key.getAccountsAsync()
+        let account = accounts[0];
+        this.account = account;
+        this.pe.addProvider(key)
         this.pe.addProvider(new RPCSubprovider(this.conf.rpcUrl));
+        // addRevertTraces(this.pe, account)
         this.pe.start()
 
         this.pe.on('error', () => {
             this.logger.error(`Can't connect to endpoint`)
         })
 
-        const CONNECT_TIMEOUT = 7000;
-        let connected = new Promise((res, rej) => {
-            this.pe.on('block', res)
-            setTimeout(
-                _ => {
-                    rej(new Error(`Web3.js couldn't connect after ${CONNECT_TIMEOUT}ms`))
-                }, 
-                CONNECT_TIMEOUT
-            )
-        });
+        const CONNECT_TIMEOUT = 1000;
         
         try {
-            await connected;
+            await zxWeb3Connected(this.pe, CONNECT_TIMEOUT);
         } catch(ex) {
             this.logger.error(`couldn't connect - `, ex)
             throw ex;
         }
 
-        this.web3Wrapper = new Web3Wrapper(this.pe);
-        let accounts = await this.web3Wrapper.getAvailableAddressesAsync();
-        let account = accounts[0];
-        this.account = account;
 
+        this.web3Wrapper = new Web3Wrapper(this.pe, {
+            from: this.account
+        });
+        // let accounts = await this.web3Wrapper.getAvailableAddressesAsync();
+
+
+        // do some hacky stuff
+        if(process.env.NODE_ENV === 'development') {
+            // addRevertTraces(this.pe, account);
+        }
+
+
+        // check the available balance
+        let balance = await this.web3Wrapper.getBalanceInWeiAsync(account)
+        this.logger.info(`Using account ${account} (${fromWei(balance.toString(), 'ether')} ETH)`)
+
+        if(balance.isLessThan(toWei('1', 'ether'))) {
+            try {
+                throw new Error(`Balance may be insufficent`)
+            } catch(ex) {
+                this.logger.warn(""+ex)
+                // throw ex;
+                // It will fail anyways below. This is to support Ganache, where tx's are free.
+            }
+        }
+        
         
         let ethersProvider = new ethers.providers.JsonRpcProvider(this.conf.rpcUrl);
+        
+        
         ethersProvider.polling = true;
-        ethersProvider.pollingInterval = 1000;
+        ethersProvider.pollingInterval = 200;
         await new Promise((res, rej) => {
             ethersProvider.on('block', res);
+            // ethersProvider.getBlockNumber().then(res)
+
             setTimeout(
                 _ => {
                     rej(new Error(`Ethers.js couldn't connect after ${CONNECT_TIMEOUT}ms`))
@@ -118,373 +157,298 @@ export class EthereumChainTracker extends ChainTracker {
         })
         this.ethersProvider = ethersProvider;
         
-        // this.web3 = new Web3(
-        //     // @ts-ignore
-        //     new Web3.providers.WebsocketProvider(`ws://${this.conf.rpcUrl.split('http://')[1]}`)
-        // )
-        
-        // this.web3 = new Web3(ethersProvider);
         
         let blockNum = await ethersProvider.getBlockNumber()
-        let lastBlock = await ethersProvider.getBlock(blockNum)
-        let lastBlockIndex = blockNum;
-        let lastBlockhash = lastBlock.hash
-        let lastBlockTimestamp = lastBlock.timestamp;
 
+        if(!this.conf.eventListenerAddress) {
+            this.logger.error("Not deployed");
+            throw new Error("Not deployed");
+        }
 
+        let txDefaults = { from: this.account }
 
-        this.eventListener = new EventListenerContract(
-            require('../../../../contracts/build/artifacts/EventListener.json').compilerOutput.abi,
+        this.eventEmitter = new EventEmitterAdapter(
+            this.ethersProvider,
+            this.logger,
+            this.conf.eventEmitterAddress
+        )
+
+        this.eventListener = new EventListenerAdapter(
+            this.ethersProvider,
+            this.logger,
             this.conf.eventListenerAddress,
             this.pe,
-            { from: this.account }
-        );
-        this.eventListener_sub = new ethers.Contract(
-            this.conf.eventListenerAddress,
-            require('../../../../contracts/build/artifacts/EventListener.json').compilerOutput.abi,
-            this.ethersProvider
+            txDefaults,
+            this.web3Wrapper
         )
 
-        this.state = new EthereumStateGadget(this.eventListener.address)
-
-        this.eventEmitter_sub = new ethers.Contract(
-            this.conf.eventEmitterAddress,
-            require('../../../../contracts/build/artifacts/EventEmitter.json').compilerOutput.abi,
-            this.ethersProvider
-        )
-        // this.eventEmitter_web3 = new this.web3.eth.Contract(
-        //     require('../../../../contracts/build/artifacts/EventEmitter.json').compilerOutput.abi, 
-        //     this.conf.eventEmitterAddress, 
-        //     { from: account }
-        // )
-
-
-        this.bridgeContract = new BridgeContract(
-            require('../../../../contracts/build/artifacts/Bridge.json').compilerOutput.abi,
+        this.bridge = new BridgeAdapter(
+            this.ethersProvider,
+            this.logger,
             this.conf.bridgeAddress,
             this.pe,
-            { from: account }
-        )
-        this.escrowContract = new EscrowContract(
-            require('../../../../contracts/build/artifacts/Escrow.json').compilerOutput.abi,
-            this.conf.escrowAddress,
-            this.pe,
-            { from: account }
-        )
-
-        this.bridgeContract_sub = new ethers.Contract(
-            this.conf.bridgeAddress,
-            require('../../../../contracts/build/artifacts/Bridge.json').compilerOutput.abi,
-            this.ethersProvider
-        )
-        this.escrowContract_sub = new ethers.Contract(
-            this.conf.escrowAddress,
-            require('../../../../contracts/build/artifacts/Escrow.json').compilerOutput.abi,
-            this.ethersProvider
+            txDefaults,
+            this.web3Wrapper,
         )
 
 
         await this.loadStateAndEvents()
 
-        this.logger.info(`Sync'd to block #${blockNum}, ${this.state.events.length} pending events`)
-        this.logger.info(`stateRoot = ${this.interchainStateRoot.toString('hex')}`)
-        this.logger.info(`eventsRoot = ${this.state.root.toString('hex')}`)
+        this.logger.info(`Sync'd to block #${blockNum}`)
+        this.logger.info(``)
+        
+        let update = await InterchainStateUpdate.getLatestStaterootAtTime(this.conf.chainId, getCurrentBlocktime())
+        this.logger.info(`stateRoot = ${update.stateRoot}`)
+        this.logger.info(`eventsRoot = ${update.eventRoot}`)
 
         
         
         this.logger.info("Bridges:")
-        // this.bridgeIds.map(id => {
-            
-        //     this.logger.info(`\t${id}`)
-        // })
-        this.logger.info(`\t${this.bridgeContract.address}`)
-        this.logger.info(`\t${this.escrowContract.address}`)
-
+        this.logger.info(`\t${this.bridge.bridgeContract.address}`)
 
         return;
     }
     
     private async loadStateAndEvents() {
-        // 1. Load chain's state root
-        // 
-        let interchainStateRoot = dehexify(
-            (await this.eventListener.interchainStateRoot.callAsync())
-        )
+        let previousEvents = await this.eventEmitter.loadPreviousEvents()
 
-        
-        // 2. Load all previously emitted events (including those that may not be ack'd on other chains yet)
-        // 
-        // this.ethersProvider.resetEventsBlock(0);
-        const EventEmitted = this.eventEmitter_sub.filters.EventEmitted(null);
-        const logs = await this.ethersProvider.getLogs({
-            fromBlock: 0,
-            toBlock: "latest",
-            address: this.eventEmitter_sub.address,
-            topics: EventEmitted.topics
-        });
-
-        let eventsEmitted: Buffer[] = [];
-
-
-        for (const log of logs) {
-            let eventHash = log.data;
-            eventsEmitted.push(dehexify(eventHash));
-            this.state.addEvent(eventHash)
+        for(let ev of previousEvents) {
+            await this.chainEvent.insert({
+                ...ev,
+                chain: this.conf.chainId
+            })
         }
 
-        this.interchainStateRoot = interchainStateRoot;
-        // this.eventsEmitted = eventsEmitted;
-        
-        // Ack any pending events
-        if(this.state.events.length) {
-            // this.eventsTree = new MerkleTree(this.eventsEmitted, keccak256);
-            
+        let previousUpdates = await this.eventListener.loadPreviousStateRootUpdates()
+        for(let update of previousUpdates) {
+            await this.stateUpdate.insert({
+                ...update,
+                chain: this.conf.chainId
+            })
+        }
 
-            // then get all the previous token bridge events
-            const getPreviousBridgeEvents = async (contract_sub) => {
-                const TokensBridged = contract_sub.filters.TokensBridged();
-                const logs = await this.ethersProvider.getLogs({
-                    fromBlock: 0,
-                    toBlock: "latest",
-                    address: contract_sub.address,
-                    topics: TokensBridged.topics
-                });
-        
-                const fakeEthersEvent = {};
-                
-                for (const log of logs) {
-                    let decoded = contract_sub.interface.events.TokensBridged.decode(log.data, log.topics)
-                    // this.onTokensBridgedEvent()
-                    // console.log(log)
-                    
-                    // let data: ITokenBridgeEventArgs = {
-                    //     eventHash, targetBridge, chainId, receiver, token, amount, _salt
-                    // }
-                    let data = decoded;
-            
-                    let tokensBridgedEv: MessageSentEvent = {
-                        fromChain: this.state.getId(),
-                        data,
-                        toBridge: data.targetBridge,
-                        eventHash: data.eventHash
-                    };
-                    this.events.emit('ITokenBridge.TokensBridgedEvent', tokensBridgedEv);
+        this.logger.info(`pastEvents=${previousEvents.length} pastStateUpdates=${previousUpdates.length}`)
 
-                    // this.onTokensBridgedEvent.call(this, decoded.push(fakeEthersEvent))
+        // TODO 
+        // this.bridge.loadPreviousBridgeEvents()
+    }
+
+    async processBridgeEvent(ev: CrosschainEvent<any>) {
+        this.logger.info(`Proving event ${ev.data.eventHash} for bridging`)
+
+        let proof = await this.crosschainStateService.proveEvent(
+            this.conf.chainId, 
+            ev.from.chainId, 
+            ev.eventHash
+        );
+
+        return new Promise((res, rej) => {
+            this.txQueue.push(
+                () => {
+                    return this.bridge.bridge(ev, proof)
+                },
+                (err) => {
+                    if(err) rej(err);
+                    else res()
                 }
-
-            }
-
-            await getPreviousBridgeEvents(this.bridgeContract_sub)
-            await getPreviousBridgeEvents(this.escrowContract_sub)
-            // TODO
-
-            // let eventEmittedEvent: EventEmittedEvent = {
-            //     eventHash: '',
-            //     newChainRoot: '',
-            //     newChainIndex: ''
-            // }
-            // this.events.emit('EventEmitter.EventEmitted', eventEmittedEvent);
-        }
-        
+            )
+        })
     }
 
     listen() {
+        this.txQueue = queue(
+            async (txFn) => {
+                return await txFn()
+            },  
+            1
+        )
+
+        this.eventsForBridgingQueue = queue(
+            async (ev) => {
+                return this.processBridgeEvent(ev).catch(ex => {
+                    this.logger.error(`${ev.eventHash} bridging failed, queueing for retry`)
+                    this.logger.error(ex)
+
+                    this.pendingCrosschainEvs.push(ev)
+                })
+            }
+        )
+
         this.logger.info(`listening to events on ${this.conf.eventEmitterAddress}`)
 
-        // 1) Listen to any events emitted from this chain
-        this.eventEmitter_sub.on(EventEmitterEvents.EventEmitted, this.onEventEmitted.bind(this))
-        // this.eventEmitter_web3.events.EventEmitted((err, ev) => {
-        //     if(err) {
-        //         this.logger.error(`err in event receival - ${err}`)
-        //     } else {
-        //         this.onEventEmitted(
-        //             ev.returnValues.eventHash,
-        //             ev
-        //         );
-        //     }
-        // })
+        this.eventEmitter.events.on('eventEmitted', async (event) => {
+            await this.chainEvent.insert({
+                ...event,
+                chain: this.conf.chainId,
+            })
 
-        // 2) Listen to any state root updates that happen
-        this.eventListener_sub.on(EventListenerEvents.StateRootUpdated, this.onStateRootUpdated.bind(this))
+            this.logger2.info('debug', event)
 
-        // 3) Listen to the original events of the bridge/escrow contracts
-        // So we can relay them later
-        this.bridgeContract_sub.on(BridgeEvents.TokensBridged, this.onTokensBridgedEvent.bind(this))
-        this.escrowContract_sub.on(EscrowEvents.TokensBridged, this.onTokensBridgedEvent.bind(this)) 
-    }
+            this.events.emit('eventEmitted', event)
+        })
 
-    private async onStateRootUpdated(root: string, ev: ethers.Event) {
-        this.events.emit('StateRootUpdated');
-        this.logger.info(`state root updated - ${root}`)
-        this.interchainStateRoot = dehexify(root);
-    }
+        this.eventListener.events.on('stateRootUpdated', async (update: StateRootUpdated) => {
+            let stateUpdate = new InterchainStateUpdate
+            stateUpdate.blockHash = update.blockHash
+            stateUpdate.blockTime = update.blockTime
+            stateUpdate.eventRoot = update.eventRoot
+            stateUpdate.stateRoot = update.stateRoot
+            stateUpdate.chain = this.conf.chainId
 
-    async processBridgeEvents(
-        crosschainState: CrosschainState
-    ) {
-        // process all events
-        try {
-            // Now process any events on this bridge for the user
-            for(let ev of this.pendingTokenBridgingEvs) {
-                // if(!interchainState.isEventAcknowledged(ev.fromChain, ev.eventHash)) {
-                //     this.logger.info(`Skipping ${ev.eventHash}, not ack'd yet on this chain`)
-                //     return
-                // }
-                let { rootProof, eventProof} = crosschainState.proveEvent(ev.fromChain, ev.eventHash)
-                let _proof = rootProof.proofs.map(hexify)
-                let _proofPaths = rootProof.paths
-                let _interchainStateRoot = hexify(rootProof.root)
-                let _eventsProof = eventProof.proofs.map(hexify)
-                let _eventsPaths = eventProof.paths
-                let _eventsRoot = hexify(eventProof.root)
+            await this.stateUpdate.insert(stateUpdate)
 
-
-                // if(ev.toBridge == await this.escrowContract.tokenBridgeId.callAsync()) {
-                if(ev.toBridge == shortToLongBridgeId(this.escrowContract.address)) {
-                    await this.web3Wrapper.awaitTransactionSuccessAsync(
-                        await this.escrowContract.claim.sendTransactionAsync(
-                            ev.data.token, 
-                            ev.data.receiver, 
-                            ev.data.amount, 
-                            ev.data.chainId, 
-                            ev.data._salt, 
-                            _proof, 
-                            _proofPaths, 
-                            _interchainStateRoot, 
-                            _eventsProof, 
-                            _eventsPaths, 
-                            _eventsRoot,
-                            { from: this.account }
-                        )
-                    );
-                    this.logger.info(`bridged ev: ${ev.eventHash} for bridge ${ev.toBridge}`)
-                    this.pendingTokenBridgingEvs.pop()
+            // Also link the state root update with the 
+            // snapshot we inserted
+            let snapshot = await this.snapshots.findOne(
+                {
+                    chain: this.conf.chainId,
+                    stateRoot: normaliseAddress(update.stateRoot)
+                },
+                {
+                    order: {
+                        id: "DESC"
+                    }
                 }
-                else if(ev.toBridge == shortToLongBridgeId(this.bridgeContract.address)) {
-                // else if(ev.toBridge == await this.bridgeContract.tokenBridgeId.callAsync()) {
-                    await this.web3Wrapper.awaitTransactionSuccessAsync(
-                        await this.bridgeContract.claim.sendTransactionAsync(
-                            ev.data.token, 
-                            ev.data.receiver, 
-                            ev.data.amount, 
-                            ev.data.chainId, 
-                            ev.data._salt, 
-                            _proof, 
-                            _proofPaths, 
-                            _interchainStateRoot, 
-                            _eventsProof, 
-                            _eventsPaths, 
-                            _eventsRoot,
-                            ev.eventHash,
-                            { from: this.account }
-                        )
-                    );
-                    this.logger.info(`bridged ev: ${ev.eventHash} for bridge ${ev.toBridge}`)
-                    this.pendingTokenBridgingEvs.pop()
-                } else {
-                    this.logger.error(`couldn't find bridge ${ev.toBridge} for event ${ev.eventHash}`)
+            )
+
+            if(!snapshot) {
+                throw new Error("Couldn't find snapshot for corresponding state root update. UNEXPECTED!")
+            }
+            if(snapshot.update) {
+                throw new Error("Snapshot already linked to update, which indicates race conditions. UNEXPECTED!")
+            }
+            
+            let stateUpdate_inserted = await this.stateUpdate.findOne({
+                chain: this.conf.chainId,
+                stateRoot: update.stateRoot,
+                blockHash: update.blockHash,
+                eventRoot: update.eventRoot
+            })
+            if(!stateUpdate_inserted) {
+                throw new Error("State update should have been inserted, UNEXPECTED!")
+            }
+
+            snapshot.update = stateUpdate_inserted
+            await snapshot.save()
+
+
+            this.logger2.info('debug', update)
+
+            // Also try process acknowledged events
+            let evs = this.pendingCrosschainEvs.slice()
+            this.pendingCrosschainEvs = []
+            
+            let events = await ChainEvent.createQueryBuilder('event')
+                .where('event.eventHash IN (:bridgeEventHashes)', { bridgeEventHashes: evs.map(ev => ev.eventHash) })
+                .where('event.blockTime <= :stateRootUpdateBlocktime', { stateRootUpdateBlocktime: stateUpdate_inserted.blockTime })
+                .getMany();
+            
+            let eventsToProcess = events.map(event => event.eventHash);
+            
+            let toProcess = evs.filter( ({ eventHash }) => {
+                return eventsToProcess.includes(eventHash)
+            })
+            let toNotProcess = evs.filter( ({ eventHash }) => {
+                return !eventsToProcess.includes(eventHash)
+            })
+            
+            toProcess.map(task => this.eventsForBridgingQueue.push(task))
+            this.pendingCrosschainEvs = toNotProcess;
+            
+        })
+
+        this.bridge.events.on('tokensBridged', async (tokensBridgedEv: TokensBridgedEvent) => {
+            let crosschainEvent: CrosschainEvent<any> = {
+                data: tokensBridgedEv,
+                eventHash: tokensBridgedEv.eventHash,
+                from: {
+                    chainId: this.conf.chainId,
+                    bridge: normaliseAddress(this.bridge.bridgeContract.address)
+                },
+                to: {
+                    // TODO(liamz): hazardous converting from bignum to number...
+                    chainId: tokensBridgedEv.targetChainId.toNumber(),
+                    targetBridge: normaliseAddress(tokensBridgedEv.targetBridge)
                 }
             }
-        } catch(ex) {
-            this.logger.error(`failed to do bridging`)
-            this.logger.error(ex)
+
+            this.logger2.info('debug', crosschainEvent)
+
+            this.events.emit('crosschainEvent', crosschainEvent)
+        })
+
+        this.eventEmitter.listen()
+        this.eventListener.listen()
+        this.bridge.listen()
+
+        let self = this;
+    }
+
+    async updateStateRoot(): Promise<any> 
+    {
+        try {
+            let eventsCount = await this.chainEvent.count({ chain: this.conf.chainId })
+
+            // compute the state root first
+            let stateRootUpdate = await this.crosschainStateService.proveStateRootUpdate(this.conf.chainId);
+            
+            this.logger.info(`computeUpdatedStateRoot: root=${stateRootUpdate.root} eventRoot=${stateRootUpdate.eventRoot} ackdEvent=${eventsCount - 1}`)
+
+            this.txQueue.push(async () => {
+                try {
+                    return await this.eventListener.updateStateRoot(stateRootUpdate)
+                } catch(ex) {
+                    // we can't get revert messages back
+                    // but we can try ascertain if the error was due to something we can understand
+                    
+                    // we can just count the number of events
+                    let eventsCountNow = await this.chainEvent.count({ chain: this.conf.chainId })
+                    // this.logger.info(eventsCount, eventsCountNow)
+                    if(eventsCountNow > eventsCount) {
+                        this.logger.info(`State root update failed, newer events emitted`)
+                        this.logger.info(`ChainEvent.count BEFORE=${eventsCount} NOW=${eventsCountNow}`)
+                    } else {
+                        throw ex;
+                    }
+                }
+            })
+        } catch(err) {
+            this.logger.error(err)
+            throw err;
         }
     }
 
-    private async onEventEmitted(eventHash: string, ev: ethers.Event) {
-        this.logger.info(`block #${ev.blockNumber}, event emitted - ${eventHash}`)
-        this.state.addEvent(eventHash)
-        // 0x809375b783A8207e0430107d820C9AB5Fd94254E
-
-        let eventEmittedEvent: EventEmittedEvent = { 
-            eventHash,
-            newChainRoot: ev.blockHash,
-            newChainIndex: ''+ev.blockNumber
-        }
-        this.events.emit('EventEmitter.EventEmitted', eventEmittedEvent);
-    }
-
-    private onTokensBridgedEvent() {
-        // console.log(arguments)
-        let args = Array.from(arguments)
-        args.pop()
-        let ev = Array.from(arguments).pop() as ethers.Event;
-        
-        let [ eventHash, targetBridge, chainId, receiver, token, amount, _salt ] = args;
-        let data: ITokenBridgeEventArgs = {
-            eventHash, targetBridge, chainId, receiver, token, amount, _salt
-        }
-        // this.logger.info(
-        //     JSON.stringify(data))
-
-        let tokensBridgedEv: MessageSentEvent = {
-            data,
-            fromChain: this.state.getId(),
-            toBridge: shortToLongBridgeId(data.targetBridge),
-            eventHash
-        };
-        this.events.emit('ITokenBridge.TokensBridgedEvent', tokensBridgedEv);
-    }
-
-    
     get bridgeIds(): string[] {
         return [
-            shortToLongBridgeId(this.escrowContract.address),
-            shortToLongBridgeId(this.bridgeContract.address)
+            normaliseAddress(this.bridge.bridgeContract.address)
         ]
     }
 
     // Listen for the original events from other chains
     // and add them to our pending queue here
-    async receiveCrosschainMessage(tokensBridgedEv: MessageSentEvent): Promise<boolean> {
-        this.logger.info(JSON.stringify(tokensBridgedEv))
-        // if(
-        //     tokensBridgedEv.toBridge == await this.escrowContract.tokenBridgeId.callAsync() || 
-        //     tokensBridgedEv.toBridge == await this.bridgeContract.tokenBridgeId.callAsync())
-        if(this.bridgeIds.includes(tokensBridgedEv.toBridge))
+    async receiveCrosschainEvent(ev: CrosschainEvent<any>): Promise<boolean> {
+        // this.logger.debug(JSON.stringify(ev))
+
+        if(ev.from.chainId == this.conf.chainId) {
+            // this.logger.warn('receiveCrosschainMessage: ignoring event from own chain')
+            return;
+        }
+
+        if(this.bridgeIds.includes(ev.to.targetBridge))
         {
-            this.logger.info(`Received ${tokensBridgedEv.eventHash} from chain ${tokensBridgedEv.fromChain}`)
-            this.pendingTokenBridgingEvs.push(tokensBridgedEv)
+            this.logger.info(`receiveCrosschainMessage fromChain=${ev.from.chainId} eventHash=${ev.data.eventHash}`)
+            this.pendingCrosschainEvs.push(ev)
             return true;
         }
+
         return false;
-    }
-
-    
-
-    async updateStateRoot(
-        proof: MerkleTreeProof, leaf: ChainStateLeaf
-    ): Promise<any> 
-    {
-        try {
-            await EventListenerWrapper.updateStateRoot(this.eventListener, proof, leaf as EthereumStateLeaf)
-        } catch(err) {
-            // console.log(ex)
-            // if(err.code == -32000) {
-            //     this.logger.error(err.data.stack)
-            // }
-            this.logger.error(err)
-            throw err;
-        }
-
-        return;
     }
 
     async stop() {
         this.pe.stop();
+        this.ethersProvider = null;
+        await this.eventEmitter.stop()
+        await this.eventListener.stop()
+        await this.bridge.stop()
     }
 }
-
-
-class EventListenerWrapper {
-    static updateStateRoot(eventListener: EventListenerContract, proof: MerkleTreeProof, leaf: EthereumStateLeaf) {
-        return eventListener.updateStateRoot.sendTransactionAsync(
-            proof.proofs.map(hexify), 
-            proof.paths, 
-            hexify(proof.root),
-            hexify(leaf.eventsRoot)
-        )
-    }
-}
-

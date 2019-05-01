@@ -3,20 +3,26 @@
   "scripts": {
     "build:contracts": "yarn wsrun -p ${npm_package_config_solPackages} -r build:contracts",
     "build": "yarn wsrun -p ${npm_package_config_tsPackages} -r build",
-    "build:ts": ""
+    "watch": "tsc -b -W tsconfig.json",
+    "test": "yarn wsrun -p ${npm_package_config_testPkgs} -r test"
   },
   "config": {
     "solPackages": "@ohdex/contracts @ohdex/typescript-solidity-merkle-tree",
-    "tsPackages": "@ohdex/contracts @ohdex/deployer @ohdex/multichain @ohdex/relayer @ohdex/bridge-ui @ohdex/typescript-solidity-merkle-tree"
+    "tsPackages": "@ohdex/shared @ohdex/contracts @ohdex/deployer @ohdex/multichain @ohdex/relayer @ohdex/bridge-ui @ohdex/typescript-solidity-merkle-tree",
+    "testPkgs": "@ohdex/contracts @ohdex/typescript-solidity-merkle-tree @ohdex/bridge-ui"
   },
   "workspaces": {
     "packages": [
       "packages/bridge-ui",
+      "packages/bridge-ui-v2",
       "packages/contracts",
       "packages/deployer",
       "packages/multichain",
       "packages/relayer",
-      "packages/ts-merkle-tree"      
+      "packages/ts-merkle-tree",
+      "packages/config",
+      "packages/shared",
+      "packages/chainlog"
     ],
     "nohoist": [
       "**/ganache-cli/**",
@@ -26,5 +32,8 @@
   "devDependencies": {
     "typescript": "^3.3.3333",
     "wsrun": "^3.6.4"
+  },
+  "dependencies": {
+    "dotenv": "^7.0.0"
   }
 }

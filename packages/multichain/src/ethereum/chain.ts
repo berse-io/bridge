@@ -8,14 +8,14 @@ import { MnemonicWalletSubprovider, Web3ProviderEngine, RPCSubprovider } from '@
 import { resolve, dirname } from 'path'
 import { existsSync, mkdirSync } from 'fs'
 
-const DEFAULT_BALANCE_ETHER = '99999999999'
+const DEFAULT_BALANCE_ETHER = '18446744073709551615'
 
 
 export class EthereumChain implements IChain {
     server: any;
 
     async start(conf: IChainConfig, accountsConf: IAccountsConfig): Promise<any> {
-        let dbpath = resolve(dirname(require.resolve(`../../package.json`)), `db/${conf.chainId}`)
+        let dbpath = resolve(dirname(require.resolve(`@ohdex/multichain`)), `../../db/ganache_${conf.chainId}`)
         let firstStart = !existsSync(dbpath)
         if(firstStart) {
             mkdirSync(dbpath)
@@ -27,15 +27,20 @@ export class EthereumChain implements IChain {
                 log: console.log
             },
             network_id: `${conf.chainId}`,
+            // vmErrorsOnRPCResponse: true,
             // db_path: resolve(dirname(require.resolve(`../../package.json`)), `db/${conf.chainId}`),
             db_path: dbpath,
             total_accounts: 100,
             s: "TestRPC is awesome!", // I didn't choose this
+
+            // Only works with ganache-core@2.5.3?
             gasPrice: 0,
-            // gasLimit: 10000000000000000000,
+            // gasLimit: '1000000000000000',
             debug: false,         
-            defaultBalanceEther: '1000000000000000',
+            defaultBalanceEther: DEFAULT_BALANCE_ETHER,
             unlock: [0, 1],
+            // verbose: true,
+            allowUnlimitedContractSize: true
         });
 
         let blockchainState = await new Promise<any>((res, rej) => {

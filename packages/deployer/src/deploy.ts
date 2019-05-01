@@ -1,58 +1,19 @@
-import Web3 from "web3";
-import { Web3ProviderEngine, RPCSubprovider, BigNumber} from "0x.js";
+import { RPCSubprovider, Web3ProviderEngine } from "0x.js";
 import { PrivateKeyWalletSubprovider } from "@0x/subproviders";
-import { Web3Wrapper, AbiDefinition, Provider, TxData } from '@0x/web3-wrapper';
-
-// import{
-//     EventUtilContract,
-// } from '../../contracts/build/wrappers/event_util';
-
-import {
-    EventListenerContract
-} from '../../contracts/build/wrappers/event_listener';
-
-import {
-    EventEmitterContract,
-} from '../../contracts/build/wrappers/event_emitter';
-
-import {
-    EscrowContract
-}  from '../../contracts/build/wrappers/escrow'
-
-import {
-    BridgeContract
-}   from '../../contracts/build/wrappers/bridge';
-
-import {
-    WETH9Contract
-}   from '../../contracts/build/wrappers/weth9';
-
-import {
-    DemoERC20Contract
-}   from '../../contracts/build/wrappers/demo_erc20';
+import { logUtils } from '@0x/utils';
+import { Web3Wrapper } from '@0x/web3-wrapper';
+import { BridgeContract } from '@ohdex/contracts/lib/build/wrappers/bridge';
+import { EventEmitterContract } from '@ohdex/contracts/lib/build/wrappers/event_emitter';
+import { EventListenerContract } from '@ohdex/contracts/lib/build/wrappers/event_listener';
+import { WETH9Contract } from '@ohdex/contracts/lib/build/wrappers/weth9';
+import { WhitelistContract } from '@ohdex/contracts/lib/build/wrappers/whitelist';
+import { fromWei, toWei } from "web3-utils";
 import { ConfigManager } from "./config";
+import { deployLibraries, getDeployArgs } from "./deploy_utils";
 
-const assert = require('assert');
-
-
-function getDeployArgs(name: string, pe: Web3ProviderEngine, from: string): [ string, AbiDefinition[], Provider, Partial<TxData>] {
-    // let json = require(`../../contracts/build/contracts/${name}.json`);
-    let json = require(`../../contracts/build/artifacts/${name}.json`);
-    let bytecode = json.compilerOutput.evm.bytecode.object;
-    let abi = json.compilerOutput.abi;
-    let provider = pe;
-
-    assert.ok(bytecode.length > 0)
-    assert.ok(abi.length > 0)
-    assert.ok(from != "")
-
-    return [
-        bytecode,
-        abi,
-        provider,
-        { from }
-    ]
-}
+const winston = require('winston'); 
+const { format } = winston;
+const { label } = format;
 
 
 async function deploy(configMgr: ConfigManager) {
@@ -69,39 +30,81 @@ async function deploy(configMgr: ConfigManager) {
 
     console.log(`Deploying to ${networks.length} networks`)
 
-    await Promise.all(networks.map(net => {
-        return _deploy(configMgr, net)
-    }));
+    for(let net of networks) {
+        await _deploy(configMgr, net)
+    }
 
     configMgr.save()
 }
 
+
 async function _deploy(configMgr: ConfigManager, network: string) {
     const config = configMgr.config[network];
-    const privateKey = require("../../config/accounts.json").deployAccountPrivateKey;
+    
+    let logger = winston.loggers.add(
+        `deployer-${network}`, 
+        {
+            format: require('./logger').logFormat([
+                label({ label: network })
+            ]),
+            transports: [
+                new winston.transports.Console()
+            ]
+        }
+    );
+
+    logUtils.log = (args) => {
+        logger.info(args)
+    }
+
+    logger.info(`Deploying to network (rpcUrl=${config.rpcUrl})`)
 
     let pe: Web3ProviderEngine, web3: Web3Wrapper;
     let accounts;
     let account;
 
+    let deploymentAccount = require("@ohdex/config").accounts.deployment;
+
     pe = new Web3ProviderEngine();
-     pe.addProvider(new PrivateKeyWalletSubprovider(privateKey));
+    pe.addProvider(new PrivateKeyWalletSubprovider(deploymentAccount.privateKey))
     pe.addProvider(new RPCSubprovider(config.rpcUrl));
     pe.start()
+    
     web3 = new Web3Wrapper(pe);
     accounts = await web3.getAvailableAddressesAsync();
     account = accounts[0];
 
-    // 1 Deploy event util
 
-    // let eventUtil = await EventUtilContract.deployAsync(
-    //     ...getDeployArgs('EventUtil', pe, account)
-    // );
+    // check the available balance
+    let balance = await web3.getBalanceInWeiAsync(account)
+    logger.info(`Using account ${account} (${fromWei(balance.toString(), 'ether')} ETH)`)
+
+    if(balance.lessThan(toWei('1', 'ether'))) {
+        try {
+            throw new Error(`Balance may be insufficent`)
+        } catch(ex) {
+            logger.warn(""+ex)
+            // throw ex;
+            // It will fail anyways below. This is to support Ganache, where tx's are free.
+        }
+    }
+
+    // 0 Deploy libraries
+    await deployLibraries(pe, account)
+
+    // 1 Deploy whitelist
+    let whitelist = await WhitelistContract.deployAsync(
+        ...getDeployArgs('Whitelist', pe, account)
+    );
 
     // 2 Deploy eventEmitter
-
+    // @ts-ignore
     let eventEmitter = await EventEmitterContract.deployAsync(
-        ...getDeployArgs('EventEmitter', pe, account)
+        ...getDeployArgs('EventEmitter', pe, account, true),
+        // @ts-ignore
+        whitelist.address,
+        config.chainId,
+        network
     );
 
 
@@ -109,68 +112,35 @@ async function _deploy(configMgr: ConfigManager, network: string) {
     
     // @ts-ignore
     let eventListener = await EventListenerContract.deployAsync(
-        ...getDeployArgs('EventListener', pe, account),
+        ...getDeployArgs('EventListener', pe, account, true),
+        // @ts-ignore
         eventEmitter.address
     )
 
 
-    // 4 Deploy Escrow
-
-    // @ts-ignore
-    let escrow = await EscrowContract.deployAsync(
-        ...getDeployArgs('Escrow', pe, account),
-        config.chainId,
-        eventListener.address,
-        eventEmitter.address
-    );
-
-    // 5 Deploy Bridge
+    // 4 Deploy Bridge
 
     // @ts-ignore
     let bridge = await BridgeContract.deployAsync(
         ...getDeployArgs('Bridge', pe, account),
-        config.chainId,
+        // @ts-ignore
         eventListener.address,
         eventEmitter.address,
     )
-    
 
-    // config.eventUtilAddress = eventUtil.address;
-    config.eventEmitterAddress = eventEmitter.address;
-    config.eventListenerAddress = eventListener.address;
-    config.escrowAddress = escrow.address;
-    config.bridgeAddress = bridge.address;
+    config.eventEmitterAddress = eventEmitter.address.toLowerCase();
+    config.eventListenerAddress = eventListener.address.toLowerCase();
+    config.bridgeAddress = bridge.address.toLowerCase();
 
-    // @ts-ignore
-    let aliceToken = await DemoERC20Contract.deployAsync(
-        ...getDeployArgs('DemoERC20', pe, account),
-        "AliceToken",
-        "ALI",
-        "7",
-        "1000000000"
-    );
-    // @ts-ignore
-    let bobToken = await DemoERC20Contract.deployAsync(
-        ...getDeployArgs('DemoERC20', pe, account),
-        "BobToken",
-        "BOB",
-        "7",
-        "1000000000"
-    );
 
     // @ts-ignore
     let weth = await WETH9Contract.deployAsync(
         ...getDeployArgs('WETH9', pe, account)
     );
-    config.wethToken = weth.address;
-    config.aliceToken = aliceToken.address;
-    config.bobToken = bobToken.address;
+    config.wethToken = weth.address.toLowerCase();
     
 
     pe.stop();
 }
 
-export {
-    _deploy,
-    deploy
-}
+export { _deploy, deploy };

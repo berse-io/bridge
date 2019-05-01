@@ -1,4 +1,9 @@
 {
-    "name": "@ohdex/contracts",
-    "private": true
+    "name": "@ohdex/config",
+    "private": true,
+    "version": "0.0.1",
+    "files": [
+        "*.json"
+    ],
+    "main": "index.js"
 }

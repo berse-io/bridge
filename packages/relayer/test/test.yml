@@ -1,0 +1,6 @@
+rpcUrl: http://localhost:10000
+contracts:
+  artifacts: ./../../packages/contracts/build/artifacts/*.json
+  addresses:
+    - Bridge: '0x82ac0ab2db794ae1376ac18318ae3560f8dc40b6'
+  watch_new: false

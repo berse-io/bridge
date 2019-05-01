@@ -1,6 +1,8 @@
 import { ConfigManager } from "./config";
 import { deploy } from "./deploy";
 
+import '@ohdex/config';
+
 const configMgr = ConfigManager.load()
 
 deploy(configMgr)
@@ -9,7 +11,5 @@ deploy(configMgr)
 })
 .catch(err => {
     console.log(err);
-    // if(err.data.stack)
-    //     console.log(err.data.stack)
     process.exit(-1)
 })

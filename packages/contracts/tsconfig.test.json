@@ -1,9 +1,0 @@
-{
-    "extends": "./tsconfig",
-    "compilerOptions": {
-    },
-    "include": [
-        "./build/wrappers/*",
-        "test/**.ts"
-    ],
-}

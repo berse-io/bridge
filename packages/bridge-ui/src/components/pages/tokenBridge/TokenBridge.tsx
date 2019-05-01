@@ -7,7 +7,6 @@ import TokenReceiver from './TokenReceiver';
 import {connect} from 'react-redux';
 import getConfigValue from '../../../utils/getConfigValue';
 
-import EscrowArtifact from '@ohdex/contracts/build/artifacts/Escrow.json'
 import BridgeArtifact from '@ohdex/contracts/build/artifacts/Bridge.json'
 
 const styles = (theme:any) => ({
@@ -36,16 +35,7 @@ class TokenBridge extends React.Component<any> {
 
     componentDidMount() {
         const {drizzle} = this.props;
-
-        // On mount add token contract to truffle
-        const Escrow = {
-            contractName: "Escrow",
-            web3Contract: new drizzle.web3.eth.Contract(EscrowArtifact.compilerOutput.abi, getConfigValue(this.props.drizzleState.web3.networkId, 'escrowAddress'))
-        } 
         
-        drizzle.addContract(Escrow);
-
-
         // On mount add token contract to truffle
         const Bridge = {
             contractName: "Bridge",
