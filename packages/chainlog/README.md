@@ -10,8 +10,6 @@ A beautifully simple CLI to log Solidity smart contract interactions.
  * connects to any Ethereum JSON-RPC provider
  * works with Truffle and sol-compiler artifacts
 
-Developed as part of our [interchain bridging protocol, ohdex](https://github.com/liamzebedee/ohdex).
-
 ## Usage
 ### CLI
 Configure `chainwatch.yml`:
@@ -27,7 +25,7 @@ contracts:
 truffle: false
 ```
 
-Then run `yarn start`.
+Then run `yarn start ./chainwatch.yml`.
 
 ### Node.js API
 ```
