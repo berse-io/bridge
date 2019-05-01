@@ -52,6 +52,7 @@ class TokenActions  extends React.Component<any> {
         amount: "",
         to: "",
         tokenIndex: 0,
+        targetNetwork: "Ethereum",
         gasSlider: 50,
         gasPrice: 0,
     }
@@ -69,6 +70,8 @@ class TokenActions  extends React.Component<any> {
         if(!token) {
             return <></>
         }
+
+        const buttonText = this.state.action == 0 ? "Send" : "Bridge";
 
 
         return (
@@ -97,7 +100,7 @@ class TokenActions  extends React.Component<any> {
                                     />
                                 </Grid>
 
-                                <Grid item xs={12} lg={6}>
+                                { this.state.action == 0 && <Grid item xs={12} lg={6}>
                                     <TextField
                                         id="to"
                                         label="Receiver"
@@ -107,14 +110,15 @@ class TokenActions  extends React.Component<any> {
                                         fullWidth
                                         type="text"
                                     />
-                                </Grid>
+                                </Grid>}
 
                                 { this.state.action == 2 && <Grid item xs={12} lg={6}>
                                     <FormControl fullWidth className={classes.formControl}>
-                                        <InputLabel htmlFor="network">Network</InputLabel>
+                                        <InputLabel htmlFor="network">Target Network</InputLabel>
                                         <Select
-                                            value={"Ethereum"}
+                                            value={this.state.targetNetwork}
                                             fullWidth
+                                            onChange={this.handleChange('targetNetwork')}
                                             inputProps={{
                                             name: 'Token',
                                             id: 'Token',
@@ -138,7 +142,7 @@ class TokenActions  extends React.Component<any> {
                                 </Grid>
                                 <Grid item xs={12}>
                                     <Grid style={{height: "100%"}} container alignItems="flex-end" justify="flex-end" direction="row">
-                                        <Button variant="contained" onClick={this.handleSend} color="primary" className={classes.sendButton}>SEND</Button>
+                                        <Button variant="contained" onClick={this.handleSend} color="primary" className={classes.sendButton}>{buttonText}</Button>
                                     </Grid>
                                 </Grid>
                            </> : 
@@ -164,13 +168,23 @@ class TokenActions  extends React.Component<any> {
     }
 
     handleSend = async () => {
-        this.props.dispatch({
-            type: walletActions.SEND_TOKEN,
-            tokenIndex: this.state.tokenIndex,
-            to: this.state.to,
-            amount: this.state.amount,
-            fee: this.state.gasPrice,
-        })
+        if(this.state.action == 0){ //sending action
+            this.props.dispatch({
+                type: walletActions.SEND_TOKEN,
+                tokenIndex: this.state.tokenIndex,
+                to: this.state.to,
+                amount: this.state.amount,
+                fee: this.state.gasPrice,
+            })
+        } else { //bridge action
+            this.props.dispatch({
+                type: walletActions.BRIDGE_TOKEN,
+                tokenIndex: this.state.tokenIndex,
+                amount: this.state.amount,
+                targetChain: this.state.targetNetwork,
+                fee: this.state.gasPrice,
+            })
+        }
     }
 
     loadToken = async () => {        

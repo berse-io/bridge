@@ -6,6 +6,7 @@ const actionTypes = {
     UPDATE_ALL_BALANCES: 'UPATE_ALL_TOKEN_BALANCES',
     SET_TOKEN_BALANCE: 'SET_TOKEN_BALANCE',
     SEND_TOKEN: 'SEND_TOKEN',
+    BRIDGE_TOKEN: 'BRIDGE_TOKEN',
 };
 
 export default actionTypes;

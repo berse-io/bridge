@@ -30,10 +30,6 @@ class WalletProvider extends ProviderEngine {
 
           // Subscription
         const subscriptionSubprovider = new SubscriptionsSubprovider();
-        subscriptionSubprovider.on('data', (err:any, notification:any) => {
-            
-            this.emit('data', err, notification);
-        });
         this.addProvider(subscriptionSubprovider);
 
         // this.start();
